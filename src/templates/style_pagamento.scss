@@ -1,0 +1,95 @@
+@import "./Colors.scss";
+
+// Style Old
+@media all {
+  .blocoBoleto {
+    border: 1px solid $cor_4;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    background-color: $cor_2;
+  }
+
+  .textDescr {
+    color: $cor_8;
+    margin-bottom: 5px;
+  }
+
+  .modalValidacao {
+    width: 660px;
+    display: block;
+    margin: auto;
+  }
+
+  .tokenValidacao input {
+    display: flex;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    border: 0.1rem solid $cor_6;
+    width: 50px !important;
+    height: 60px !important;
+    margin: auto 10px 31px 28px;
+    font-size: 34px;
+    font-weight: 300 !important;
+  }
+
+  .tokenValidacao input:focus {
+    border: 0.1rem solid $cor_1 !important;
+    border-radius: 10px !important;
+  }
+
+  .tokenValidacao {
+    display: flex;
+    justify-content: center !important;
+    height: 100px !important;
+  }
+
+  .pagarEscolha {
+    margin: 5px 20px;
+    width: 150px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    height: 50px;
+    border-radius: 0;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    font-size: 19px;
+  }
+
+  .pagarValidar {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    width: auto;
+    border-radius: 0;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    font-size: 16px;
+  }
+
+  .loadingPagar {
+    display: block;
+    margin: auto;
+    color: $cor_1 !important;
+  }
+
+  .showmePagar {
+    display: none;
+  }
+
+  .showhimPagar:hover .hiddenmePagar {
+    display: none;
+  }
+  .showhimPagar:hover .showmePagar {
+    display: block;
+  }
+  .ocultarSaldoPagar {
+    font-size: 15x;
+    color: $cor_6;
+  }
+
+  .texto-saldos-pagar {
+    font-size: 17px;
+    
+  }
+  
+}

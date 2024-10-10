@@ -1,0 +1,139 @@
+@import "./Colors.scss";
+
+@media all {
+  .botoesServicos {
+    margin: 5px 20px;
+    width: 300px !important;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    height: 110px;
+    border-radius: 7px;
+    border-bottom: 10px solid $cor_1 !important;
+  }
+
+  .iconServicos {
+    font-size: 3em;
+    color: $cor_1 !important;
+    margin: 15px 10px;
+    float: left;
+  }
+
+  .tituloBotoes {
+    font-size: 20px;
+    margin: -10px 21px 0 0;
+  }
+
+  .btnProcurarServicos {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+  }
+  .baixarBoletoServicos {
+    float: right !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+    font-size: 16px;
+  }
+
+  .termosServicos {
+    background-color: transparent !important;
+    border: none !important;
+    text-decoration: underline $cor_6 !important;
+    color: $cor_6 !important;
+  }
+
+  .textDescr {
+    margin-bottom: 5px;
+  }
+
+  .btnServicosSucesso {
+    background: transparent;
+    color: $cor_6;
+    border: 1px solid $cor_1;
+    border-bottom: 5px solid $cor_1;
+    width: 20%;
+    margin: 27px 0 -33px;
+  }
+
+  .btnServicosSucesso:hover,
+  .btnServicosSucesso:focus {
+    background-color: $cor_1;
+    border-color: $cor_6;
+    color: $cor_5;
+  }
+
+  .btnServicosCancelar {
+    background: transparent;
+    color: $cor_6;
+    border: 1px solid red;
+    border-bottom: 5px solid red;
+    width: 20%;
+  }
+
+  .btnServicosCancelar:hover,
+  .btnServicosCancelar:focus {
+    background-color: red;
+    border-color: $cor_3;
+    color: $cor_5;
+  }
+
+  .btnServicosRecarga {
+    background: $cor_1;
+    color: $cor_5;
+    border: 1px solid $cor_6;
+    border-bottom: 5px solid $cor_6;
+    width: 20%;
+  }
+
+  .btnServicosRecarga:hover,
+  .btnServicosRecarga:focus {
+    background: $cor_1;
+    color: $cor_5;
+    border: 1px solid $cor_3;
+    border-bottom: 5px solid $cor_3;
+    width: 20%;
+  }
+
+  .botoesRecargas {
+    margin: 5px 20px;
+    width: 300px !important;
+    background-color: $cor_5 !important;
+    border: 0 !important;
+    color: $cor_6 !important;
+    /* height: 110px; */
+    border-radius: 7px;
+    /* border-bottom: 10px solid $cor_1 !important; */
+  }
+
+  .botoesRecargas p {
+    font-size: 20px;
+    text-align: center !important;
+  }
+
+  .valoresListas {
+    margin: auto !important;
+  }
+
+  .btnValor,
+  .btnValor:hover,
+  .btnValor:focus {
+    background-color: $cor_5 !important;
+    color: black;
+    border: 1px solid black;
+    width: 50%;
+    text-align: left;
+    margin: 5px;
+    font-size: 14px;
+  }
+
+  .selectDDD {
+    width: 10%;
+  }
+}

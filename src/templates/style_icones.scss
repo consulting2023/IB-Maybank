@@ -1,0 +1,27 @@
+@import "./Colors.scss";
+
+@media all {
+  .iconeHome {
+    font-size: 27px;
+    color: $cor_1;
+    margin: 10px;
+  }
+
+  .iconesSaldos {
+    font-size: 27px;
+    // margin: 5px;
+    color: $cor_1;
+  }
+  
+  .iconesFavoritos {
+    font-size: 35px;
+    // margin: 10px 0 5px;
+    color: $cor_1;
+  }
+
+  .Login {
+    font-size: 30px;
+    margin: auto -50px auto 30px;
+    float: left;
+  }
+}

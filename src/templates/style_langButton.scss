@@ -1,0 +1,93 @@
+@import "./Colors.scss";
+
+@media all {
+  .langBtnWrapper {
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+
+    .langBtn {
+      // background-color: $cor_1; 
+      border: none;
+      border-radius: 50px;
+      transform: rotateY(180deg);
+    }
+
+    .langImg {
+      height: 42px;
+      margin: 4px;
+    }
+
+    .langLabel {
+      display: none;
+    }
+
+    .langsIcon {
+      height: 100%;
+      border-radius: 50px;
+      font-size: 44px; 
+      margin: 3px;
+    }
+  
+    .flip-btn {
+      width: 50px;
+      height: 50px;
+      perspective: 1000px;
+    }
+  
+    .flip-btn-inner {
+      position: relative;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.35s;
+      transform-style: preserve-3d;
+    }
+  
+    .flip-btn:hover .flip-btn-inner {
+      transform: rotateY(180deg);
+      cursor: pointer;
+    }
+
+    .flip-btn-front {
+      border-radius: 50px;
+      // background-color: $cor_5;
+    }
+  
+    .flip-btn-front, .langBtn {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+  }
+
+  .langBtnWrapper:hover {
+    .langLabel {
+      min-width: 100px;
+      display: block;
+      position: absolute;
+      color: $cor_6;
+      padding-left: 30px;
+      padding-right: 30px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      background-color: $cor_7;
+      text-align: center;
+      margin: 10px 0 0 20px;
+      // border: 2px solid $cor_1;
+      // border: 2px solid;
+      border-radius: 5px;
+      z-index: 100;
+
+      font-family: Gantari;
+      font-size: 14px;
+      box-shadow: 0px 2px 12px 0px $cor_6;
+    }
+  }
+}

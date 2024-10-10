@@ -1,0 +1,50 @@
+@import "./Colors.scss";
+
+@media all {
+
+  .extrato {
+    .redText {
+      color: red;
+    }
+
+    .greenText {
+      color: green;
+    }
+
+    .react-datepicker__input-container input {
+      max-width: 150px;
+      padding: 20px;
+      border-radius: 50px !important;
+      border-color: $cor_6;
+      font-family: Gantari;
+    }
+
+    .react-datepicker__day {
+      border-radius: 50px !important;
+
+      &--keyboard-selected,
+      &--selected {
+        background: $cor_1 !important;
+      }
+    }
+
+    .pagination {
+      margin-bottom: 0px;
+      margin-left: 0px;
+    }
+
+    .buttonGroup {
+      .btn{
+        border-radius: 50px;
+      }
+    }
+
+    .btnProcurarExtrato {
+      border-radius: 50px !important;
+    }
+
+    .texto-saldos-Extrato {
+      font-size: 17px;
+    }
+  }
+}

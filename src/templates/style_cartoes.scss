@@ -1,0 +1,121 @@
+@import "./Colors.scss";
+
+@media all {
+  input[type="file"] {
+    display: none;
+  }
+  .custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 5px 12px;
+    margin: 5px;
+    cursor: pointer;
+  }
+
+  .custom-file-caixa {
+    border: 1px solid #ccc;
+    display: inline-block;
+    cursor: pointer;
+    width: 100%;
+    margin: 0 0 0 0;
+    padding: 2px 0;
+  }
+
+  .botoesCartao {
+    margin: 5px 20px;
+    width: 300px !important;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    height: 110px;
+    border-radius: 7px;
+    border-bottom: 10px solid $cor_1 !important;
+  }
+
+  .iconCartao {
+    font-size: 3em;
+    color: $cor_1 !important;
+    margin: 15px 10px;
+    float: left;
+  }
+
+  .tituloBotoes {
+    font-size: 20px;
+    margin: -10px 21px 0 0;
+  }
+
+  .btnProcurarCartao {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+  }
+  .baixarBoletoCartao {
+    float: right !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+    font-size: 16px;
+  }
+
+  .termosCartao {
+    background-color: transparent !important;
+    border: none !important;
+    text-decoration: underline $cor_6 !important;
+    color: $cor_6 !important;
+  }
+
+  .textDescr {
+    margin-bottom: 5px;
+  }
+
+  .btnCartaoSucesso {
+    background: transparent;
+    color: $cor_6;
+    border: 1px solid $cor_1;
+    border-bottom: 5px solid $cor_1;
+    width: 20%;
+  }
+
+  .btnCartaoSucesso:hover,
+  .btnCartaoSucesso:focus {
+    background-color: $cor_1;
+    border-color: $cor_6;
+  }
+
+  .btnCartaoCancelar {
+    background: transparent;
+    color: $cor_6;
+    border: 1px solid red;
+    border-bottom: 5px solid red;
+    width: 20%;
+  }
+
+  .btnCartaoCancelar:hover,
+  .btnCartaoCancelar:focus {
+    background-color: red;
+    border-color: $cor_3;
+  }
+
+  .btnCartaoRecarga {
+    background: $cor_1;
+    color: $cor_5;
+    border: 1px solid $cor_6;
+    border-bottom: 5px solid $cor_6;
+    width: 20%;
+  }
+
+  .btnCartaoRecarga:hover,
+  .btnCartaoRecarga:focus {
+    background: $cor_1;
+    color: $cor_5;
+    border: 1px solid $cor_3;
+    border-bottom: 5px solid $cor_3;
+    width: 20%;
+  }
+  
+}

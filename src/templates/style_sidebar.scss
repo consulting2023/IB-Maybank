@@ -1,0 +1,87 @@
+@import "./Colors.scss";
+
+@media all {
+  .sidebar {
+    .textMenu {
+      
+    }
+
+    .sidebar-lang-wrapper {
+      .langBtnWrapper{
+        .langsIcon {
+          fill: $cor_5;
+        }
+        .langBtn {
+          background-color: $cor_1; 
+        }
+        .flip-btn-front {
+          background-color: $cor_1;
+        }
+      }
+    }
+
+    .pro-item-content {
+      // font-size: 15px;
+      font-family: Gantari;
+      font-size: 1.2em !important;
+    }
+
+    .pro-item-content:not(:hover), a:not(:hover) {
+      color: $cor_1;
+    }
+
+    .pro-sidebar {
+      height: 100%;
+      width: 100%;
+      min-width: 100%;
+    }
+
+    .pro-sidebar > .pro-sidebar-inner {
+      background: $cor_7;
+      height: 100%;
+      position: relative;
+      z-index: 101;
+    }
+
+    .pro-sidebar > .pro-sidebar-inner .pro-sidebar-header {
+      line-height: 11px !important;
+    }
+
+    .pro-sidebar > .pro-sidebar-inner > .pro-sidebar-layout {
+      height: 100%;
+    }
+
+    .pro-sidebar-content {
+      height: 100%;
+    }
+
+    .pro-sidebar .pro-menu .pro-menu-item > .pro-inner-item > .pro-icon-wrapper {
+      width: 30px;
+      min-width: 30px;
+      height: 30px;
+    }
+
+    .pro-sidebar .pro-menu .pro-menu-item > .pro-inner-item > .pro-icon-wrapper > .pro-icon {
+      animation: none !important;
+    }
+
+    .pro-sidebar .pro-menu .pro-menu-item {
+      border-color: $cor_2;
+      border-style: solid;
+      border-top-width: 0px;
+      border-bottom-width: 3px;
+      border-left: 0;
+      border-right: 0;
+    }
+
+    .pro-sidebar .pro-menu .pro-menu-item > .pro-inner-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 15px 35px 15px 20px;
+      cursor: pointer;
+    }
+
+
+  }
+}

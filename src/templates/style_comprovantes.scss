@@ -1,0 +1,135 @@
+@import "./Colors.scss";
+
+// Style Antigo
+@media all {
+  .comprovanteEscolha {
+    margin: 5px 20px;
+    width: 300px !important;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    height: 110px;
+    border-radius: 7px;
+    border-bottom: 10px solid $cor_1 !important;
+  }
+
+  .iconComprovante {
+    font-size: 3em;
+    color: $cor_1 !important;
+    margin: 15px 10px;
+    float: left;
+  }
+
+  .tituloBotoes {
+    font-size: 20px;
+    margin: -10px 21px 0 0;
+  }
+
+  .col-sm-9 {
+    border: 1px solid $cor_4;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  .campoBusca {
+    border: 1px solid $cor_8;
+    border-radius: 10px;
+    margin: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: $cor_6;
+  }
+
+  .btnProcurarComprovante {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+  }
+
+  .baixarComprovante {
+    float: right !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+    font-size: 16px;
+  }
+  /* .pages {
+    
+} */
+}
+
+// Style New
+
+@media all {
+  .comprovanteEscolha_new {
+    margin: 5px 20px;
+    width: 300px !important;
+    background-color: $cor_2 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    height: 110px;
+    border-radius: 7px;
+    border-bottom: 10px solid $cor_1 !important;
+  }
+
+  .iconComprovante_new {
+    font-size: 3em;
+    color: $cor_1 !important;
+    margin: 15px 10px;
+    float: left;
+  }
+
+  .tituloBotoes_new {
+    font-size: 20px;
+    margin: -10px 21px 0 0;
+  }
+
+  .col-sm-9 {
+    border: 1px solid $cor_4;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  .campoBusca {
+    border: 1px solid $cor_8;
+    border-radius: 10px;
+    margin: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: $cor_6;
+  }
+
+  .btnProcurarComprovante_new {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+  }
+
+  .baixarComprovante_new {
+    float: right !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+    font-size: 16px;
+  }
+  /* .pages {
+    
+} */
+}
+

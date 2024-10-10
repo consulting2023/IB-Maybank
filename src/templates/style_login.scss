@@ -1,0 +1,225 @@
+@import "./Colors.scss";
+
+@media all {
+
+  // GERAL
+
+  .login {
+    overflow-x: hidden !important;
+    background-image: url("../assets/images/backgrounds/fundo.jpg") !important;
+    background-size: cover !important;
+    background-repeat: no-repeat;
+    height: 100vh;
+
+    // background-color: $cor_1;
+    background-blend-mode: multiply;
+    // background-blend-mode: luminosity;
+    // background-blend-mode: hard-light;
+
+  }
+
+    // HEADER
+
+    $sideMargin: 25px;
+    $borderRadius: 25px;
+
+    .barra_superior {
+      height: 70px;
+      background-color: $cor_3;
+      background-size: cover !important;
+      border-bottom-left-radius: $borderRadius;
+      border-bottom-right-radius: $borderRadius;
+    }
+
+    .logoLogin {
+      height: 50px;
+      padding-left: $sideMargin;
+    }
+
+    // COMPONENTES IMPORTADOS
+
+    .loginLangWrapper {
+      padding-right: $sideMargin;
+      .langBtnWrapper{
+        .langsIcon {
+          fill: $cor_6;
+        }
+        .langBtn {
+          background-color: $cor_5; 
+        }
+        .flip-btn-front {
+          background-color: $cor_5;
+        }
+      }
+    }
+
+    .loginPassWrapper {
+      .password {
+        .caixa_senha {
+          .senha {
+            border-color: $cor_5;
+          }
+
+          .numSenha.numSenha {
+            background-color: $cor_5;
+          }
+        }
+
+        .caixa_digitos {
+          .button_digitos:not(:hover):not(:focus) {
+            background: $cor_5;
+            color: $cor_6;
+          }
+        }
+      }
+    }
+
+    // BODY
+
+    $titleFont: 22pt;
+    $windowHeight: 450px;
+
+    h1 {
+      font-family: GantariLight;
+      color: $cor_1;
+      font-size: $titleFont !important;
+      line-height: 1em;
+      white-space: pre-wrap;
+    }
+
+    h2 {
+      font-size: 11pt !important;
+      color: $cor_5;
+    }
+
+    .divisoria {
+      height: 0.5px;
+      width: 100%;
+    }
+
+    .login-usuario {
+      height: $windowHeight; 
+      width: $windowHeight; 
+      border-top-left-radius: $borderRadius;
+      border-bottom-left-radius: $borderRadius;
+
+      padding-left: $sideMargin;
+      padding-right: $sideMargin;
+      background-color: $cor_3;
+
+      .divisoria {
+        background-color: $cor_5;
+      }
+
+      label {
+        color: $cor_5;
+      }
+
+      .botaologin {
+        height: 50px;
+        width: 65%;
+        border: 0;
+        border-radius: $borderRadius;
+        color: $cor_5;
+        font-size: 12pt;
+        font-weight: 800 !important;
+
+        background: linear-gradient(to left, $cor_1 50%, $cor_4 50%) right;
+        background-size: 200%;
+        transition: .3s ease-out;
+      }
+
+      .botaologin:disabled {
+        color: $cor_6;
+        background-position: left;
+      }
+
+      .email-input {
+        height: 40px;
+        background-color: $cor_5 !important;
+        color: $cor_6 !important;
+        border-radius: 50px;
+        text-indent: 20px;
+        border: none;
+        text-transform: lowercase;
+      }
+    }
+
+    .slider {
+      width: $windowHeight;
+      height: $windowHeight;
+    }
+
+    .carousel img {
+      -webkit-user-drag: none;
+      border-top-right-radius: $borderRadius;
+      border-bottom-right-radius: $borderRadius;
+      min-width: $windowHeight;
+      min-height: $windowHeight;
+    }
+
+    .carousel-indicators li {
+      background-color: $cor_6 !important;
+    }
+
+    .carousel-caption {
+      background-color: $cor_5;
+      border-radius: $borderRadius;
+      opacity: 0.9;
+
+      h3 {
+        font-family: Gantari;
+        font-size: 16pt;
+        color: $cor_6;
+      }
+
+      p {
+        font-size: 11pt;
+        color: $cor_6;
+      }
+    }
+
+    .modalContent {
+      border-radius: $borderRadius !important;
+      border: 2px solid $cor_1 !important;
+      background-color: $cor_6 !important;
+      color: $cor_5;
+      padding: $sideMargin;
+
+      .modalBtn {
+        border-radius: 50px;
+      }
+
+      .divisoria {
+        background-color: $cor_5;
+        margin-bottom: $sideMargin;
+        margin-top: $sideMargin;
+      }
+
+      .digitoContainer {
+        padding-top: 20px;
+        justify-content: space-between;
+      }
+
+      .digitoInput {
+        color: $cor_5;
+        font-family: Gantari;
+        font-size: 14pt;
+
+        background-color: transparent !important;
+        border: none;
+        width: 55px !important;
+        height: 40px !important;
+        border-bottom-left-radius: 8px 2px;
+        border-bottom-right-radius: 8px 2px;
+        border-bottom: 5px solid $cor_5;
+      }
+    }
+
+    // .loadingLogin {
+    //   display: block;
+    //   margin: auto;
+    //   // color: $cor_1 !important;
+    // }
+
+}

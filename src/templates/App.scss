@@ -1,0 +1,164 @@
+@import "./Colors.scss";
+@import "./Bootstrap.scss";
+
+// CARREGAR FONTES
+
+@font-face {
+  font-family: Montserrat;
+  src: url("../assets/fonts/Montserrat/Montserrat-Regular.woff") format('woff'),
+       url("../assets/fonts/Montserrat/Montserrat-Regular.woff2") format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Gantari;
+  src: url("../assets/fonts/Gantari/Gantari-Medium.woff2") format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: GantariBold;
+  src: url("../assets/fonts/Gantari/Gantari-Bold.woff2") format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: GantariLight;
+  src: url("../assets/fonts/Gantari/Gantari-Light.woff2") format('woff2');
+  font-display: swap;
+}
+
+@media all {
+  #root {
+    height: 100vh;
+  }
+
+  /// CLASSES DE TESTE
+   .red {
+    background-color: red;
+  }
+
+  .blue {
+    background-color: blue;
+  }
+
+  .yellow {
+    background-color: yellow;
+  } 
+  //////
+
+  // Paginas padrão
+
+  .site-content {
+    flex: auto;
+    font-family: Montserrat;
+    font-size: 10pt;
+    // background-color: $cor_2;
+  }
+
+  .baseWindow {
+    border-radius: 25px;
+    background-color: $cor_5;
+  }
+
+  .baseButtonPrimary.baseButtonPrimary {
+    padding: 0px;
+    border-radius: 50px;
+    width: 220px;
+    height: 70px;
+    border-bottom: 5px solid $cor_1;
+  }
+
+  .baseButtonPrimary.baseButtonPrimary:not(:hover) {
+    background-color: $cor_5;
+  }
+
+  .buttonTitle {
+    font-family: Gantari;
+    font-size: 18px;
+  }
+
+  // Utilitários
+
+  .select-none {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  // .loading {
+  //   left: 50%;
+  //   top: 50%;
+  //   position: absolute;
+  //   margin-left: -40px;
+  //   margin-top: -40px;
+  //   font-size: 100px;
+  //   width: 50%;
+  // }
+
+// BOOTSTRAP
+
+  .modal-content {
+    font-family: Montserrat;
+    font-size: 12pt;
+    border-radius: 25px;
+  }
+
+  .modal-header {
+    .close {
+      font-size: 26pt;
+      padding: 10px;
+    }
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+  
+  .modal-footer {
+    border: none;
+  }
+
+  .modal-open {
+    // overflow: scroll !important;
+    width: 100%;
+  }
+
+  // .modal-dialog {
+  //   max-width: 100%;
+    // max-height: none;
+  // }
+
+  .alert-warning {
+    position: absolute;
+    z-index: 1500;
+    width: 33%;
+  }
+  
+  .row:hover .select {
+    display: block;
+  }
+  
+  .select {
+    display: none;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+  }
+  
+  .breadcrumb {
+    background-color: transparent;
+    border-bottom: $cor_6 solid 0.1rem;
+    border-radius: 0;
+  }
+  
+  .input-group-text {
+    background-color: transparent !important;
+    border: none !important;
+  }
+
+}

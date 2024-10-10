@@ -1,0 +1,21 @@
+data_vencimento;valor(inteiro virgula decimal);juros_dia(inteiro virgula decimal);multa(inteiro virgula decimal);sacado_nome;sacado_documento(CPF ou CNPJ apenas números);sacado_endereco(rua numero e complemento em formato livre);sacado_cep(00000-000);sacado_cidade;sacado_uf_sigla(e.g.:SP);numero_documento(número de nota fiscal ou nota de serviço);e-mail
+01/08/2021;1;0,1;0,1;fulano de tal;36364164803;Rua XPTO 607;18150-000;cidade X;SP;999;exemplo@xpto.com.br
+01/08/2021;1,01;0,2;0,2;fulano de tal;36364164803;Rua XPTO 608;18150-000;cidade X;SP;1000;exemplo@xpto.com.br
+03/08/2021;2,01;0,3;0,3;fulano de tal;36364164803;Rua XPTO 609;18150-000;cidade X;SP;1001;exemplo@xpto.com.br
+01/08/2021;3,01;0,4;0,4;fulano de tal;36364164803;Rua XPTO 610;18150-000;cidade X;SP;1002;exemplo@xpto.com.br
+01/08/2021;4,01;0,5;0,5;fulano de tal;36364164803;Rua XPTO 611;18150-000;cidade X;SP;1003;exemplo@xpto.com.br
+01/08/2021;5,01;0,6;0,6;fulano de tal;36364164803;Rua XPTO 612;18150-000;cidade X;SP;1004;exemplo@xpto.com.br
+01/08/2021;6,01;0,7;0,7;fulano de tal;36364164803;Rua XPTO 613;18150-000;cidade X;SP;1005;exemplo@xpto.com.br
+01/08/2021;7,01;0,8;0,8;fulano de tal;36364164803;Rua XPTO 614;18150-000;cidade X;SP;1006;exemplo@xpto.com.br
+01/08/2021;8,01;0,9;0,9;fulano de tal;36364164803;Rua XPTO 615;18150-000;cidade X;SP;1007;exemplo@xpto.com.br
+01/08/2021;9,01;1;1;fulano de tal;36364164803;Rua XPTO 616;18150-000;cidade X;SP;1008;exemplo@xpto.com.br
+01/08/2021;10,01;1,1;1,1;fulano de tal;36364164803;Rua XPTO 617;18150-000;cidade X;SP;1009;exemplo@xpto.com.br
+01/08/2021;11,01;1,2;1,2;fulano de tal;36364164803;Rua XPTO 618;18150-000;cidade X;SP;1010;exemplo@xpto.com.br
+01/08/2021;12,01;1,3;1,3;fulano de tal;36364164803;Rua XPTO 619;18150-000;cidade X;SP;1011;exemplo@xpto.com.br
+01/08/2021;13,01;1,4;1,4;fulano de tal;36364164803;Rua XPTO 620;18150-000;cidade X;SP;1012;exemplo@xpto.com.br
+01/08/2021;14,01;1,5;1,5;fulano de tal;36364164803;Rua XPTO 621;18150-000;cidade X;SP;1013;exemplo@xpto.com.br
+01/08/2021;15,01;1,6;1,6;fulano de tal;36364164803;Rua XPTO 622;18150-000;cidade X;SP;1014;exemplo@xpto.com.br
+01/08/2021;16,01;1,7;1,7;fulano de tal;36364164803;Rua XPTO 623;18150-000;cidade X;SP;1015;exemplo@xpto.com.br
+01/08/2021;17,01;1,8;1,8;fulano de tal;36364164803;Rua XPTO 624;18150-000;cidade X;SP;1016;exemplo@xpto.com.br
+01/08/2021;18,01;1,9;1,9;fulano de tal;36364164803;Rua XPTO 625;18150-000;cidade X;SP;1017;exemplo@xpto.com.br
+01/08/2021;19,01;2;2;fulano de tal;36364164803;Rua XPTO 626;18150-000;cidade X;SP;1018;exemplo@xpto.com.br

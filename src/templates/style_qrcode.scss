@@ -1,0 +1,32 @@
+@import "./Colors.scss";
+
+@media all {
+  .containerQRCode {
+    border: 1px solid $cor_4 !important;
+    background-color: $cor_7;
+    padding: 20px;
+    border-radius: 10px;
+  }
+
+  .containerPerfil img {
+    border: 2px solid $cor_1 !important;
+  }
+
+  .title h2 {
+    font-weight: 600;
+    float: left;
+  }
+
+  .qrCode {
+    width: 100% !important;
+    height: 100% !important;
+    float: left;
+  }
+
+  .btnQRCode,.btnQRCode:hover, .btnQRCode:focus {
+    background-color: $cor_1;
+    border-bottom-color: $cor_2;
+    border-color: $cor_1;
+    width: 100%;
+  }
+}

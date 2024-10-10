@@ -1,0 +1,44 @@
+@import "Colors.scss";
+
+$spacer: 12pt;
+
+$spacers: ();
+$spacers: map-merge(
+  (
+    6: ($spacer * 4.5),
+    7: ($spacer * 6),
+    8: ($spacer * 8.5),
+    9: ($spacer * 10),
+  ),
+  $spacers
+);
+
+$sizes: ();
+$sizes: map-merge(
+  (
+    5: 5%,
+    10: 10%,
+    15: 15%,
+    20: 20%,
+    30: 30%,
+    35: 35%,
+    40: 40%,
+    45: 45%,
+    55: 55%, 
+    60: 60%, 
+    65: 65%, 
+    70: 70%,
+    80: 80%, 
+    85: 85%, 
+    90: 90%,
+    95: 95%
+  ),
+  $sizes
+);
+
+$theme-colors: (
+  "primary":    $cor_1,
+);
+
+// @import 'bootstrap/dist/css/bootstrap.min.css';
+@import "bootstrap/scss/bootstrap";

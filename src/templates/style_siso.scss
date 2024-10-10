@@ -1,0 +1,123 @@
+@import "./Colors.scss";
+
+// Style Antigo
+@media all {
+  .header {
+    background-color: $cor_6 !important;
+  }
+  .logoSiso {
+    width: 26%;
+    margin: 10px -145px;
+  }
+
+  .siso {
+    overflow-x: hidden !important;
+    background-image: url("../assets/images/backgrounds/fundo.jpg") !important;
+    background-size: cover;
+    height: 100vh;
+  }
+
+  .sisoButton {
+    margin: 10px;
+    background-color: $cor_1 !important;
+    border-bottom: $cor_5 solid 10px !important;
+    padding: 10px !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 10px !important;
+  }
+
+  .sisoButtonCpf {
+    margin: 10px;
+    background-color: $cor_1 !important;
+    border: none;
+    padding: 5px !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-radius: 10px !important;
+  }
+
+  .sisoBtnProdutos {
+    background-color: $cor_1;
+    color: $cor_5;
+    border: 0;
+    text-align: left;
+    display: block;
+    margin: 10px;
+    width: 100%;
+    border-bottom: 5px solid $cor_5 !important;
+    border-radius: 5px;
+  }
+
+  .btnInicio {
+    float: right;
+    width: 50%;
+    background-color: $cor_1;
+    border-bottom: $cor_5 solid 5px !important;
+    border: 0;
+    border-radius: 5px;
+  }
+
+  .returnSimulacao h2 {
+    color: $cor_5;
+    text-transform: capitalize;
+  }
+
+  .btnLojasApp {
+    background-color: $cor_1;
+    border: 0;
+    border-bottom: 10px solid $cor_5 !important;
+    display: block;
+    margin: auto;
+    width: 70%;
+    height: 66px !important;
+    font-size: 20px;
+  }
+  .historico {
+    border-bottom: 1px solid;
+    padding: 5px 0;
+    margin: 5px 0;
+  }
+  .historico button {
+    float: right;
+    width: 100% !important;
+    background-color: $cor_1;
+    border-bottom: $cor_6 solid 5px !important;
+    border: 0;
+    border-radius: 5px;
+    margin: 10px 0;
+  }
+
+  .btnFazerSimulacao {
+    float: right;
+    width: 31% !important;
+    background-color: $cor_1;
+    border-bottom: $cor_6 solid 5px !important;
+    border: 0;
+    border-radius: 5px;
+    margin: 10px 0;
+  }
+
+  .btnSimulacaoCancelar{
+    float: right;
+    width: 31% !important;
+    background-color: $cor_1;
+    border-bottom: $cor_6 solid 5px !important;
+    border: 0;
+    border-radius: 5px;
+    margin: 10px 0;
+  }
+
+  .btnPDF {
+    background-color: $cor_1;
+    border: 0;
+    border-bottom: 10px solid $cor_5 !important;
+    display: block;
+    margin: 40px auto auto;
+    width: 70%;
+    height: 66px !important;
+    font-size: 20px;
+  }
+}

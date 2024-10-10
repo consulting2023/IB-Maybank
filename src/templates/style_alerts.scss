@@ -1,0 +1,22 @@
+@import "./Colors.scss";
+
+@media all {
+  .overlay {
+    z-index: 9999;
+    pointer-events: none;
+
+    .alert {
+      position: relative !important;
+      width: 400px !important;
+      margin-right: 50px !important;
+      pointer-events: auto;
+    }
+
+    .alertWrapper {
+      right: 0px;
+      bottom: 0px;
+      z-index: 500;
+      width: 400px;
+    }
+  }
+}

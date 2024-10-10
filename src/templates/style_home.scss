@@ -1,0 +1,77 @@
+@import "./Colors.scss";
+
+@media all {
+  .home {
+    background: $cor_2;
+  }
+
+  .acoesRapidas {
+    border: 1px solid $cor_4;
+    // padding: 10px;
+    border-radius: 10px;
+    // margin-bottom: 10px;
+  }
+
+  .acoesTitulo {
+    border-radius: 5px;
+    border: none;
+    background-color: $cor_1 !important;
+    // padding: 7px 0px 0 10px;
+  }
+
+  .titulo {
+    color: $cor_5;
+    font-size: 20px;
+  }
+
+  .botao-acao-rapida {
+    border: 1px solid $cor_2;
+    border-radius: 5px;
+    background-color: $cor_5;
+  }
+
+  .botao-acao-rapida:hover {
+    background-color: $cor_2;
+  }
+
+  .link {
+    font-size: 18px;
+    color: $cor_1;
+  }
+
+  .blocoPesquisaExt {
+    background-color: $cor_2;
+    border: 1px solid $cor_4;
+    // padding: 10px;
+    border-radius: 10px;
+    // margin-bottom: 15px;
+  }
+
+  .paginas {
+    border: 1px solid $cor_4;
+    // padding: 10px;
+    border-radius: 10px;
+    // margin-bottom: 30px;
+  }
+
+  .boxSaldos {
+    height: 50px;
+  }
+
+  .ocultarSaldo {
+    font-size: 30px;
+    color: $cor_6;
+  }
+
+  .showme {
+    display: none;
+  }
+
+  .showhim:hover .hiddenme {
+    display: none;
+  }
+
+  .showhim:hover .showme {
+    display: block;
+  }
+}

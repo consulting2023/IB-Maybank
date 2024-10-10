@@ -1,0 +1,311 @@
+@import "./Colors.scss";
+
+// Style Antigo
+@media all {
+  .transfEscolha {
+    margin: 5px 20px;
+    width: 300px !important;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    height: 110px;
+    border-radius: 7px;
+    border-bottom: 10px solid $cor_1 !important;
+  }
+
+  .modalValidacao {
+    width: 660px;
+    display: block;
+    margin: auto;
+  }
+
+  .iconTransf {
+    font-size: 3em;
+    color: $cor_1 !important;
+    margin: 15px 10px;
+    float: left;
+  }
+
+  .tituloBotoes {
+    font-size: 20px;
+    margin: -10px 21px 0 0;
+  }
+
+  .realizarTransferencia {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    width: 10%;
+    border-radius: 0;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    font-size: 16px;
+  }
+
+  .fotoPj {
+    filter: brightness(0) !important;
+  }
+
+  .iconeBancos {
+    display: block;
+    margin: auto;
+    width: 65px;
+    height: 50px;
+    background-color: transparent;
+    border: 0;
+  }
+
+  .iconeBancos:hover {
+    display: block;
+    margin: auto;
+
+    background-color: transparent;
+    border: 0;
+  }
+
+  .iconeBancosOutros {
+    display: block;
+    margin: auto;
+    width: 65px;
+    height: 42px;
+    background-color: $cor_8;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .iconeBancosOutros:hover,
+  .iconeBancosOutros:focus {
+    display: block;
+    margin: auto;
+    background-color: $cor_8;
+    border: 0;
+    cursor: pointer !important;
+  }
+
+  .iconeBancosOutros label:hover {
+    cursor: pointer !important;
+  }
+
+  .showmeTransf {
+    display: none;
+  }
+
+  .showhimTransf:hover .hiddenmeTransf {
+    display: none;
+  }
+  .showhimTransf:hover .showmeTransf {
+    display: block;
+  }
+  .ocultarSaldoTransf {
+    font-size: 15x;
+    color: $cor_6;
+  }
+
+  .texto-saldos-Transf {
+    font-size: 17px;
+  }
+
+  .bancosOutros {
+    background-color: transparent;
+    color: $cor_6;
+    border: 0;
+    text-align: left;
+    display: block;
+  }
+
+  .titlebancos:hover {
+    cursor: pointer;
+  }
+
+  .btnTransfSucesso {
+    background: transparent;
+    color: $cor_6;
+    border: 1px solid $cor_1;
+    border-bottom: 5px solid $cor_1;
+    float: right;
+  }
+
+  .btnTransfSucesso:hover,
+  .btnTransfSucesso:focus {
+    background-color: $cor_1;
+    border-color: $cor_6;
+    color: $cor_5;
+  }
+
+  .btnTransfCancelar {
+    background: transparent;
+    color: $cor_6;
+    border: 1px solid red;
+    border-bottom: 5px solid red;
+  }
+
+  .btnTransfCancelar:hover,
+  .btnTransfCancelar:focus {
+    background-color: red;
+    border-color: $cor_3;
+    color: $cor_5;
+  }
+  .campoGerarTransf {
+    border: 1px solid $cor_2;
+    padding: 10px;
+    padding-bottom: 50px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+}
+
+//Style Novo
+
+@media all {
+  .transfEscolha_new {
+    margin: 5px 20px;
+    width: 300px !important;
+    background-color: $cor_2 !important;
+    border-color: $cor_4 !important;
+    color: $cor_6 !important;
+    height: 110px;
+    border-radius: 7px;
+    border-bottom: 10px solid $cor_1 !important;
+  }
+
+  .modalValidacao_new {
+    width: 660px;
+    display: block;
+    margin: auto;
+  }
+
+  .iconTransf_new {
+    font-size: 3em;
+    color: $cor_1 !important;
+    margin: 15px 10px;
+    float: left;
+  }
+
+  .tituloBotoes_new {
+    font-size: 20px;
+    margin: -10px 21px 0 0;
+  }
+
+  .realizarTransferencia_new {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    width: 10%;
+    border-radius: 0;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    font-size: 16px;
+  }
+
+  .fotoPj_new {
+    filter: brightness(0) !important;
+  }
+
+  .iconeBancos_new {
+    display: block;
+    margin: auto;
+    width: 65px;
+    height: 50px;
+    background-color: transparent;
+    border: 0;
+  }
+
+  .iconeBancos_new:hover {
+    display: block;
+    margin: auto;
+    background-color: transparent;
+    border: 0;
+  }
+
+  .iconeBancosOutros_new {
+    display: block;
+    margin: auto;
+    width: 65px;
+    height: 42px;
+    background-color: $cor_8;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .iconeBancosOutros_new:hover,
+  .iconeBancosOutros_new:focus {
+    display: block;
+    margin: auto;
+    background-color: $cor_8;
+    border: 0;
+    cursor: pointer !important;
+  }
+
+  .iconeBancosOutros_new label:hover {
+    cursor: pointer !important;
+  }
+
+  .showmeTransf {
+    display: none;
+  }
+
+  .showhimTransf:hover .hiddenmeTransf {
+    display: none;
+  }
+  .showhimTransf:hover .showmeTransf {
+    display: block;
+  }
+  .ocultarSaldoTransf_new {
+    font-size: 15x;
+    color: $cor_6;
+  }
+
+  .texto-saldos-Transf_new {
+    font-size: 17px;
+  }
+
+  .bancosOutros_new {
+    background-color: transparent;
+    color: $cor_6;
+    border: 0;
+    text-align: left;
+    display: block;
+  }
+
+  .titlebancos_new:hover {
+    cursor: pointer;
+  }
+
+  .btnTransfSucesso_new {
+    background: transparent;
+    color: $cor_6;
+    border: 1px solid $cor_1;
+    border-bottom: 5px solid $cor_1;
+    float: right;
+  }
+
+  .btnTransfSucesso_new:hover,
+  .btnTransfSucesso_new:focus {
+    background-color: $cor_1;
+    border-color: $cor_6;
+    color: $cor_5;
+  }
+
+  .btnTransfCancelar_new {
+    background: transparent;
+    color: $cor_6;
+    border: 1px solid red;
+    border-bottom: 5px solid red;
+  }
+
+  .btnTransfCancelar_new:hover,
+  .btnTransfCancelar_new:focus {
+    background-color: red;
+    border-color: $cor_3;
+    color: $cor_5;
+  }
+
+  .campoGerarTransf_new {
+    border: 1px solid $cor_2;
+    background-color: $cor_4;
+    padding: 10px;
+    padding-bottom: 50px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+}

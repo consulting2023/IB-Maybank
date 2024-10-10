@@ -1,0 +1,300 @@
+@import "./Colors.scss";
+
+// Style Old
+@media all {
+  input[type="file"] {
+    display: none;
+  }
+  .custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 5px 12px;
+    margin: 5px;
+    cursor: pointer;
+  }
+
+  .custom-file-caixa {
+    border: 1px solid #ccc;
+    display: inline-block;
+    cursor: pointer;
+    width: 100%;
+    margin: 0 0 0 0;
+    padding: 2px 0;
+  }
+
+  .cobrarEscolha {
+    margin: 5px 20px;
+    width: 300px !important;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    height: 110px;
+    border-radius: 7px;
+    border-bottom: 10px solid $cor_1 !important;
+  }
+
+  .iconCobrar {
+    font-size: 3em;
+    color: $cor_1 !important;
+    margin: 15px 10px;
+    float: left;
+  }
+
+  .tituloBotoes {
+    font-size: 20px;
+    margin: -10px 21px 0 0;
+  }
+
+  .breadCobrar {
+    background-color: $cor_5 !important;
+  }
+
+  .verMultiBoletos {
+    float: right !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: 10%;
+    font-size: 16px;
+  }
+
+  .btnBaixarCobrar {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+  }
+
+  .download_csv {
+    float: left !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    /*    width: 15%; */
+    font-size: 16px;
+  }
+
+  .ajudaMultiBoletos {
+    float: left !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: 10%;
+    font-size: 16px;
+    visibility: hidden !important;
+  }
+
+  .gerarBoletoCobrar {
+    float: left !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto;
+    font-size: 16px;
+  }
+
+  .baixarBoletoCobrar {
+    float: right !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+    font-size: 16px;
+  }
+
+  .campoGerarBoleto {
+    border: 1px solid $cor_2;
+    padding: 10px;
+    padding-bottom: 50px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  .btnProcurarCobrar {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: 100% !important;
+    font-size: 15px;
+    margin: 5px 12px 10px;
+  }
+
+  .btnCEPCobrar {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+    font-size: 15px;
+  }
+
+  .btnCadastrarCobrar {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: 10% !important;
+    font-size: 15px;
+  }
+}
+
+// Style New
+@media all {
+  input[type="file"] {
+    display: none;
+  }
+  .custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 5px 12px;
+    margin: 5px;
+    cursor: pointer;
+  }
+
+  .custom-file-caixa {
+    border: 1px solid #ccc;
+    display: inline-block;
+    cursor: pointer;
+    width: 100%;
+    margin: 0 0 0 0;
+    padding: 2px 0;
+  }
+
+  .cobrarEscolha_new {
+    margin: 5px 20px;
+    width: 300px !important;
+    background-color: $cor_2 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    height: 110px;
+    border-radius: 7px;
+    border-bottom: 10px solid $cor_1 !important;
+  }
+
+  .iconCobrar_new {
+    font-size: 3em;
+    color: $cor_1 !important;
+    margin: 15px 10px;
+    float: left;
+  }
+
+  .tituloBotoes_new {
+    font-size: 20px;
+    margin: -10px 21px 0 0;
+  }
+
+  .breadCobrar {
+    background-color: $cor_5 !important;
+  }
+
+  .verMultiBoletos_new {
+    float: right !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: 10%;
+    font-size: 16px;
+  }
+
+  .btnBaixarCobrar_new {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+  }
+
+  .download_csv_new {
+    float: left !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    /*    width: 15%; */
+    font-size: 16px;
+  }
+
+  .ajudaMultiBoletos_new {
+    float: left !important;
+    margin: 5px 20px;
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: 10%;
+    font-size: 16px;
+    visibility: hidden !important;
+  }
+
+  .gerarBoletoCobrar_new {
+    float: left !important;
+    margin: 5px 20px;
+    background-color: $cor_1 !important;
+    border-color: $cor_3 !important;
+    color: $cor_5 !important;
+    border-bottom: 0.3rem solid $cor_5 !important;
+    width: auto;
+    font-size: 16px;
+  }
+
+  .baixarBoletoCobrar_new {
+    float: right !important;
+    margin: 5px 20px;
+    background-color: $cor_1 !important;
+    border-color: $cor_3 !important;
+    color: $cor_5 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+    font-size: 16px;
+  }
+
+  .campoGerarBoleto_new {
+    border: 1px solid $cor_1;
+    padding: 10px;
+    padding-bottom: 50px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    background-color: $cor_2;
+  }
+
+  .btnProcurarCobrar_new {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: 100% !important;
+    font-size: 15px;
+    margin: 5px 12px 10px;
+  }
+
+  .btnCEPCobrar_new {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: auto !important;
+    font-size: 15px;
+  }
+
+  .btnCadastrarCobrar_new {
+    background-color: $cor_5 !important;
+    border-color: $cor_3 !important;
+    color: $cor_6 !important;
+    border-bottom: 0.3rem solid $cor_1 !important;
+    width: 10% !important;
+    font-size: 15px;
+  }
+}
