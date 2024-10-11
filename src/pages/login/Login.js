@@ -103,6 +103,7 @@ export default class Login extends Component {
               orderedArr[1] = arrContas[0];
             }
             this.setState({ contas: orderedArr, confirmShow: true });
+            
           }
         }
         this.setState({ loading: false });
@@ -112,7 +113,7 @@ export default class Login extends Component {
   };
 
   loginConta = (dados) => {
-
+    this.enviarToken()
     this.setState({ Qrcode_imagem: null, inputToken: true, inputTokenQrcode: false });
 
     var n = dados.conta.id;
@@ -183,14 +184,13 @@ export default class Login extends Component {
   };
 
   Valida_token = async (id) => {
-    const pessoa = JSON.parse(this.state.token_chave);
+    
     const data = {
-      url: 'otp/validar',
+      url: 'utilitarios/validacao-email-confere',
       data: {
-        'usuario_id': pessoa.conta_id,
-        'token': id,
-        'ativa': 1
-      },
+        "email": this.state.email,
+        "token": id,
+    },
       method: 'POST',
     };
 
@@ -219,6 +219,26 @@ export default class Login extends Component {
     if (data.length == 6) {
       this.Valida_token(data);
     }
+  }
+
+  enviarToken = () => {
+    
+    const data = {
+      url: 'utilitarios/validacao-email-envio',
+      data: {
+        "email": this.state.email,
+    },
+      method: 'POST',
+    };
+
+    setTimeout(() => {
+      // Funcoes.Geral_API(data, true).then((res) => {
+      Funcoes.Geral_API(data, true).then((res) => {
+        if (res == true) {
+          console.log(res)
+        }
+      });
+    }, 300);
   }
 
   render() {
@@ -412,6 +432,8 @@ export default class Login extends Component {
                     ) :
                       null
                   }
+
+                 
 
                   {/* QR Code */}
                   {/* {this.state.inputTokenQrcode ?
