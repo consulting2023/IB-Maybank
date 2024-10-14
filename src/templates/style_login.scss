@@ -21,7 +21,7 @@
     // HEADER
 
     $sideMargin: 25px;
-    $borderRadius: 25px;
+    $borderRadius: 10px;
 
     .barra_superior {
       height: 70px;
@@ -120,7 +120,7 @@
         width: 65%;
         border: 0;
         border-radius: $borderRadius;
-        color: $cor_5;
+        color: $cor_2;
         font-size: 12pt;
         font-weight: 800 !important;
 

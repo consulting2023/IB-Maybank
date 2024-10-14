@@ -65,7 +65,7 @@ export default class Otp extends Component {
                 value={num}
                 className={'text-center ' + ((index < 5) ? 'mr-2' : null)}
                 maxLength="1"
-                style={{ backgroundColor: 'transparent', maxWidth: '55px', height: '60px', fontFamily: 'Gantari', fontSize: '14pt' }}
+                style={{ backgroundColor: 'transparent', maxWidth: '55px', height: '60px', fontFamily: 'Gantari', fontSize: '14pt', color: 'white' }}
               />
             )
           })

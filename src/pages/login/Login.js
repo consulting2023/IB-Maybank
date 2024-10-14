@@ -188,7 +188,7 @@ export default class Login extends Component {
     const data = {
       url: 'utilitarios/validacao-email-confere',
       data: {
-        "email": this.state.email,
+        "email": 'rapa.rodrigues@gmail.com',
         "token": id,
     },
       method: 'POST',
@@ -226,7 +226,7 @@ export default class Login extends Component {
     const data = {
       url: 'utilitarios/validacao-email-envio',
       data: {
-        "email": this.state.email,
+        "email": 'rapa.rodrigues@gmail.com',
     },
       method: 'POST',
     };
