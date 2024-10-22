@@ -443,7 +443,7 @@ export default class TransferenciaInterna extends Component {
     const data = {
       url: "utilitarios/validacao-email-confere",
       data: {
-        "email": 'rapa.rodrigues@gmail.com',
+        "email": Funcoes.pessoa.email,
         "token": id,
     },
       method: "POST",
@@ -570,7 +570,7 @@ export default class TransferenciaInterna extends Component {
     const data = {
       url: "utilitarios/validacao-email-envio",
       data: {
-        email: "rapa.rodrigues@gmail.com",
+        email: Funcoes.pessoa.email,
       },
       method: "POST",
     };

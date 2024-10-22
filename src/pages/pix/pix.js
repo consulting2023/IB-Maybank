@@ -72,6 +72,7 @@ export default class Pix extends Component {
   }
 
   ValidarChave = () => {
+    this.enviarToken();
     this.setState({ loading: true });
 
     const pix = this.state.pixPesquisa;
@@ -188,6 +189,7 @@ export default class Pix extends Component {
   };
 
   combinacoes = async () => {
+    
     this.setState({ loading: true });
     let { password } = this.state;
 
@@ -256,11 +258,10 @@ export default class Pix extends Component {
 
   Valida_token = async (id) => {
     const data = {
-      url: "otp/validar",
+      url: "utilitarios/validacao-email-confere",
       data: {
-        usuario_id: Funcoes.pessoa.conta_id,
+        email: Funcoes.pessoa.email,
         token: id,
-        ativa: 1,
       },
       method: "POST",
     };
@@ -326,6 +327,7 @@ export default class Pix extends Component {
   };
 
   gerar_transferencia = () => {
+    this.enviarToken();
     let valor_enviar = this.state.valor.replace("R$", "");
     valor_enviar = valor_enviar.replace(" ", "");
     valor_enviar = valor_enviar.replace(".", "");
@@ -709,7 +711,26 @@ export default class Pix extends Component {
   getPass = async (data) => {
     this.setState({ password: data });
   };
+  enviarToken = () => {
+    this.setState({ token_app: true });
 
+    const data = {
+      url: "utilitarios/validacao-email-envio",
+      data: {
+        email: Funcoes.pessoa.email,
+      },
+      method: "POST",
+    };
+
+    setTimeout(() => {
+      // Funcoes.Geral_API(data, true).then((res) => {
+      Funcoes.Geral_API(data, true).then((res) => {
+        if (res == true) {
+          console.log(res);
+        }
+      });
+    }, 300);
+  };
   render() {
     const pixTypesPagar = [
       // { title: 'QR Code' },

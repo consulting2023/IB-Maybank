@@ -369,7 +369,7 @@ export default {
     titleSenha: 'Senha',
     textSenha: 'Digite sua senha',
     titleToken: 'Token',
-    textTokenDescr: 'Digite o Token gerado pela sua Chave de Acesso em seu App.',
+    textTokenDescr: 'Digite o Token enviado por seu email',
 
 
     erroSenha: 'Erro de senha ou token invalido',

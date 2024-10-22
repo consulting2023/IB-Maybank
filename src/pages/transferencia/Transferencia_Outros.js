@@ -104,6 +104,7 @@ export default class TransferenciaOutros extends Component {
         })
     }
     transferencia = () => {
+        this.enviarToken()
 
         var valor = this.state.valor;
         valor = valor.replace('.', '');
@@ -353,9 +354,9 @@ export default class TransferenciaOutros extends Component {
 
     Valida_token = async (id) => {
         const data = {
-            url: 'otp/validar',
+            url: 'utilitarios/validacao-email-confere',
             data: {
-                'usuario_id': this.state.pessoa.usuario_id,
+                "email": Funcoes.pessoa.email,
                 'token': id,
             },
             method: 'POST',
@@ -478,6 +479,27 @@ export default class TransferenciaOutros extends Component {
     getPass = async (data) => {
       this.setState({ password: data });
     }
+
+    enviarToken = () => {
+        this.setState({ token_app: true });
+    
+        const data = {
+          url: "utilitarios/validacao-email-envio",
+          data: {
+            email: Funcoes.pessoa.email,
+          },
+          method: "POST",
+        };
+    
+        setTimeout(() => {
+          // Funcoes.Geral_API(data, true).then((res) => {
+          Funcoes.Geral_API(data, true).then((res) => {
+            if (res == true) {
+              console.log(res);
+            }
+          });
+        }, 300);
+      };
 
     render() {
 
