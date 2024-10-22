@@ -74,7 +74,9 @@ export async function Geral_API(dados, logado) {
   };
 
   const data = dados.data;
-  const url = dados.url;
+  
+  const url = dados.url.startsWith('/') ? dados.url.slice(1) : dados.url;
+  
   let apiFunc = {};
 
   switch (dados.method) {

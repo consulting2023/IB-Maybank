@@ -1,15 +1,24 @@
-import React, { Component } from 'react';
-import '../../templates/style_cobrar.scss';
-import { Container, Col, Button, Dropdown, Row, Modal, Image } from 'react-bootstrap';
-import Icones from '../../constants/Icon';
-import OtpInput from 'react-otp-input';
-import CurrencyInput from 'react-currency-input';
-import BannerTitle from '../../components/bannerTitle/bannerTitle';
-import * as Formatar from '../../constants/Formatar';
-import Objetos from '../../constants/Objetos';
-import * as Funcoes from '../../constants/Funcoes';
-import ReactLoading from 'react-loading';
-import Password from '../../components/password/Password';
+import React, { Component } from "react";
+import "../../templates/style_cobrar.scss";
+import {
+  Container,
+  Col,
+  Button,
+  Dropdown,
+  Row,
+  Modal,
+  Image,
+} from "react-bootstrap";
+import Icones from "../../constants/Icon";
+import OtpInput from "react-otp-input";
+import CurrencyInput from "react-currency-input";
+import BannerTitle from "../../components/bannerTitle/bannerTitle";
+import * as Formatar from "../../constants/Formatar";
+import Objetos from "../../constants/Objetos";
+import * as Funcoes from "../../constants/Funcoes";
+import ReactLoading from "react-loading";
+import Password from "../../components/password/Password";
+import QRCode from "react-qr-code";
 
 export default class Pix extends Component {
   constructor() {
@@ -17,16 +26,25 @@ export default class Pix extends Component {
     this.state = {
       showModalPesquisa: false,
       pixPesquisa: {},
-      chaveValue: '',
+      chaveValue: "",
       showModalTransferencia: false,
-      retornoConsulta: { chave: '', dados_bancarios: { nome: '', nome_banco: '', agencia: '', conta: '', documento: '' } },
+      retornoConsulta: {
+        chave: "",
+        dados_bancarios: {
+          nome: "",
+          nome_banco: "",
+          agencia: "",
+          conta: "",
+          documento: "",
+        },
+      },
 
       valor: 0,
-      msg: '',
+      msg: "",
       saldo: 0,
       tarifa: 0,
       showModalComprovante: false,
-      titleModalComprovante: '',
+      titleModalComprovante: "",
       comprovante_pdf: {},
 
       chaves_disponiveis: {},
@@ -39,14 +57,14 @@ export default class Pix extends Component {
       showModalQr: false,
       showModalQrReceber: false,
       selectQrChave: {},
-      valorQr: '',
-      qrCopypaste: '',
-      qrImg: '',
+      valorQr: "",
+      qrCopypaste: "",
+      qrImg: "",
 
       loading: false,
 
-      password: ['', '', '', '', '', '']
-    }
+      password: ["", "", "", "", "", ""],
+    };
   }
 
   componentDidMount() {
@@ -61,26 +79,26 @@ export default class Pix extends Component {
 
     if (chave.length > 0) {
       switch (pix.code) {
-        case 'cpf':
-          var chave_final = chave.replace(/[^0-9]+/g, '');
+        case "cpf":
+          var chave_final = chave.replace(/[^0-9]+/g, "");
           this.pesquisarChave(chave_final);
           break;
 
-        case 'cnpj':
-          var chave_final = chave.replace(/[^\d]+/g, '');
+        case "cnpj":
+          var chave_final = chave.replace(/[^\d]+/g, "");
           this.pesquisarChave(chave_final);
           break;
 
-        case 'cel':
-          var chave_final = '+55' + chave.replace(/[^\d]+/g, '');
+        case "cel":
+          var chave_final = "+55" + chave.replace(/[^\d]+/g, "");
           this.pesquisarChave(chave_final);
           break;
 
-        case 'email':
+        case "email":
           var verifica = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
           if (verifica.test(chave) === false) {
-            this.setState({ loading: false })
-            alert('Email inválido');
+            this.setState({ loading: false });
+            alert("Email inválido");
             return false;
           } else {
             var chave_final = chave.toLowerCase();
@@ -88,45 +106,42 @@ export default class Pix extends Component {
           }
           break;
 
-        case 'random':
+        case "random":
           var chave_final = chave;
           this.pesquisarChave(chave_final);
           break;
 
-        case 'copy':
+        case "copy":
           var chave_final = chave;
           this.pesquisarChaveQR(chave_final);
           break;
 
-        default: this.setState({ loading: false }); alert('Erro');
+        default:
+          this.setState({ loading: false });
+          alert("Erro");
       }
-
     } else {
       this.setState({ loading: false });
-      alert('Digite a chave pix');
+      alert("Digite a chave pix");
     }
-
   };
 
   pesquisarChave = (chave_final) => {
-
     const dados = {
-
-      url: 'pix/pix/consultar-chave',
-      method: 'POST',
-      funcao: 'pesquisarChave',
-      tela: 'pix',
+      url: "pix/pix/consultar-chave",
+      method: "POST",
+      funcao: "pesquisarChave",
+      tela: "pix",
       data: {
-        "conta_id": Funcoes.pessoa.conta_id,
-        "chave_pix": chave_final
-      }
+        conta_id: Funcoes.pessoa.conta_id,
+        chave_pix: chave_final,
+      },
     };
 
     Funcoes.Geral_API(dados, true).then((responseJson) => {
-
       if (responseJson == 0) {
-        this.setState({ loading: false })
-        this.props.alerts('Erro interno', '', 'warning');
+        this.setState({ loading: false });
+        this.props.alerts("Erro interno", "", "warning");
       } else {
         if (responseJson.chave) {
           this.setState({ retornoConsulta: responseJson });
@@ -135,30 +150,28 @@ export default class Pix extends Component {
             this.setState({ showModalTransferencia: true });
           }, 1000);
         } else {
-          this.setState({ loading: false })
-          alert('Chave Pix não encontrada');
+          this.setState({ loading: false });
+          alert("Chave Pix não encontrada");
         }
       }
-
     });
   };
 
   pesquisarChaveQR = (chave_final) => {
     const dados = {
-      url: 'pix/pix/consultar-qrcode',
-      method: 'POST',
-      funcao: 'pesquisarChave',
-      tela: 'pix',
+      url: "pix/pix/consultar-qrcode",
+      method: "POST",
+      funcao: "pesquisarChave",
+      tela: "pix",
       data: {
-        "conta_id": Funcoes.pessoa.conta_id,
-        "emv": chave_final
-      }
+        conta_id: Funcoes.pessoa.conta_id,
+        emv: chave_final,
+      },
     };
 
     Funcoes.Geral_API(dados, true).then((responseJson) => {
-
       if (responseJson == 0) {
-        alert('Chave não encontrada');
+        alert("Chave não encontrada");
       } else {
         if (responseJson.chave) {
           this.setState({ retornoConsulta: responseJson });
@@ -167,12 +180,10 @@ export default class Pix extends Component {
             this.setState({ showModalTransferencia: true });
           }, 1000);
         } else {
-          this.setState({ loading: false })
-          alert('Chave não encontrada');
+          this.setState({ loading: false });
+          alert("Chave não encontrada");
         }
-
       }
-
     });
   };
 
@@ -180,81 +191,92 @@ export default class Pix extends Component {
     this.setState({ loading: true });
     let { password } = this.state;
 
-    if (password.some((e) => e == '')) {
-      this.props.alerts('Erro', 'erro de login', 'warning');
+    if (password.some((e) => e == "")) {
+      this.props.alerts("Erro", "erro de login", "warning");
       this.setState({ loading: false });
     } else {
       this.setState({ loading: true });
 
-      const cartesian = (a) => a.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
+      const cartesian = (a) =>
+        a.reduce((a, b) => a.flatMap((d) => b.map((e) => [d, e].flat())));
       let output = cartesian(password);
       let texto = [];
 
-      for (var i = 0; i < (Object.keys(output)).length; i++) {
-        texto.push(output[i][0] + '' + output[i][1] + '' + output[i][2] + '' + output[i][3] + '' + output[i][4] + '' + output[i][5]);
+      for (var i = 0; i < Object.keys(output).length; i++) {
+        texto.push(
+          output[i][0] +
+            "" +
+            output[i][1] +
+            "" +
+            output[i][2] +
+            "" +
+            output[i][3] +
+            "" +
+            output[i][4] +
+            "" +
+            output[i][5]
+        );
       }
 
       const data = {
-        url: 'usuario/login',
+        url: "usuario/login",
         data: {
-          'email': Funcoes.pessoa.email,
-          'password': texto,
-          'sub_banco_id': '',
-          'token_aparelho': '',
-          'nome_aparelho': ''
+          email: Funcoes.pessoa.email,
+          password: texto,
+          sub_banco_id: "",
+          token_aparelho: "",
+          nome_aparelho: "",
         },
-        method: 'POST',
+        method: "POST",
       };
 
       Funcoes.Geral_API(data, false).then((res) => {
-        let chave = '';
+        let chave = "";
 
         if (res != 0) {
           chave = texto;
-          i = (Object.keys(output));
+          i = Object.keys(output);
         }
 
-        if (chave == '') {
+        if (chave == "") {
           this.setState({ loading: false });
-          this.props.alerts('Erro', 'Senha Incorreta', 'warning');
+          this.props.alerts("Erro", "Senha Incorreta", "warning");
         } else {
           if (this.state.OTP.length == 6) {
             this.setState({ password: chave });
             this.Valida_token(this.state.OTP);
           } else {
-            this.setState({ loading: false })
-            this.props.alerts('Erro', 'Preencha o token', 'warning');
+            this.setState({ loading: false });
+            this.props.alerts("Erro", "Preencha o token", "warning");
           }
         }
-      })
+      });
     }
   };
 
   Valida_token = async (id) => {
-
     const data = {
-      url: 'otp/validar',
+      url: "otp/validar",
       data: {
-        'usuario_id': Funcoes.pessoa.conta_id,
-        'token': id,
-        'ativa': 1
+        usuario_id: Funcoes.pessoa.conta_id,
+        token: id,
+        ativa: 1,
       },
-      method: 'POST',
+      method: "POST",
     };
 
     setTimeout(() => {
       Funcoes.Geral_API(data, true).then((res) => {
         if (res == true) {
-
-          let valor_enviar = this.state.valor.replace('R$', '');
-          valor_enviar = valor_enviar.replace(' ', '');
-          valor_enviar = valor_enviar.replace('.', '');
-          valor_enviar = valor_enviar.replace(',', '.');
+          let valor_enviar = this.state.valor.replace("R$", "");
+          valor_enviar = valor_enviar.replace(" ", "");
+          valor_enviar = valor_enviar.replace(".", "");
+          valor_enviar = valor_enviar.replace(",", ".");
 
           this.valor_tarifa(valor_enviar);
         } else {
           this.setState({ loading: false });
-          this.props.alerts("Erro", "Token inválido", 'warning');
+          this.props.alerts("Erro", "Token inválido", "warning");
         }
       });
     }, 300);
@@ -262,27 +284,27 @@ export default class Pix extends Component {
 
   SaldoConta = () => {
     const data = {
-      url: 'conta/saldo',
-      data: { 'conta_id': Funcoes.pessoa.conta_id },
-      method: 'POST',
+      url: "conta/saldo",
+      data: { conta_id: Funcoes.pessoa.conta_id },
+      method: "POST",
     };
 
     Funcoes.Geral_API(data, true).then((res) => {
       this.setState({ saldo: res.digital });
     });
-  }
+  };
 
   valor_tarifa = (valor_simulacao) => {
     const data = {
-      url: 'tarifa/consulta',
+      url: "tarifa/consulta",
       data: {
-        "chave": 'pix',
-        "conta_id": Funcoes.pessoa.conta_id,
-        "valor": valor_simulacao
+        chave: "pix",
+        conta_id: Funcoes.pessoa.conta_id,
+        valor: valor_simulacao,
       },
-      method: 'POST',
-      funcao: 'valor_tarifa',
-      tela: 'pix'
+      method: "POST",
+      funcao: "valor_tarifa",
+      tela: "pix",
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
@@ -293,11 +315,10 @@ export default class Pix extends Component {
 
       if (parseFloat(tarifado) > parseFloat(this.state.saldo)) {
         this.setState({ loading: false });
-        alert('Saldo insuficiente');
-
+        alert("Saldo insuficiente");
       } else if (parseFloat(valor) > parseFloat(this.state.saldo)) {
         this.setState({ loading: false });
-        alert('Saldo insuficiente');
+        alert("Saldo insuficiente");
       } else {
         this.gerar_transferencia();
       }
@@ -305,80 +326,64 @@ export default class Pix extends Component {
   };
 
   gerar_transferencia = () => {
-    let valor_enviar = this.state.valor.replace('R$', '');
-    valor_enviar = valor_enviar.replace(' ', '');
-    valor_enviar = valor_enviar.replace('.', '');
-    valor_enviar = valor_enviar.replace(',', '.');
+    let valor_enviar = this.state.valor.replace("R$", "");
+    valor_enviar = valor_enviar.replace(" ", "");
+    valor_enviar = valor_enviar.replace(".", "");
+    valor_enviar = valor_enviar.replace(",", ".");
 
     const dados = {
-
-      url: 'pix/pix/enviar-pix',
-      method: 'POST',
-      funcao: 'pesquisarChave',
-      tela: 'pix',
+      url: "pix/pix/enviar-pix",
+      method: "POST",
+      funcao: "pesquisarChave",
+      tela: "pix",
       data: {
-        "valor": valor_enviar,
-        "mensagem": this.state.msg,
-        "dados_recebedor": {
-          "chave_pix": this.state.retornoConsulta.chave,
-          "banco": this.state.retornoConsulta.dados_bancarios.banco,
-          "conta": this.state.retornoConsulta.dados_bancarios.conta,
-          "agencia": this.state.retornoConsulta.dados_bancarios.agencia,
-          "documento": this.state.retornoConsulta.dados_bancarios.documento,
-          "tipo_conta": this.state.retornoConsulta.dados_bancarios.tipo_conta,
-          "nome": this.state.retornoConsulta.dados_bancarios.nome
+        valor: valor_enviar,
+        mensagem: this.state.msg,
+        dados_recebedor: {
+          chave_pix: this.state.retornoConsulta.chave,
+          banco: this.state.retornoConsulta.dados_bancarios.banco,
+          conta: this.state.retornoConsulta.dados_bancarios.conta,
+          agencia: this.state.retornoConsulta.dados_bancarios.agencia,
+          documento: this.state.retornoConsulta.dados_bancarios.documento,
+          tipo_conta: this.state.retornoConsulta.dados_bancarios.tipo_conta,
+          nome: this.state.retornoConsulta.dados_bancarios.nome,
         },
-        "conta_id": Funcoes.pessoa.conta_id,
-        "senha": this.state.password,
-        "token": this.state.OTP,
-      }
+        conta_id: Funcoes.pessoa.conta_id,
+        senha: this.state.password,
+        token: this.state.OTP,
+      },
     };
 
     Funcoes.Geral_API(dados, true).then((responseJson) => {
-
       if (responseJson.cod == 0) {
-
         this.closeModalTransferencia();
         alert("Erro desconhecido.");
-
       } else if (responseJson.cod == 1) {
-
         setTimeout(() => {
           this.closeModalTransferencia();
           this.comprovante_ver(responseJson.mov_id);
         }, 1000);
-
       } else if (responseJson.cod == 2) {
-
         this.AgendarPix();
-
       } else if (responseJson.cod == 3) {
-
         this.setState({ loading: false });
 
         this.closeModalTransferencia();
         alert("Transação não efetuada, por favor consulte seu gerente.");
-
       } else if (responseJson.cod == 4) {
-
         this.closeModalTransferencia();
         alert(responseJson.msg);
-
       } else if (responseJson.cod == 5) {
-
         this.closeModalTransferencia();
         alert(responseJson.msg);
-
       } else if (responseJson.cod == 10) {
-
         this.closeModalTransferencia();
-        alert("Não é permitido a realização de múltiplas transferências Pix em menos de um minuto");
-
+        alert(
+          "Não é permitido a realização de múltiplas transferências Pix em menos de um minuto"
+        );
       } else {
-
         this.setState({ loading: false });
-        alert('Erro desconhecido');
-
+        alert("Erro desconhecido");
       }
     });
   };
@@ -407,81 +412,88 @@ export default class Pix extends Component {
   // };
 
   comprovante_ver = (id) => {
-    this.setState({ loading: true, showModalComprovante: true, titleModalComprovante: 'Gerando comprovante...' });
+    this.setState({
+      loading: true,
+      showModalComprovante: true,
+      titleModalComprovante: "Gerando comprovante...",
+    });
 
     const data = {
-      url: 'conta/comprovante-pdf',
+      url: "conta/comprovante-pdf",
       data: {
-        "id": id
+        id: id,
       },
-      method: 'POST',
-      funcao: 'comprovante_ver',
-      tela: 'pix'
+      method: "POST",
+      funcao: "comprovante_ver",
+      tela: "pix",
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
       this.setState({ comprovante_pdf: responseJson });
       setTimeout(() => {
-        this.setState({ titleModalComprovante: 'Transação Pix efetuada com sucesso!', loading: false });
+        this.setState({
+          titleModalComprovante: "Transação Pix efetuada com sucesso!",
+          loading: false,
+        });
       }, 1000);
     });
   };
 
   abrirComprovante = () => {
-    let pdfWindow = window.open("")
-    pdfWindow.document.write("<body style='margin: 0;'><embed width='100%' height='100%' src='data:application/pdf;base64, " + encodeURI(this.state.comprovante_pdf) + "' /></body>");
-    pdfWindow.document.title = 'Comprovante'
-  }
+    let pdfWindow = window.open("");
+    pdfWindow.document.write(
+      "<body style='margin: 0;'><embed width='100%' height='100%' src='data:application/pdf;base64, " +
+        encodeURI(this.state.comprovante_pdf) +
+        "' /></body>"
+    );
+    pdfWindow.document.title = "Comprovante";
+  };
 
   AgendarPix = () => {
-
     const dados = {
-      url: 'pix/pix/agendar-pix',
-      method: 'POST',
-      funcao: 'pesquisarChave',
-      tela: 'pix',
+      url: "pix/pix/agendar-pix",
+      method: "POST",
+      funcao: "pesquisarChave",
+      tela: "pix",
       data: {
-        "valor": this.state.valor,
-        "mensagem": this.state.msg,
-        "dados_recebedor": {
-          "chave_pix": this.state.retornoConsulta.chave,
-          "banco": this.state.retornoConsulta.dados_bancarios.banco,
-          "conta": this.state.retornoConsulta.dados_bancarios.conta,
-          "agencia": this.state.retornoConsulta.dados_bancarios.agencia,
-          "documento": this.state.retornoConsulta.dados_bancarios.documento,
-          "tipo_conta": this.state.retornoConsulta.dados_bancarios.tipo_conta,
-          "nome": this.state.retornoConsulta.dados_bancarios.nome
+        valor: this.state.valor,
+        mensagem: this.state.msg,
+        dados_recebedor: {
+          chave_pix: this.state.retornoConsulta.chave,
+          banco: this.state.retornoConsulta.dados_bancarios.banco,
+          conta: this.state.retornoConsulta.dados_bancarios.conta,
+          agencia: this.state.retornoConsulta.dados_bancarios.agencia,
+          documento: this.state.retornoConsulta.dados_bancarios.documento,
+          tipo_conta: this.state.retornoConsulta.dados_bancarios.tipo_conta,
+          nome: this.state.retornoConsulta.dados_bancarios.nome,
         },
-        "data_hora": Formatar.formatarDateAnoHoraSegundo(new Date()),
-        "conta_id": Funcoes.pessoa.conta_id
-      }
+        data_hora: Formatar.formatarDateAnoHoraSegundo(new Date()),
+        conta_id: Funcoes.pessoa.conta_id,
+      },
     };
 
     Funcoes.Geral_API(dados, true).then((responseJson) => {
-
       if (responseJson == 1) {
         this.setState({ loading: false });
         alert("O Pix será efetivado em até 1 Hora.");
         window.location.reload();
       } else {
         this.setState({ loading: false });
-        alert('Erro ao agendar pix.');
+        alert("Erro ao agendar pix.");
       }
-
     });
   };
-
 
   consultar_chaves_banco = () => {
     this.setState({ loading: true });
     const data = {
-      url: 'pix/pix/chaves-disponiveis',
+      url: "pix/pix/chaves-disponiveis",
       data: {
-        "conta_id": Funcoes.pessoa.conta_id
+        conta_id: Funcoes.pessoa.conta_id,
       },
-      method: 'GET',
-      funcao: 'consultar_chaves_banco',
-      tela: 'pix'
+      method: "GET",
+      funcao: "consultar_chaves_banco",
+      tela: "pix",
     };
     Funcoes.Geral_API(data, true).then((responseJson) => {
       this.setState({ chaves_disponiveis: responseJson });
@@ -492,16 +504,16 @@ export default class Pix extends Component {
   consultar_chaves_cliente = () => {
     this.setState({ loading: true });
     const data = {
-      url: 'pix/pix/consultar-chaves',
+      url: "pix/pix/consultar-chaves",
       data: {
-        "conta_id": Funcoes.pessoa.conta_id
+        conta_id: Funcoes.pessoa.conta_id,
       },
-      method: 'POST',
-      funcao: 'consultar_chaves_cliente',
-      tela: 'pix'
+      method: "POST",
+      funcao: "consultar_chaves_cliente",
+      tela: "pix",
     };
     Funcoes.Geral_API(data, true).then((responseJson) => {
-      this.setState({ minhas_chaves_pix: responseJson })
+      this.setState({ minhas_chaves_pix: responseJson });
       this.setState({ loading: false });
     });
   };
@@ -510,15 +522,15 @@ export default class Pix extends Component {
     this.setState({ loading: true });
 
     const data = {
-      url: 'pix/pix/criar-chave',
+      url: "pix/pix/criar-chave",
       data: {
-        "conta_id": Funcoes.pessoa.conta_id,
-        "tipo": tipo,
-        "chave": ""
+        conta_id: Funcoes.pessoa.conta_id,
+        tipo: tipo,
+        chave: "",
       },
-      method: 'POST',
-      funcao: 'criar_chave_pix',
-      tela: 'pix'
+      method: "POST",
+      funcao: "criar_chave_pix",
+      tela: "pix",
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
@@ -529,31 +541,21 @@ export default class Pix extends Component {
       200	Sucesso */
 
       if (responseJson.status == 200) {
-
         this.closeModalCriar();
-        alert('Chave criada com sucesso')
+        alert("Chave criada com sucesso");
         this.consultar_chaves_cliente();
-
       } else if (responseJson.status == 301) {
-
         this.setState({ showModalChaves: false });
-        alert('Não conseguiu criar a chave')
-
+        alert("Não conseguiu criar a chave");
       } else if (responseJson.status == 302) {
-
         this.setState({ showModalChaves: false });
-        alert('Chave já cadastrada em outro banco')
-
+        alert("Chave já cadastrada em outro banco");
       } else if (responseJson.status == 304) {
-
         this.setState({ showModalChaves: false });
-        alert('O número limite de chaves é cinco')
-
+        alert("O número limite de chaves é cinco");
       } else {
-
         this.setState({ showModalChaves: false });
-        alert('Tente novamente mais tarde')
-
+        alert("Tente novamente mais tarde");
       }
     });
   };
@@ -561,14 +563,14 @@ export default class Pix extends Component {
   excluir_chave_pix = (dados) => {
     this.setState({ loading: true });
     const data = {
-      url: 'pix/pix/excluir-chave',
+      url: "pix/pix/excluir-chave",
       data: {
-        "conta_id": Funcoes.pessoa.conta_id,
-        "id": dados.id,
+        conta_id: Funcoes.pessoa.conta_id,
+        id: dados.id,
       },
-      method: 'POST',
-      funcao: 'excluir_chave_pix',
-      tela: 'pix'
+      method: "POST",
+      funcao: "excluir_chave_pix",
+      tela: "pix",
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
@@ -579,7 +581,6 @@ export default class Pix extends Component {
         alert("Não foi possível excluir a chave");
       }
     });
-
   };
 
   GerarQrRecebimento = () => {
@@ -587,31 +588,31 @@ export default class Pix extends Component {
 
     var valor_qrcodeenviar = this.state.valorQr;
 
-    if (valor_qrcodeenviar == '') {
+    if (valor_qrcodeenviar == "") {
       valor_qrcodeenviar = 0;
     } else {
-      valor_qrcodeenviar = valor_qrcodeenviar.replace('R$ ', '');
-      valor_qrcodeenviar = valor_qrcodeenviar.replace('.', '');
-      valor_qrcodeenviar = valor_qrcodeenviar.replace(',', '.');
+      valor_qrcodeenviar = valor_qrcodeenviar.replace("R$ ", "");
+      valor_qrcodeenviar = valor_qrcodeenviar.replace(".", "");
+      valor_qrcodeenviar = valor_qrcodeenviar.replace(",", ".");
     }
 
     const dados = {
-      url: 'pix/pix/gera-qrcode-estatico',
-      method: 'POST',
-      funcao: 'pesquisarChave',
-      tela: 'pix',
+      url: "pix/pix/gera-qrcode-estatico",
+      method: "POST",
+      funcao: "pesquisarChave",
+      tela: "pix",
       data: {
-        "conta_id": Funcoes.pessoa.conta_id,
-        "valor": valor_qrcodeenviar,
-        "pixels_modulo": 20,
-        "formato_imagem": "jpeg",
-        "chave_pix": this.state.selectQrChave.chave
-      }
+        conta_id: Funcoes.pessoa.conta_id,
+        valor: valor_qrcodeenviar,
+        pixels_modulo: 20,
+        formato_imagem: "jpeg",
+        chave_pix: this.state.selectQrChave.chave,
+      },
     };
 
     Funcoes.Geral_API(dados, true).then((responseJson) => {
       if (responseJson != 0) {
-        this.setState({ qrCopypaste: responseJson.copia_cola, qrImg: 'data:image/png;base64,' + responseJson.qrcode })
+        this.setState({ qrCopypaste: responseJson.copia_cola });
 
         setTimeout(() => {
           this.setState({ loading: false });
@@ -622,111 +623,194 @@ export default class Pix extends Component {
         this.setState({ loading: false });
         alert("Erro na geração do QRcode.");
       }
-
     });
-
   };
 
   closeModalPesquisa = () => {
-    this.setState({ showModalPesquisa: false, pixPesquisa: {}, chaveValue: '', loading: false })
-  }
+    this.setState({
+      showModalPesquisa: false,
+      pixPesquisa: {},
+      chaveValue: "",
+      loading: false,
+    });
+  };
 
   closeModalTransferencia = () => {
-    this.setState({ showModalTransferencia: false, loading: false, valor: 0, msg: '', chaveValue: '', OTP: '', password: ['', '', '', '', '', ''], password1: '', password2: '', password3: '', password4: '', password5: '', password6: '', senha1: [], senha2: [], mostrar_1: false, mostrar_2: false, mostrar_3: false, mostrar_4: false, mostrar_5: false, mostrar_6: false, bloco_1: [], bloco_2: [], bloco_3: [], bloco_4: [], bloco_5: [], bloco_6: [], });
-  }
+    this.setState({
+      showModalTransferencia: false,
+      loading: false,
+      valor: 0,
+      msg: "",
+      chaveValue: "",
+      OTP: "",
+      password: ["", "", "", "", "", ""],
+      password1: "",
+      password2: "",
+      password3: "",
+      password4: "",
+      password5: "",
+      password6: "",
+      senha1: [],
+      senha2: [],
+      mostrar_1: false,
+      mostrar_2: false,
+      mostrar_3: false,
+      mostrar_4: false,
+      mostrar_5: false,
+      mostrar_6: false,
+      bloco_1: [],
+      bloco_2: [],
+      bloco_3: [],
+      bloco_4: [],
+      bloco_5: [],
+      bloco_6: [],
+    });
+  };
 
   closeModalExcluir = () => {
-    this.setState({ showModalExcluirChave: false, loading: false, selectExcluirChave: {} });
-  }
+    this.setState({
+      showModalExcluirChave: false,
+      loading: false,
+      selectExcluirChave: {},
+    });
+  };
 
   closeModalCriar = () => {
     this.setState({ showModalNovaChave: false, loading: false });
-  }
+  };
 
   closeModalQr = () => {
-    this.setState({ showModalQr: false, loading: false, selectQrChave: {}, valorQr: '' });
-  }
+    this.setState({
+      showModalQr: false,
+      loading: false,
+      selectQrChave: {},
+      valorQr: "",
+    });
+  };
 
   closeModalQrReceber = () => {
-    this.setState({ showModalQrReceber: false, loading: false, qrImg: '', qrCopypaste: '' });
-  }
+    this.setState({
+      showModalQrReceber: false,
+      loading: false,
+      qrImg: "",
+      qrCopypaste: "",
+    });
+  };
 
   closeModalComprovante = () => {
-    this.setState({ showModalComprovante: false, loading: false, titleModalComprovante: '', comprovante_pdf: '' });
-  }
+    this.setState({
+      showModalComprovante: false,
+      loading: false,
+      titleModalComprovante: "",
+      comprovante_pdf: "",
+    });
+  };
 
   getPass = async (data) => {
     this.setState({ password: data });
-  }
+  };
 
   render() {
-
     const pixTypesPagar = [
       // { title: 'QR Code' },
-      { key: 1, title: 'CPF', code: 'cpf', msg: 'Digite o CPF', icon: Icones.documento, mask: Formatar.cpf_mask, type: 'text' },
-      { key: 2, title: 'CNPJ', code: 'cnpj', msg: 'Digite o CNPJ', icon: Icones.documento, mask: Formatar.cnpj_mask },
-      { key: 3, title: 'Celular', code: 'cel', msg: 'Digite o Celular', icon: Icones.celular, mask: Formatar.cel_mask },
-      { key: 4, title: 'E-Mail', code: 'email', msg: 'Digite o E-Mail', icon: Icones.email },
-      { key: 5, title: 'Chave Aleatória', code: 'random', msg: 'Digite ou cole a chave aleatória', icon: Icones.chave },
-      { key: 6, title: 'Copia e Cola', code: 'copy', msg: 'Cole o Pix aqui', icon: Icones.copiacola }
-    ]
+      {
+        key: 1,
+        title: "CPF",
+        code: "cpf",
+        msg: "Digite o CPF",
+        icon: Icones.documento,
+        mask: Formatar.cpf_mask,
+        type: "text",
+      },
+      {
+        key: 2,
+        title: "CNPJ",
+        code: "cnpj",
+        msg: "Digite o CNPJ",
+        icon: Icones.documento,
+        mask: Formatar.cnpj_mask,
+      },
+      {
+        key: 3,
+        title: "Celular",
+        code: "cel",
+        msg: "Digite o Celular",
+        icon: Icones.celular,
+        mask: Formatar.cel_mask,
+      },
+      {
+        key: 4,
+        title: "E-Mail",
+        code: "email",
+        msg: "Digite o E-Mail",
+        icon: Icones.email,
+      },
+      {
+        key: 5,
+        title: "Chave Aleatória",
+        code: "random",
+        msg: "Digite ou cole a chave aleatória",
+        icon: Icones.chave,
+      },
+      {
+        key: 6,
+        title: "Copia e Cola",
+        code: "copy",
+        msg: "Cole o Pix aqui",
+        icon: Icones.copiacola,
+      },
+    ];
 
     return (
       <div>
-        <BannerTitle title={"Pix"} img={Objetos.transferenciaImg}/>
+        <BannerTitle title={"Pix"} img={Objetos.transferenciaImg} />
 
         <Container className="py-2 px-5">
           Pagar
           <Row>
-            {
-              pixTypesPagar.map(el => (
-                <Col key={el.key} sm={4} className="my-3">
-                  <Button
-                    variant="outline-primary"
-                    style={{ width: '200px', height: '100px' }}
-                    onClick={() => this.setState({ showModalPesquisa: true, pixPesquisa: el })}
+            {pixTypesPagar.map((el) => (
+              <Col key={el.key} sm={4} className="my-3">
+                <Button
+                  variant="outline-primary"
+                  style={{ width: "200px", height: "100px" }}
+                  onClick={() =>
+                    this.setState({ showModalPesquisa: true, pixPesquisa: el })
+                  }
                   // className="cobrarEscolha"
-                  >
-                    <Container>
-                      <Row >
-                        <Col xs={4} className="align-self-center">
-                          {el.icon}
-                        </Col>
-                        <Col xs={8} >
-                          <p className="tituloBotoes">
-                            {el.title}
-                          </p>
-                        </Col>
-                      </Row>
-                    </Container>
-                  </Button>
-                </Col>
-              ))
-            }
+                >
+                  <Container>
+                    <Row>
+                      <Col xs={4} className="align-self-center">
+                        {el.icon}
+                      </Col>
+                      <Col xs={8}>
+                        <p className="tituloBotoes">{el.title}</p>
+                      </Col>
+                    </Row>
+                  </Container>
+                </Button>
+              </Col>
+            ))}
           </Row>
-
           <br />
-
           Receber
           <Row>
             <Col key={0} sm={4} className="my-3">
               <Button
                 variant="outline-primary"
-                style={{ width: '200px', height: '100px' }}
+                style={{ width: "200px", height: "100px" }}
                 onClick={() => {
                   this.consultar_chaves_cliente();
                   this.setState({ showModalChaves: true });
                 }}
               >
                 <Container>
-                  <Row >
+                  <Row>
                     <Col xs={4} className="align-self-center">
                       {Icones.chave}
                     </Col>
-                    <Col xs={8} >
-                      <p className="tituloBotoes">
-                        Minhas Chaves
-                      </p>
+                    <Col xs={8}>
+                      <p className="tituloBotoes">Minhas Chaves</p>
                     </Col>
                   </Row>
                 </Container>
@@ -736,21 +820,19 @@ export default class Pix extends Component {
             <Col key={1} sm={4} className="my-3">
               <Button
                 variant="outline-primary"
-                style={{ width: '200px', height: '100px' }}
+                style={{ width: "200px", height: "100px" }}
                 onClick={() => {
                   this.consultar_chaves_cliente();
                   this.setState({ showModalQr: true });
                 }}
               >
                 <Container>
-                  <Row >
+                  <Row>
                     <Col xs={4} className="align-self-center">
                       {Icones.qrPix}
                     </Col>
-                    <Col xs={8} >
-                      <p className="tituloBotoes">
-                        Gerar QRCode
-                      </p>
+                    <Col xs={8}>
+                      <p className="tituloBotoes">Gerar QRCode</p>
                     </Col>
                   </Row>
                 </Container>
@@ -766,56 +848,52 @@ export default class Pix extends Component {
           onHide={() => this.closeModalPesquisa()}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Método de Pix: {this.state.pixPesquisa.title}</Modal.Title>
+            <Modal.Title>
+              Método de Pix: {this.state.pixPesquisa.title}
+            </Modal.Title>
           </Modal.Header>
 
           <Modal.Body>
-
-            {
-              this.state.loading ?
-
-                <ReactLoading className="d-block my-5 mx-auto" type={'spin'} color={'#00000'} height={'50px'} />
-
-                :
-
-                <Container className="text-center">
-                  <Row className="p-3">
-                    <Col>
-                      <label>{this.state.pixPesquisa.msg}</label>
-                    </Col>
-                    <Col>
-                      <input
-                        type="text"
-                        autoComplete="off"
-                        value={this.state.chaveValue}
-                        onChange={event => {
-                          if (this.state.pixPesquisa.mask) {
-                            const format = this.state.pixPesquisa.mask;
-                            this.setState({ chaveValue: format(event.target.value) });
-                          } else {
-                            this.setState({ chaveValue: event.target.value });
-                          }
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                </Container>
-            }
-
-
+            {this.state.loading ? (
+              <ReactLoading
+                className="d-block my-5 mx-auto"
+                type={"spin"}
+                color={"#00000"}
+                height={"50px"}
+              />
+            ) : (
+              <Container className="text-center">
+                <Row className="p-3">
+                  <Col>
+                    <label>{this.state.pixPesquisa.msg}</label>
+                  </Col>
+                  <Col>
+                    <input
+                      type="text"
+                      autoComplete="off"
+                      value={this.state.chaveValue}
+                      onChange={(event) => {
+                        if (this.state.pixPesquisa.mask) {
+                          const format = this.state.pixPesquisa.mask;
+                          this.setState({
+                            chaveValue: format(event.target.value),
+                          });
+                        } else {
+                          this.setState({ chaveValue: event.target.value });
+                        }
+                      }}
+                    />
+                  </Col>
+                </Row>
+              </Container>
+            )}
           </Modal.Body>
 
-          {
-            this.state.loading ?
-              null
-              :
-              <Modal.Footer>
-                <Button onClick={() => this.ValidarChave()} >
-                  Pesquisar
-                </Button>
-              </Modal.Footer>
-          }
-
+          {this.state.loading ? null : (
+            <Modal.Footer>
+              <Button onClick={() => this.ValidarChave()}>Pesquisar</Button>
+            </Modal.Footer>
+          )}
         </Modal>
 
         <Modal
@@ -831,105 +909,104 @@ export default class Pix extends Component {
             </Modal.Header>
             <Modal.Body>
               <Container className="text-center py-3">
-                {
-                  this.state.loading ?
+                {this.state.loading ? (
+                  <ReactLoading
+                    className="d-block my-5 mx-auto"
+                    type={"spin"}
+                    color={"#00000"}
+                    height={"50px"}
+                  />
+                ) : (
+                  <Row className="justify-content-center">
+                    <Col>
+                      <div className="pb-3">
+                        <Row>
+                          <Col className="text-right">Favorecido:</Col>
+                          <Col className="text-left">
+                            {this.state.retornoConsulta.dados_bancarios.nome ||
+                              "String não populada"}
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col className="text-right">Banco:</Col>
+                          <Col className="text-left">
+                            {this.state.retornoConsulta.dados_bancarios
+                              .nome_banco || "String não populada"}
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col className="text-right">Agência e Conta:</Col>
+                          <Col className="text-left">
+                            {this.state.retornoConsulta.dados_bancarios
+                              .agencia || "String não populada"}{" "}
+                            |{" "}
+                            {this.state.retornoConsulta.dados_bancarios.conta ||
+                              "String não populada"}
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col className="text-right">Documento:</Col>
+                          <Col className="text-left">
+                            {this.state.retornoConsulta.dados_bancarios
+                              .documento || "String não populada"}
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col className="text-right">Chave Pix:</Col>
+                          <Col className="text-left">
+                            {this.state.retornoConsulta.chave ||
+                              "String não populada"}
+                          </Col>
+                        </Row>
+                      </div>
 
-                    <ReactLoading className="d-block my-5 mx-auto" type={'spin'} color={'#00000'} height={'50px'} />
+                      <div className="pt-3">
+                        <Row className="m-2">
+                          <Col className="text-right">
+                            <label>Valor do Pix:</label>
+                          </Col>
+                          <Col className="text-left">
+                            <CurrencyInput
+                              // className="form-control"
+                              decimalSeparator=","
+                              thousandSeparator="."
+                              prefix="R$ "
+                              value={this.state.valor}
+                              onChange={(event) => {
+                                this.setState({ valor: event });
+                              }}
+                              style={{ width: "180px" }}
+                              className="text-center"
+                            />
+                          </Col>
+                        </Row>
 
-                    :
+                        <Row className="m-2">
+                          <Col className="text-right">
+                            <label>Mensagem (opcional):</label>
+                          </Col>
+                          <Col className="text-left">
+                            <textarea
+                              value={this.state.msg}
+                              onChange={(event) =>
+                                this.setState({ msg: event.target.value })
+                              }
+                              style={{ width: "180px" }}
+                            />
+                          </Col>
+                        </Row>
+                      </div>
+                    </Col>
 
-                    <Row className="justify-content-center">
+                    <Col>
+                      <div className="pb-3">
+                        <Row>
+                          <span className="text-left">Digite sua senha</span>
+                        </Row>
 
-                      <Col>
-                        <div className="pb-3">
-                          <Row>
-                            <Col className="text-right">
-                              Favorecido:
-                            </Col>
-                            <Col className="text-left">
-                              {this.state.retornoConsulta.dados_bancarios.nome || 'String não populada'}
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col className="text-right">
-                              Banco:
-                            </Col>
-                            <Col className="text-left">
-                              {this.state.retornoConsulta.dados_bancarios.nome_banco || 'String não populada'}
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col className="text-right">
-                              Agência e Conta:
-                            </Col>
-                            <Col className="text-left">
-                              {this.state.retornoConsulta.dados_bancarios.agencia || 'String não populada'} | {this.state.retornoConsulta.dados_bancarios.conta || 'String não populada'}
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col className="text-right">
-                              Documento:
-                            </Col>
-                            <Col className="text-left">
-                              {this.state.retornoConsulta.dados_bancarios.documento || 'String não populada'}
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col className="text-right">
-                              Chave Pix:
-                            </Col>
-                            <Col className="text-left">
-                              {this.state.retornoConsulta.chave || 'String não populada'}
-                            </Col>
-                          </Row>
-                        </div>
-
-                        <div className="pt-3">
-                          <Row className="m-2">
-                            <Col className="text-right">
-                              <label>Valor do Pix:</label>
-                            </Col>
-                            <Col className="text-left">
-                              <CurrencyInput
-                                // className="form-control"
-                                decimalSeparator=","
-                                thousandSeparator="."
-                                prefix="R$ "
-                                value={this.state.valor}
-                                onChange={event => {
-                                  this.setState({ valor: event })
-                                }
-                                }
-                                style={{ width: '180px' }}
-                                className="text-center"
-                              />
-                            </Col>
-                          </Row>
-
-                          <Row className="m-2">
-                            <Col className="text-right">
-                              <label>Mensagem (opcional):</label>
-                            </Col>
-                            <Col className="text-left">
-                              <textarea
-                                value={this.state.msg}
-                                onChange={event => this.setState({ msg: event.target.value })}
-                                style={{ width: '180px' }}
-                              />
-                            </Col>
-                          </Row>
-                        </div>
-                      </Col>
-
-                      <Col>
-                        <div className="pb-3">
-                          <Row>
-                            <span className="text-left">Digite sua senha</span>
-                          </Row>
-
-                          <Row className="justify-content-center m-2">
-                            <Password passProp={this.getPass} />
-                            {/* <div className="d-flex flex-row mb-2" >
+                        <Row className="justify-content-center m-2">
+                          <Password passProp={this.getPass} />
+                          {/* <div className="d-flex flex-row mb-2" >
 
                               <div className="mx-2" style={{ width: '55px', height: '40px', borderBottomLeftRadius: '8px 2px', borderBottomRightRadius: '8px 2px', borderBottom: '5px solid #daa521' }}>
                                 {this.state.mostrar_1 ? (<div style={{ width: '15px', height: '15px', backgroundColor: '#daa521', borderRadius: '50px' }} className="d-block mx-auto my-1"></div>) : null}
@@ -984,61 +1061,64 @@ export default class Pix extends Component {
                                 </Button>
                               </ButtonGroup>
                             </div> */}
-                          </Row>
-                        </div>
+                        </Row>
+                      </div>
 
-                        <div>
-                          <Row className="pt-3">
-                            <span className="text-left">Insira sua chave de acesso encontrada no app</span>
-                          </Row>
-                          <Row className="justify-content-center m-2">
-                            <OtpInput
-                              focusInput={1}
-                              isInputNum={true}
-                              value={this.state.OTP}
-                              onChange={(value) => {
-                                this.setState({ OTP: value });
-                              }}
-                              numInputs={6}
-                              containerStyle={{ justifyContent: 'space-between' }}
-                              inputStyle={{ fontSize: '18pt', width: '55px', height: '40px', margin: '5px' }}
-                            />
-                          </Row>
-                        </div>
-
-                      </Col>
-                    </Row>
-
-                }
+                      <div>
+                        <Row className="pt-3">
+                          <span className="text-left">
+                            Insira sua chave de acesso encontrada no app
+                          </span>
+                        </Row>
+                        <Row className="justify-content-center m-2">
+                          <OtpInput
+                            focusInput={1}
+                            isInputNum={true}
+                            value={this.state.OTP}
+                            onChange={(value) => {
+                              this.setState({ OTP: value });
+                            }}
+                            numInputs={6}
+                            containerStyle={{ justifyContent: "space-between" }}
+                            inputStyle={{
+                              fontSize: "18pt",
+                              width: "55px",
+                              height: "40px",
+                              margin: "5px",
+                            }}
+                          />
+                        </Row>
+                      </div>
+                    </Col>
+                  </Row>
+                )}
               </Container>
             </Modal.Body>
 
-            {
-              this.state.loading ?
-                null
-                :
-                <Modal.Footer>
-                  <Button
-                    disabled={this.state.disabled}
-                    onClick={() => {
-                      if (this.state.valor !== 'R$ 0,00' ||
-                        this.state.valor !== 0 ||
-                        this.state.bloco_1 !== '' ||
-                        this.state.bloco_2 !== '' ||
-                        this.state.bloco_3 !== '' ||
-                        this.state.bloco_4 !== '' ||
-                        this.state.bloco_5 !== '' ||
-                        this.state.bloco_6 !== '' ||
-                        this.state.OTP.length == 6) {
-                        this.combinacoes();
-                      }
-                    }} >
-                    Transferir
-                  </Button>
-                </Modal.Footer>
-            }
-
-
+            {this.state.loading ? null : (
+              <Modal.Footer>
+                <Button
+                  disabled={this.state.disabled}
+                  onClick={() => {
+                    if (
+                      this.state.valor !== "R$ 0,00" ||
+                      this.state.valor !== 0 ||
+                      this.state.bloco_1 !== "" ||
+                      this.state.bloco_2 !== "" ||
+                      this.state.bloco_3 !== "" ||
+                      this.state.bloco_4 !== "" ||
+                      this.state.bloco_5 !== "" ||
+                      this.state.bloco_6 !== "" ||
+                      this.state.OTP.length == 6
+                    ) {
+                      this.combinacoes();
+                    }
+                  }}
+                >
+                  Transferir
+                </Button>
+              </Modal.Footer>
+            )}
           </Modal.Body>
         </Modal>
 
@@ -1055,23 +1135,23 @@ export default class Pix extends Component {
 
           <Modal.Body>
             <Container>
-              {
-                this.state.loading ?
-
-                  <ReactLoading className="d-block my-5 mx-auto" type={'spin'} color={'#00000'} height={'50px'} />
-
-                  :
-
-                  <Row className="p-5 w-100">
-                    <Button
-                      className="w-100"
-                      onClick={() => this.abrirComprovante()}
-                    >
-                      Visualizar Comprovante
-                    </Button>
-                  </Row>
-
-              }
+              {this.state.loading ? (
+                <ReactLoading
+                  className="d-block my-5 mx-auto"
+                  type={"spin"}
+                  color={"#00000"}
+                  height={"50px"}
+                />
+              ) : (
+                <Row className="p-5 w-100">
+                  <Button
+                    className="w-100"
+                    onClick={() => this.abrirComprovante()}
+                  >
+                    Visualizar Comprovante
+                  </Button>
+                </Row>
+              )}
             </Container>
           </Modal.Body>
         </Modal>
@@ -1090,63 +1170,74 @@ export default class Pix extends Component {
           <Modal.Body>
             <Container className="text-center">
               <Col>
-                {
-                  this.state.loading ?
-                    <ReactLoading className="d-block my-5 mx-auto" type={'spin'} color={'#00000'} height={'50px'} />
-                    :
+                {this.state.loading ? (
+                  <ReactLoading
+                    className="d-block my-5 mx-auto"
+                    type={"spin"}
+                    color={"#00000"}
+                    height={"50px"}
+                  />
+                ) : this.state.minhas_chaves_pix.length > 0 ? (
+                  this.state.minhas_chaves_pix.map((chave) => (
+                    <Row
+                      key={chave.id}
+                      style={{
+                        border: "3px solid #daa521",
+                        borderRadius: "25px",
+                      }}
+                      className="py-2 px-4 m-2"
+                    >
+                      <Col xs={10}>
+                        <Row>Chave Pix {chave.tipo_chave}</Row>
+                        <Row>{chave.chave}</Row>
+                      </Col>
 
-                    (this.state.minhas_chaves_pix.length > 0) ?
-                      this.state.minhas_chaves_pix.map(chave => (
-
-                        <Row key={chave.id} style={{ border: '3px solid #daa521', borderRadius: '25px' }} className="py-2 px-4 m-2">
-                          <Col xs={10}>
-                            <Row>
-                              Chave Pix {chave.tipo_chave}
-                            </Row>
-                            <Row>
-                              {chave.chave}
-                            </Row>
-                          </Col>
-
-                          <Col xs={2}>
-                            <Button
-                              className="h-100"
-                              onClick={() => {
-                                this.setState({ selectExcluirChave: chave });
-                                this.setState({ showModalChaves: false, showModalExcluirChave: true });
-                              }}
-                            >
-                              Excluir
-                            </Button>
-                          </Col>
-                        </Row>
-
-                      ))
-                      :
-                      <Row style={{ border: '3px solid #daa521', borderRadius: '25px' }} className="py-2 px-4 m-2">
-                        Nenhuma Chave Pix cadastrada no momento
-                      </Row>
-                }
+                      <Col xs={2}>
+                        <Button
+                          className="h-100"
+                          onClick={() => {
+                            this.setState({ selectExcluirChave: chave });
+                            this.setState({
+                              showModalChaves: false,
+                              showModalExcluirChave: true,
+                            });
+                          }}
+                        >
+                          Excluir
+                        </Button>
+                      </Col>
+                    </Row>
+                  ))
+                ) : (
+                  <Row
+                    style={{
+                      border: "3px solid #daa521",
+                      borderRadius: "25px",
+                    }}
+                    className="py-2 px-4 m-2"
+                  >
+                    Nenhuma Chave Pix cadastrada no momento
+                  </Row>
+                )}
               </Col>
             </Container>
           </Modal.Body>
 
-          {
-            this.state.loading ?
-              null
-              :
-              <Modal.Footer>
-                <Button
-                  onClick={() => {
-                    this.setState({ showModalChaves: false, showModalNovaChave: true });
-                    this.consultar_chaves_banco();
-                  }}
-                >
-                  Cadastrar Nova Chave
-                </Button>
-              </Modal.Footer>
-          }
-
+          {this.state.loading ? null : (
+            <Modal.Footer>
+              <Button
+                onClick={() => {
+                  this.setState({
+                    showModalChaves: false,
+                    showModalNovaChave: true,
+                  });
+                  this.consultar_chaves_banco();
+                }}
+              >
+                Cadastrar Nova Chave
+              </Button>
+            </Modal.Footer>
+          )}
         </Modal>
 
         <Modal
@@ -1166,24 +1257,35 @@ export default class Pix extends Component {
                   Escolha o tipo de chave que deseja criar:
                 </Row>
 
-                {
-                  ((this.state.chaves_disponiveis.length > 0) && !this.state.loading) ?
-
-                    this.state.chaves_disponiveis.map(chave => (
-                      <Row className="m-2" key={this.state.chaves_disponiveis.indexOf(chave)}>
-                        <Button className="w-100" onClick={() => { this.criar_chave_pix(chave) }}>
-                          {
-                            (chave === 'aleatorio') ?
-                              <span>Chave Aleatória</span>
-                              :
-                              <span>{chave}</span>
-                          }
-                        </Button>
-                      </Row>
-                    ))
-                    :
-                    <ReactLoading className="d-block my-5 mx-auto" type={'spin'} color={'#00000'} height={'50px'} />
-                }
+                {this.state.chaves_disponiveis.length > 0 &&
+                !this.state.loading ? (
+                  this.state.chaves_disponiveis.map((chave) => (
+                    <Row
+                      className="m-2"
+                      key={this.state.chaves_disponiveis.indexOf(chave)}
+                    >
+                      <Button
+                        className="w-100"
+                        onClick={() => {
+                          this.criar_chave_pix(chave);
+                        }}
+                      >
+                        {chave === "aleatorio" ? (
+                          <span>Chave Aleatória</span>
+                        ) : (
+                          <span>{chave}</span>
+                        )}
+                      </Button>
+                    </Row>
+                  ))
+                ) : (
+                  <ReactLoading
+                    className="d-block my-5 mx-auto"
+                    type={"spin"}
+                    color={"#00000"}
+                    height={"50px"}
+                  />
+                )}
               </Col>
             </Container>
           </Modal.Body>
@@ -1204,26 +1306,36 @@ export default class Pix extends Component {
               Chave Pix: {this.state.selectExcluirChave.chave}
               <br />
               <br />
-              {
-                this.state.loading ?
-                  <ReactLoading className="d-block my-5 mx-auto" type={'spin'} color={'#00000'} height={'50px'} />
-                  :
-                  <Row>
-                    <Col>
-                      <Button onClick={() => { this.excluir_chave_pix(this.state.selectExcluirChave) }}>Sim</Button>
-                    </Col>
-                    <Col>
-                      <Button
-                        onClick={() => {
-                          this.closeModalExcluir();
-                          this.setState({ showModalChaves: true });
-                        }}
-                      >
-                        Não
-                      </Button>
-                    </Col>
-                  </Row>
-              }
+              {this.state.loading ? (
+                <ReactLoading
+                  className="d-block my-5 mx-auto"
+                  type={"spin"}
+                  color={"#00000"}
+                  height={"50px"}
+                />
+              ) : (
+                <Row>
+                  <Col>
+                    <Button
+                      onClick={() => {
+                        this.excluir_chave_pix(this.state.selectExcluirChave);
+                      }}
+                    >
+                      Sim
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      onClick={() => {
+                        this.closeModalExcluir();
+                        this.setState({ showModalChaves: true });
+                      }}
+                    >
+                      Não
+                    </Button>
+                  </Col>
+                </Row>
+              )}
             </Container>
           </Modal.Body>
         </Modal>
@@ -1240,80 +1352,76 @@ export default class Pix extends Component {
 
           <Modal.Body>
             <Container className="p-3">
-              {
-                this.state.loading ?
-                  <ReactLoading className="d-block my-5 mx-auto" type={'spin'} color={'#00000'} height={'50px'} />
-                  :
-                  <div>
-                    Escolha sua chave abaixo:
+              {this.state.loading ? (
+                <ReactLoading
+                  className="d-block my-5 mx-auto"
+                  type={"spin"}
+                  color={"#00000"}
+                  height={"50px"}
+                />
+              ) : (
+                <div>
+                  Escolha sua chave abaixo:
+                  <Col className="mt-3 px-5">
+                    <Row className="mb-5">
+                      <div className="w-100">
+                        <Dropdown>
+                          <Dropdown.Toggle className="w-100">
+                            {this.state.selectQrChave.chave ||
+                              "Selecionar Chave"}
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            {this.state.minhas_chaves_pix.length > 0 ? (
+                              this.state.minhas_chaves_pix.map((chave) => (
+                                <Dropdown.Item
+                                  onClick={() => {
+                                    this.setState({ selectQrChave: chave });
+                                  }}
+                                  key={chave.id}
+                                >
+                                  {chave.chave}
+                                </Dropdown.Item>
+                              ))
+                            ) : (
+                              <div className="p-3">
+                                <span>
+                                  Você ainda não possui nenhuma chave cadastrada
+                                </span>
+                              </div>
+                            )}
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      </div>
+                    </Row>
 
-                    <Col className="mt-3 px-5">
-                      <Row className="mb-5">
-                        <div className="w-100">
-                          <Dropdown >
-                            <Dropdown.Toggle className="w-100">
-                              {
-                                this.state.selectQrChave.chave ||
-                                'Selecionar Chave'
-                              }
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                              {
-                                (this.state.minhas_chaves_pix.length > 0) ?
-
-                                  this.state.minhas_chaves_pix.map(chave => (
-                                    <Dropdown.Item onClick={() => {
-                                      this.setState({ selectQrChave: chave });
-                                    }}
-                                      key={chave.id}>
-                                      {chave.chave}
-                                    </Dropdown.Item>
-                                  ))
-                                  :
-                                  <div className="p-3">
-                                    <span >Você ainda não possui nenhuma chave cadastrada</span>
-                                  </div>
-                              }
-                            </Dropdown.Menu>
-                          </Dropdown>
-                        </div>
-                      </Row>
-
-                      <Row className="mt-5">
-                        <Col>
-                          <label>Valor:</label>
-                        </Col>
-                        <Col>
-                          <CurrencyInput
-                            decimalSeparator=","
-                            thousandSeparator="."
-                            prefix="R$ "
-                            value={this.state.valorQr}
-                            onChange={event => {
-                              this.setState({ valorQr: event })
-                            }
-                            }
-                            className="text-center"
-                          />
-                        </Col>
-                      </Row>
-                    </Col>
-                  </div>
-              }
+                    <Row className="mt-5">
+                      <Col>
+                        <label>Valor:</label>
+                      </Col>
+                      <Col>
+                        <CurrencyInput
+                          decimalSeparator=","
+                          thousandSeparator="."
+                          prefix="R$ "
+                          value={this.state.valorQr}
+                          onChange={(event) => {
+                            this.setState({ valorQr: event });
+                          }}
+                          className="text-center"
+                        />
+                      </Col>
+                    </Row>
+                  </Col>
+                </div>
+              )}
             </Container>
           </Modal.Body>
 
-          {
-            this.state.loading ?
-              null
-              :
-              <Modal.Footer>
-                <Button onClick={this.GerarQrRecebimento}>
-                  Gerar QR Code
-                </Button>
-              </Modal.Footer>
-          }
-
+          {this.state.loading ? null : (
+            <Modal.Footer>
+              <Button onClick={this.GerarQrRecebimento}>Gerar QR Code</Button>
+            </Modal.Footer>
+          )}
         </Modal>
 
         <Modal
@@ -1330,13 +1438,14 @@ export default class Pix extends Component {
             <Container>
               <Col>
                 <Row className="w-50 m-auto">
-                  <Image
-                    draggable="false"
-                    className="w-100 select-none"
-                    src={this.state.qrImg}
+                  <QRCode
+                    size={256}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                    value={this.state.qrCopypaste}
+                    viewBox={`0 0 256 256`}
                   />
                 </Row>
-                <Row style={{ fontSize: '9pt' }} className="p-2 text-center">
+                <Row style={{ fontSize: "9pt" }} className="p-2 text-center">
                   <span className="my-4">{this.state.qrCopypaste}</span>
                   <Button
                     className="w-100"
@@ -1351,8 +1460,7 @@ export default class Pix extends Component {
             </Container>
           </Modal.Body>
         </Modal>
-
       </div>
-    )
+    );
   }
 }

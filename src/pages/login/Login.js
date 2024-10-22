@@ -184,24 +184,27 @@ export default class Login extends Component {
   };
 
   Valida_token = async (id) => {
-    
+    const pessoa = JSON.parse(this.state.token_chave);
     const data = {
-      url: 'utilitarios/validacao-email-confere',
+      url: "utilitarios/validacao-email-ib",
       data: {
-        "email": 'rapa.rodrigues@gmail.com',
-        "token": id,
-    },
-      method: 'POST',
+        usuario_id: pessoa.conta_id,
+        email: this.state.email,
+        token: id,
+        ativa: 1,
+      },
+      method: "POST",
     };
-
+console.log(data)
     setTimeout(() => {
       // Funcoes.Geral_API(data, true).then((res) => {
       Funcoes.Geral_API(data, true).then((res) => {
+        console.log(res)
         if (res == true) {
           Funcoes.setToken(this.state.token_chave, this.state.pfp);
-          window.location.href = '/home';
+          window.location.href = "/home";
         } else {
-          this.props.alerts("Erro", "Token inválido", 'warning');
+          this.props.alerts("Erro", "Token inválido", "warning");
         }
       });
     }, 300);
@@ -226,7 +229,7 @@ export default class Login extends Component {
     const data = {
       url: 'utilitarios/validacao-email-envio',
       data: {
-        "email": 'rapa.rodrigues@gmail.com',
+        "email": this.state.email,
     },
       method: 'POST',
     };
