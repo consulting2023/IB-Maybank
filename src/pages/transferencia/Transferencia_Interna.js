@@ -527,20 +527,18 @@ export default class TransferenciaInterna extends Component {
   };
 
   abrirComprovante = () => {
-    let pdfWindow = window.open("");
-    pdfWindow.document.write(`
-      <html>
-        <head>
-          <title>Comprovante</title>
-        </head>
-        <body style="margin: 0;">
-          <embed width="100%" height="100%" type="application/pdf" src="data:application/pdf;base64,${encodeURI(
-            this.state.comprovante_pdf
-          )}" />
-        </body>
-      </html>
-    `);
-  };
+    const link = document.createElement('a');
+    const pdfBase64 = this.state.comprovante_pdf; // Supondo que você já tenha o Base64 armazenado no estado
+
+    // Definir o tipo de conteúdo como PDF e criar a URL com a string Base64
+    link.href = `data:application/pdf;base64,${pdfBase64}`;
+
+    // Definir o nome do arquivo para ser baixado
+    link.download = 'comprovante.pdf';
+
+    // Simular o clique no link para iniciar o download
+    link.click();
+};
 
   closeModalComprovante = () => {
     this.setState({

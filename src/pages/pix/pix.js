@@ -330,7 +330,6 @@ export default class Pix extends Component {
   };
 
   gerar_transferencia = () => {
-    
     let valor_enviar = this.state.valor.replace("R$", "");
     valor_enviar = valor_enviar.replace(" ", "");
     valor_enviar = valor_enviar.replace(".", "");
@@ -441,8 +440,8 @@ export default class Pix extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
-      console.log(responseJson)
-      this.setState({ comprovante_pdf: atob(responseJson) });
+      console.log(responseJson);
+      this.setState({ comprovante_pdf: responseJson});
       setTimeout(() => {
         this.setState({
           titleModalComprovante: "Transação Pix efetuada com sucesso!",
@@ -453,14 +452,19 @@ export default class Pix extends Component {
   };
 
   abrirComprovante = () => {
-    let pdfWindow = window.open("");
-    pdfWindow.document.write(
-      "<body style='margin: 0;'><embed width='100%' height='100%' src='data:application/pdf;base64, " +
-        encodeURI(this.state.comprovante_pdf) +
-        "' /></body>"
-    );
-    pdfWindow.document.title = "Comprovante";
-  };
+    const link = document.createElement('a');
+    const pdfBase64 = this.state.comprovante_pdf; // Supondo que você já tenha o Base64 armazenado no estado
+
+    // Definir o tipo de conteúdo como PDF e criar a URL com a string Base64
+    link.href = `data:application/pdf;base64,${pdfBase64}`;
+
+    // Definir o nome do arquivo para ser baixado
+    link.download = 'comprovante.pdf';
+
+    // Simular o clique no link para iniciar o download
+    link.click();
+};
+
 
   AgendarPix = () => {
     const dados = {
