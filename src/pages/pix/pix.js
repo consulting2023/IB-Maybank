@@ -63,12 +63,16 @@ export default class Pix extends Component {
 
       loading: false,
 
+      pessoa: [],
+
       password: ["", "", "", "", "", ""],
     };
   }
 
   componentDidMount() {
     this.SaldoConta();
+    const pessoa = Funcoes.pessoa;
+    this.setState({ pessoa: pessoa });
   }
 
   ValidarChave = () => {
@@ -134,7 +138,7 @@ export default class Pix extends Component {
       funcao: "pesquisarChave",
       tela: "pix",
       data: {
-        conta_id: Funcoes.pessoa.conta_id,
+        conta_id: this.state.pessoa.conta_id,
         chave_pix: chave_final,
       },
     };
@@ -189,7 +193,6 @@ export default class Pix extends Component {
   };
 
   combinacoes = async () => {
-    
     this.setState({ loading: true });
     let { password } = this.state;
 
@@ -327,7 +330,7 @@ export default class Pix extends Component {
   };
 
   gerar_transferencia = () => {
-    this.enviarToken();
+    
     let valor_enviar = this.state.valor.replace("R$", "");
     valor_enviar = valor_enviar.replace(" ", "");
     valor_enviar = valor_enviar.replace(".", "");
@@ -342,21 +345,28 @@ export default class Pix extends Component {
         valor: valor_enviar,
         mensagem: this.state.msg,
         dados_recebedor: {
-          chave_pix: this.state.retornoConsulta.chave,
-          banco: this.state.retornoConsulta.dados_bancarios.banco,
-          conta: this.state.retornoConsulta.dados_bancarios.conta,
-          agencia: this.state.retornoConsulta.dados_bancarios.agencia,
-          documento: this.state.retornoConsulta.dados_bancarios.documento,
-          tipo_conta: this.state.retornoConsulta.dados_bancarios.tipo_conta,
-          nome: this.state.retornoConsulta.dados_bancarios.nome,
+          chave_pix: this.state.retornoConsulta?.chave,
+          banco: this.state.retornoConsulta?.dados_bancarios.banco,
+          conta: this.state.retornoConsulta?.dados_bancarios.conta,
+          agencia: this.state.retornoConsulta?.dados_bancarios.agencia,
+          documento: this.state.retornoConsulta?.dados_bancarios.documento,
+          tipo_conta: this.state.retornoConsulta?.dados_bancarios.tipo_conta,
+          nome: this.state.retornoConsulta?.dados_bancarios.nome,
         },
-        conta_id: Funcoes.pessoa.conta_id,
+        conta_id: this.state.pessoa.conta_id,
         senha: this.state.password,
         token: this.state.OTP,
+        type: this.state.retornoConsulta?.type,
+        indentificador_transacao:
+          this.state.retornoConsulta?.indentificador_transacao,
+        end_to_end_id: this.state.retornoConsulta?.end_to_end_id,
+        validation_code: this.state.retornoConsulta?.validation_code,
+        tipo_pagamento_pix: this.state.retornoConsulta?.tipo_pagamento_pix,
       },
     };
 
     Funcoes.Geral_API(dados, true).then((responseJson) => {
+      console.log(responseJson);
       if (responseJson.cod == 0) {
         this.closeModalTransferencia();
         alert("Erro desconhecido.");
@@ -431,7 +441,8 @@ export default class Pix extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
-      this.setState({ comprovante_pdf: responseJson });
+      console.log(responseJson)
+      this.setState({ comprovante_pdf: atob(responseJson) });
       setTimeout(() => {
         this.setState({
           titleModalComprovante: "Transação Pix efetuada com sucesso!",
@@ -1088,7 +1099,7 @@ export default class Pix extends Component {
                       <div>
                         <Row className="pt-3">
                           <span className="text-left">
-                            Insira sua chave de acesso encontrada no app
+                            Insira o Token enviado por email
                           </span>
                         </Row>
                         <Row className="justify-content-center m-2">

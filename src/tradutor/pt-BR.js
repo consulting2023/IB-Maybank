@@ -367,7 +367,7 @@ export default {
     textModalValidacao: 'Digite sua senha e acesse sua conta %{nome_banco} em seu dispositivo para validar sua Chave de Acesso.',
     tokenValidacao: 'Token',
     titleSenha: 'Senha',
-    textSenha: 'Digite sua senha',
+    textSenha: 'Digite sua senha de transferencia',
     titleToken: 'Token',
     textTokenDescr: 'Digite o Token enviado por seu email',
 

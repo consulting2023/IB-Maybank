@@ -245,8 +245,8 @@ export default class TransferenciaOutros extends Component {
         })
         let hoje = new Date().toLocaleDateString();
 
-        const dados = localStorage['token'];
-        const pessoa = JSON.parse(dados);
+     /*    const dados = localStorage['token'];
+        const pessoa = JSON.parse(dados); */
 
         var valor = this.state.valor;
         valor = valor.replace('.', '');
@@ -288,7 +288,7 @@ export default class TransferenciaOutros extends Component {
                 'tipo_conta': this.state.tipoConta,
                 'salvar_favorecido': false,
                 'data_transferencia': hoje,
-                'conta_id': pessoa.conta_id,
+                'conta_id': this.state.pessoa.conta_id,
                 'cobrar': 1,
                 'senha': this.state.password,
                 'token': this.state.OTP,

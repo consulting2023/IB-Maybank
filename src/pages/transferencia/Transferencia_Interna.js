@@ -213,9 +213,6 @@ export default class TransferenciaInterna extends Component {
     });
     let hoje = new Date().toLocaleDateString();
 
-    const dados = localStorage["token"];
-    const pessoa = JSON.parse(dados);
-
     var valor = this.state.valorTransferencia;
     valor = valor.replace(".", "");
     valor = valor.replace(".", "");
@@ -244,7 +241,7 @@ export default class TransferenciaInterna extends Component {
             tipo_conta: "Conta corrente",
             salvar_favorecido: false,
             data_transferencia: hoje,
-            conta_id: pessoa.conta_id,
+            conta_id: this.state.pessoa.conta_id,
             cobrar: 0,
             senha: this.state.password,
             token: this.state.OTP,
@@ -264,9 +261,9 @@ export default class TransferenciaInterna extends Component {
             //*Sem saldo na conta
             alert("Saldo insuficiente");
             window.location.href = "/transferencia_interna";
-          } else if (res.mov_id) {
+          } else if (res.dados.mov_id) {
             //*pagamento realizado
-            this.comprovante_ver(res.mov_id);
+            this.comprovante_ver(res.dados.mov_id);
           } else {
             //*algum erro não previsto
             alert("Erro desconhecido");
@@ -443,9 +440,9 @@ export default class TransferenciaInterna extends Component {
     const data = {
       url: "utilitarios/validacao-email-confere",
       data: {
-        "email": Funcoes.pessoa.email,
-        "token": id,
-    },
+        email: Funcoes.pessoa.email,
+        token: id,
+      },
       method: "POST",
     };
 
@@ -514,6 +511,7 @@ export default class TransferenciaInterna extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
+      console.log(responseJson);
       this.setState({ comprovante_pdf: responseJson });
       setTimeout(() => {
         this.setState({
@@ -530,12 +528,18 @@ export default class TransferenciaInterna extends Component {
 
   abrirComprovante = () => {
     let pdfWindow = window.open("");
-    pdfWindow.document.write(
-      "<body style='margin: 0;'><embed width='100%' height='100%' src='data:application/pdf;base64, " +
-        encodeURI(this.state.comprovante_pdf) +
-        "' /></body>"
-    );
-    pdfWindow.document.title = "Comprovante";
+    pdfWindow.document.write(`
+      <html>
+        <head>
+          <title>Comprovante</title>
+        </head>
+        <body style="margin: 0;">
+          <embed width="100%" height="100%" type="application/pdf" src="data:application/pdf;base64,${encodeURI(
+            this.state.comprovante_pdf
+          )}" />
+        </body>
+      </html>
+    `);
   };
 
   closeModalComprovante = () => {
