@@ -223,7 +223,12 @@ export default class Pix extends Component {
         );
       }
 
-      const data = {
+      let chave = "";
+      chave = texto;
+      this.setState({ password: chave });
+      this.Valida_token(this.state.OTP);
+
+      /* const data = {
         url: "usuario/login",
         data: {
           email: Funcoes.pessoa.email,
@@ -235,6 +240,7 @@ export default class Pix extends Component {
         method: "POST",
       };
 
+      
       Funcoes.Geral_API(data, false).then((res) => {
         let chave = "";
 
@@ -255,7 +261,7 @@ export default class Pix extends Component {
             this.props.alerts("Erro", "Preencha o token", "warning");
           }
         }
-      });
+      }); */
     }
   };
 

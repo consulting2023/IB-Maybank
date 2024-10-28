@@ -422,7 +422,7 @@ export default class TransferenciaOutros extends Component {
         });
     }; */
 
-  Validar_senha = (value) => {
+  /* Validar_senha = (value) => {
     const data = {
       url: "usuario/login",
       data: {
@@ -444,7 +444,7 @@ export default class TransferenciaOutros extends Component {
       }
     });
   };
-
+ */
   pesquisar = (event) => {
     let value = event.target.value.toLowerCase();
     let result = [];

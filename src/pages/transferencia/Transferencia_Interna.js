@@ -458,7 +458,7 @@ export default class TransferenciaInterna extends Component {
     }, 300);
   };
 
-  Validar_senha = (value) => {
+  /* Validar_senha = (value) => {
     const data = {
       url: "usuario/login",
       data: {
@@ -478,7 +478,7 @@ export default class TransferenciaInterna extends Component {
         this.setState({ valida_senha_ok: false });
       }
     });
-  };
+  }; */
 
   maskaraInput = (value) => {
     value = value.replace(/[^\d]+/g, "");
