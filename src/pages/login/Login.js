@@ -79,6 +79,7 @@ export default class Login extends Component {
 
       // Funcoes.Geral_API(data, false).then((res) => {
       Funcoes.Geral_API(data, false).then((res) => {
+        console.log(res)
 
         if (res == 0) {
           this.props.alerts('Erro', i18n.t('login.senhaIncorreta'), 'warning');
@@ -113,6 +114,7 @@ export default class Login extends Component {
   };
 
   loginConta = (dados) => {
+    localStorage.setItem("nivel", dados.usuario.nivel);
     this.enviarToken()
     this.setState({ Qrcode_imagem: null, inputToken: true, inputTokenQrcode: false });
 

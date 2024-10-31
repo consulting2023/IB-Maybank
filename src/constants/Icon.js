@@ -49,6 +49,8 @@ export default {
 
     tarifas: <div><Iconfa.FaFunnelDollar data-tip="Tarifas" className="iconeHome" /></div>,
 
+    senha: <div><Iconfa.FaKey data-tip="Senha" className="iconeHome" /></div>,
+
     qrcode: <div><Icomim.ImQrcode data-tip="QRCode" className="iconeHome" /></div>,
 
     sair: <div><Iconio5.IoExitOutline data-tip="Sair" className="iconeHome" /></div>,
@@ -136,5 +138,11 @@ export default {
     depositoTed: <div><Icon.ArrowLeftRight style={{ fontSize: '26pt' }}/></div>,
 
     depositoComprovante: <div><Icon.FileEarmarkArrowUp style={{ fontSize: '26pt' }}/></div>,
+
+    // Senhas
+
+    senhaLogin: <div><Icon.KeyFill style={{ fontSize: '26pt' }}/></div>,
+
+    senhaTransfer: <div><Icon.Key style={{ fontSize: '26pt' }}/></div>,
 
 }

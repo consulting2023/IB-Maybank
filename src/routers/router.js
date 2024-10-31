@@ -48,6 +48,8 @@ import Aplicativos from '../pages/servicos/aplicativos';
 import QRCode from '../pages/qrcode/qrcode';
 import TransferenciaLote from '../pages/transferencia/Transferencia_Lote';
 import NoMatch from '../components/noMatch/NoMatch';
+import Senha from "../pages/senha/senha";
+
 
 function Router(props) {
   if (Produtos.ajustesWeb) {
@@ -91,6 +93,8 @@ function Router(props) {
             <Route exact path="/Cadastro_Sacado" element={<Cadastro_Sacado langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.cadastroSacado} />
             <Route exact path="/Editar_Sacado" element={<Editar_Sacado langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.editarSacado} />
 
+            <Route exact path="/senha" element={<Senha langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.senha} />
+            
             <Route exact path="/pix" element={<Pix langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.pix} />
 
             <Route exact path="/Pagar" element={<Pagar langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.pagar} />
@@ -115,6 +119,7 @@ function Router(props) {
             <Route exact path="/comprovantes_limite" element={<ComprovanteLimite langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.comprovantesLimite} />
             <Route exact path="/comprovantes_parcelado" element={<ComprovanteParcelado langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.comprovantesParcelado} />
             <Route exact path="/comprovantes_servico" element={<ComprovanteServico langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.comprovantesServicos} />
+
 
             <Route exact path="/qr_code" element={<QRCode langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.qrcode} />
 

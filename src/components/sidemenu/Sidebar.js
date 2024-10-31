@@ -25,6 +25,7 @@ export default class Sidebar extends Component {
   componentDidMount() {
     const pessoa = Funcoes.pessoa;
     this.setState({ pessoa: pessoa });
+    console.log(localStorage.getItem("nivel"))
   }
 
   componentWillUnmount() {

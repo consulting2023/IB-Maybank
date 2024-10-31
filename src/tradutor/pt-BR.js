@@ -542,7 +542,8 @@ export default {
     tarifaTitulo: 'Tarifas Conta Digital ',
     tarifaCol: 'Tarifa',
     tarifaValor: 'Valor',
-    tarifaFechar: 'Fechar'
+    tarifaFechar: 'Fechar',
+    senha: "Senhas"
   },
 
   header: {
@@ -557,5 +558,9 @@ export default {
     cancelarNotif: 'Cancelar',
     sair: 'Sair'
   },
+
+  senha: {
+    senhaTitle: "Senha"
+  }
 
 }
