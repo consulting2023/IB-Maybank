@@ -26,12 +26,14 @@ export default class Senha extends Component {
     this.setState({ nivel });
   }
 
-  modalSenha = (id) => {
-    if (id === 1) {
-      this.setState({ modalShowLogin: true });
-    } else if (id === 2) {
-      this.setState({ modalShowTransfer: true });
-    }
+  modalSenhaLogin = () => {
+    this.setState({ modalShowLogin: true });
+
+    this.enviarToken();
+  };
+  modalSenhaTransfer = () => {
+    this.setState({ modalShowLogin: true });
+
     this.enviarToken();
   };
 
@@ -54,49 +56,67 @@ export default class Senha extends Component {
   };
 
   trocarSenha = () => {
-    const data = {
-      url: "usuario/troca-senha",
-      data: {
-        email: Funcoes.pessoa.email,
-        token: this.state.OTP,
-        senha: this.state.senha,
-      },
-      method: "POST",
-      console: false,
-      tipo_aparelho: global.tipoaparelho,
-      funcao: "salvar_nova",
-      tela: "recuperar",
-    };
+    if (this.state.senha == "") {
+      alert("É Obrigatorio preencher a senha para seguir adiante");
+    } else if (this.state.OTP == "") {
+      alert("É Obrigatorio preencher a o token para seguir adiante");
+    } else {
+      const data = {
+        url: "usuario/troca-senha",
+        data: {
+          email: Funcoes.pessoa.email,
+          token: this.state.OTP,
+          senha: this.state.senha,
+        },
+        method: "POST",
+        console: false,
+        tipo_aparelho: global.tipoaparelho,
+        funcao: "salvar_nova",
+        tela: "recuperar",
+      };
 
-    Funcoes.Geral_API(data, true).then((res) => {
-      if (res === 1) {
-        alert("Senha alterada");
-        location.reload();
-      }
-    });
+      Funcoes.Geral_API(data, true).then((res) => {
+        if (res === 1) {
+          alert("Senha alterada com sucesso! Sera preciso Logar novamente");
+          Funcoes.logout();
+        } else {
+          alert("Erro em alterar a senha, tente novamente mais tarde");
+          location.reload;
+        }
+      });
+    }
   };
 
   trocarSenhaTransfer = () => {
-    const data = {
-      url: "usuario/troca-senha-transferencia",
-      data: {
-        email: Funcoes.pessoa.email,
-        token: this.state.OTP,
-        senha: this.state.senhaTransfer,
-      },
-      method: "POST",
-      console: false,
-      tipo_aparelho: global.tipoaparelho,
-      funcao: "salvar_nova",
-      tela: "recuperar",
-    };
+    if (this.state.senha == "") {
+      alert("É Obrigatorio preencher a senha para seguir adiante");
+    } else if (this.state.OTP == "") {
+      alert("É Obrigatorio preencher a o token para seguir adiante");
+    } else {
+      const data = {
+        url: "usuario/troca-senha-transferencia",
+        data: {
+          email: Funcoes.pessoa.email,
+          token: this.state.OTP,
+          senha: this.state.senhaTransfer,
+        },
+        method: "POST",
+        console: false,
+        tipo_aparelho: global.tipoaparelho,
+        funcao: "salvar_nova",
+        tela: "recuperar",
+      };
 
-    Funcoes.Geral_API(data, true).then((res) => {
-      if (res === 1) {
-        alert("Senha alterada com sucesso!");
-        location.reload();
-      }
-    });
+      Funcoes.Geral_API(data, true).then((res) => {
+        if (res === 1) {
+          alert("Senha alterada com sucesso!");
+          location.reload;
+        } else {
+          alert("Erro em alterar a senha, tente novamente mais tarde");
+          location.reload;
+        }
+      });
+    }
   };
 
   render() {
@@ -122,7 +142,7 @@ export default class Senha extends Component {
                 <Button
                   variant="outline-primary"
                   className="baseButtonPrimary"
-                  onClick={() => this.modalSenha(1)}
+                  onClick={() => this.modalSenhaLogin()}
                 >
                   <Row className="w-80 m-auto">
                     <Col xs={5} className="m-auto px-0">
@@ -134,22 +154,26 @@ export default class Senha extends Component {
                   </Row>
                 </Button>
               </Col>
-              <Col className="p-3">
-                <Button
-                  variant="outline-primary"
-                  className="baseButtonPrimary"
-                  onClick={() => this.modalSenha(2)}
-                >
-                  <Row className="w-80 m-auto">
-                    <Col xs={5} className="m-auto px-0">
-                      {Icones.senhaTransfer}
-                    </Col>
-                    <Col xs={7} className="px-0 my-auto">
-                      <p className="buttonTitle m-auto">Senha de Transferência</p>
-                    </Col>
-                  </Row>
-                </Button>
-              </Col>
+              {this.state.nivel !== "400" && (
+                <Col className="p-3">
+                  <Button
+                    variant="outline-primary"
+                    className="baseButtonPrimary"
+                    onClick={this.modalSenhaTransfer}
+                  >
+                    <Row className="w-80 m-auto">
+                      <Col xs={5} className="m-auto px-0">
+                        {Icones.senhaTransfer}
+                      </Col>
+                      <Col xs={7} className="px-0 my-auto">
+                        <p className="buttonTitle m-auto">
+                          Senha de Transferência
+                        </p>
+                      </Col>
+                    </Row>
+                  </Button>
+                </Col>
+              )}
             </Row>
           </Col>
         </Container>
@@ -182,9 +206,14 @@ export default class Senha extends Component {
                 <h6>Senha Nova</h6>
               </Row>
               <Row>
-                <input
-                  maxLength={6}
-                  onChange={(e) => this.setState({ senha: e.target.value })}
+                <OtpInput
+                  focusInput={1}
+                  isInputNum={true}
+                  value={this.state.senha}
+                  onChange={(value) => this.setState({ senha: value })}
+                  numInputs={6}
+                  className="tokenValidacao"
+                  inputType="password"
                 />
               </Row>
             </Container>
@@ -197,51 +226,51 @@ export default class Senha extends Component {
         </Modal>
 
         {/* Modal Senha Transferência */}
-        {this.state.nivel !== "400" && (
-          <Modal
-            show={this.state.modalShowTransfer}
-            size="lg"
-            onHide={() => this.setState({ modalShowTransfer: false })}
-          >
-            <Modal.Header closeButton>
-              <Modal.Title>Senha Transação</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Container>
-                <Row>
-                  <h3>Token enviado para seu email</h3>
-                </Row>
-                <Row>
-                  <OtpInput
-                    focusInput={1}
-                    isInputNum={true}
-                    value={this.state.OTP}
-                    onChange={(value) => this.setState({ OTP: value })}
-                    numInputs={6}
-                    className="tokenValidacao"
-                  />
-                </Row>
-                <Row>
-                  <h6>Senha Transação Nova</h6>
-                </Row>
-                <Row>
-                  <input
-                    maxLength={6}
-                    onChange={(e) => this.setState({ senhaTransfer: e.target.value })}
-                  />
-                </Row>
-              </Container>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button
-                variant="primary"
-                onClick={this.trocarSenhaTransfer}
-              >
-                Confirmar
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        )}
+
+        <Modal
+          show={this.state.modalShowTransfer}
+          size="lg"
+          onHide={() => this.setState({ modalShowTransfer: false })}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Senha Transação</Modal.Title>
+          </Modal.Header>
+          <Modal.Body style="align-items: center">
+            <Container>
+              <Row>
+                <h3>Token enviado para seu email</h3>
+              </Row>
+              <Row>
+                <OtpInput
+                  focusInput={1}
+                  isInputNum={true}
+                  value={this.state.OTP}
+                  onChange={(value) => this.setState({ OTP: value })}
+                  numInputs={6}
+                  className="tokenValidacao"
+                />
+              </Row>
+              <Row>
+                <h6>Senha Transação Nova</h6>
+              </Row>
+              <Row>
+                <OtpInput
+                  focusInput={1}
+                  isInputNum={true}
+                  value={this.state.senhaTransfer}
+                  onChange={(value) => this.setState({ senhaTransfer: value })}
+                  numInputs={6}
+                  className="tokenValidacao"
+                />
+              </Row>
+            </Container>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="primary" onClick={this.trocarSenhaTransfer}>
+              Confirmar
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }
