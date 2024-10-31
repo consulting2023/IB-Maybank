@@ -98,7 +98,7 @@
     }
 
     .login-usuario {
-      height: $windowHeight; 
+      height: $windowHeight + 2; 
       width: $windowHeight; 
       border-top-left-radius: $borderRadius;
       border-bottom-left-radius: $borderRadius;
@@ -214,6 +214,13 @@
         border-bottom-right-radius: 8px 2px;
         border-bottom: 5px solid $cor_5;
       }
+    }
+
+    .resetSenha {
+      background-color: transparent !important;
+      border: none !important;
+      font-style: italic;
+      text-decoration: underline;
     }
 
     // .loadingLogin {
