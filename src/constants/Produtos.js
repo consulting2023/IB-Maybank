@@ -134,7 +134,13 @@ const getListaProdutos = () => {
       rota: "/comprovantes",
       mostrar: comprovante_mostar,
     },
-
+    {
+      key: 11,
+      icone: Icones.senha,
+      titulo: "sidebar.senha",
+      rota: "/senha",
+      mostrar: senha_mostrar,
+    },
     {
       key: 17,
       icone: Icones.tarifas,
