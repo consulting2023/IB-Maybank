@@ -54,6 +54,7 @@ function App() {
     "/qr_code",
     "/perfil",
     "/senha",
+    "/cambio"
   ];
 
   var isPrivate = privatePaths.includes(document.location.pathname)

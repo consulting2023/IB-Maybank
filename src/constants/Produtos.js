@@ -14,6 +14,7 @@ const tarifas_mostrar = true;
 const perfil_mostrar = true;
 const pix_mostrar = true;
 const senha_mostrar = true;
+const cambio_mostrar = true;
 
 const getListaProdutos = () => {
   const nivel = Number(localStorage.getItem("nivel"));
@@ -102,6 +103,13 @@ const getListaProdutos = () => {
       titulo: "sidebar.senha",
       rota: "/senha",
       mostrar: senha_mostrar,
+    },
+    {
+      key: 12,
+      icone: Icones.cambio,
+      titulo: "sidebar.cambio",
+      rota: "/cambio",
+      mostrar: cambio_mostrar,
     },
     {
       key: 17,
@@ -249,4 +257,7 @@ export default {
 
   //senha
   senha: true,
+
+  // Cambio
+  cambio: true,
 };

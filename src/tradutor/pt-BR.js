@@ -543,7 +543,8 @@ export default {
     tarifaCol: 'Tarifa',
     tarifaValor: 'Valor',
     tarifaFechar: 'Fechar',
-    senha: "Senhas"
+    senha: "Senhas",
+    cambio: "Cambio",
   },
 
   header: {
@@ -561,6 +562,10 @@ export default {
 
   senha: {
     senhaTitle: "Senha"
+  },
+
+  cambio: {
+    cambiotitle: "cambio"
   }
 
 }

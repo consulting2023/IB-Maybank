@@ -53,6 +53,8 @@ export default {
 
     qrcode: <div><Icomim.ImQrcode data-tip="QRCode" className="iconeHome" /></div>,
 
+    cambio: <div><Iconfa.FaMoneyBillAlt data-tip="Cambio" className="iconeHome" /></div>,
+
     sair: <div><Iconio5.IoExitOutline data-tip="Sair" className="iconeHome" /></div>,
 
     //Header
