@@ -17,7 +17,7 @@ export default class Cambio extends Component {
       modalComprar: false,
       moeda: [],
       valueMoeda: null, // Moeda selecionada
-      valueCompra: 0,
+      valueCompra: "",
       senha: "",
       hidePassword: true,
       idCotacao: "",
@@ -39,8 +39,8 @@ export default class Cambio extends Component {
     };
 
     Funcoes.Geral_API(data).then((responseJson) => {
-      const moeda = responseJson
-      this.setState({ moeda });
+      console.log(responseJson);
+      this.setState({ moeda: responseJson.data });
     });
   }
 
@@ -68,6 +68,100 @@ export default class Cambio extends Component {
     });
   };
 
+  enviar_token2f = () => {
+    const data = {
+      url: "token2f/novo",
+      data: {
+        conta_id: Funcoes.pessoa.conta_id,
+      },
+      method: "POST",
+    };
+    Funcoes.Geral_API(data).then((responseJson) => {
+      alert("Enviamos um Token para o seu email");
+    });
+  };
+
+  valida_token2f = () => {
+    console.log(this.state.token);
+    const data = {
+      url: "token2f/valida",
+      data: {
+        conta_id: Funcoes.pessoa.conta_id,
+        email: Funcoes.pessoa.email,
+        token: this.state.token,
+      },
+      method: "POST",
+    };
+    Funcoes.Geral_API(data).then((responseJson) => {
+      console.log(responseJson);
+      if (responseJson) {
+        this.travarCotacao();
+      } else alert("Token Invalido");
+    });
+  };
+
+  travarCotacao = () => {
+    if (
+      this.state.senha == "" ||
+      this.state.valueCompra == 0 ||
+      this.state.valueMoeda == []
+    ) {
+      alert("Por favor, preencha os campos para prosseguir");
+    } else {
+      this.setState({ viewValidar: false });
+      const data = {
+        url: "cambio/cambio/travar-cotacao",
+        data: JSON.stringify({
+          moeda: this.state.valueMoeda.id,
+          amount: this.state.valueCompra,
+          operation: "BUY",
+          conta_id: Funcoes.pessoa.conta_id,
+          senha: this.state.senha,
+        }),
+        method: "POST",
+        console: false,
+        funcao: "trazer moeda crypto",
+        tela: "comprar_moeda",
+      };
+
+      Funcoes.Geral_API(data).then((responseJson) => {
+        if (responseJson.error == 0) {
+          alert(responseJson.message);
+        } else {
+          const parsedData = JSON.parse(responseJson.data); // Faz o parse da string JSON
+          const id = parsedData.result.id; // Acessa o id dentro do objeto result
+          console.log(id);
+          this.setState({ idCotacao: id });
+          this.buyMoeda();
+        }
+      });
+    }
+  };
+
+  buyMoeda = () => {
+    console.log("Id Cotacao: " + this.state.idCotacao);
+
+    const data = {
+      url: "cambio/cambio/comprar",
+      data: JSON.stringify({
+        id: this.state.idCotacao,
+      }),
+      method: "POST",
+      console: false,
+      funcao: "trazer moeda crypto",
+      tela: "comprar_moeda",
+    };
+
+    Funcoes.Geral_API(data).then((responseJson) => {
+      if (responseJson.data.success == false) {
+        Alert.alert(responseJson.data.msg);
+      } else {
+        alert("Compra realizada com Sucesso");
+        location.reload();
+      }
+    });
+  };
+
   render() {
     return (
       <div>
@@ -91,7 +185,10 @@ export default class Cambio extends Component {
                 <Button
                   variant="outline-primary"
                   className="baseButtonPrimary"
-                  onClick={() => this.setState({ modalComprar: true })}
+                  onClick={() => {
+                    this.setState({ modalComprar: true });
+                    this.enviar_token2f();
+                  }}
                 >
                   <Row className="w-80 m-auto">
                     <Col xs={5} className="m-auto px-0">
@@ -124,10 +221,9 @@ export default class Cambio extends Component {
                     options={this.state.moeda}
                     placeholder="Escolher Moeda"
                     value={this.state.valueMoeda}
-                    onChange={(selectedOption) => {
-                      console.log(selectedOption);
-                      this.setState({ valueMoeda: selectedOption });
-                      this.cotacao(selectedOption.id);
+                    onChange={(e) => {
+                      this.setState({ valueMoeda: e.id });
+                      this.cotacao(e.id);
                     }}
                     isSearchable
                     styles={{
@@ -157,19 +253,19 @@ export default class Cambio extends Component {
                 <MaskedInput
                   className="inputBoxValor" // Aplique a classe para os estilos
                   mask={[
-                    /R$/,
-                    /\d/,
-                    /\d/,
-                    /\d/,
-                    /\d/,
-                    /\d/,
+                    "R",
+                    "$",
+                    " ",
                     /\d/,
                     ".",
                     /\d/,
                     /\d/,
-                  ]} // Máscara para o valor monetário
-                  placeholder={"R$ 00, 00"} // Placeholder para exibir a entrada de unidade
-                  maxLength={16} // Limite de caracteres
+                    /\d/,
+                    ",",
+                    /\d/,
+                    /\d/,
+                  ]} // Máscara para o valor monetário no formato "R$ 1.234,56"
+                  placeholder="R$ 0,00" // Placeholder para exibir a entrada de unidade
                   value={this.state.valueCompra}
                   onChange={(e) =>
                     this.setState({ valueCompra: e.target.value })
@@ -213,7 +309,7 @@ export default class Cambio extends Component {
             </Container>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={this.trocarSenha}>
+            <Button variant="primary" onClick={this.valida_token2f}>
               Confirmar Compra
             </Button>
           </Modal.Footer>
