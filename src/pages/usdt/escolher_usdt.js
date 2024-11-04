@@ -124,7 +124,9 @@ export default class Cambio extends Component {
         tela: "comprar_moeda",
       };
 
-      Funcoes.Geral_API(data).then((responseJson) => {
+      console.log(data)
+
+      /* Funcoes.Geral_API(data).then((responseJson) => {
         if (responseJson.error == 0) {
           alert(responseJson.message);
         } else {
@@ -134,7 +136,7 @@ export default class Cambio extends Component {
           this.setState({ idCotacao: id });
           this.buyMoeda();
         }
-      });
+      }); */
     }
   };
 
@@ -218,12 +220,16 @@ export default class Cambio extends Component {
               <Row className="mb-3">
                 <Col>
                   <Select
-                    options={this.state.moeda}
+                    options={this.state.moeda.map((moeda) => ({
+                      value: moeda.id,
+                      label: moeda.symbol,
+                    }))}
                     placeholder="Escolher Moeda"
-                    value={this.state.valueMoeda}
-                    onChange={(e) => {
-                      this.setState({ valueMoeda: e.id });
-                      this.cotacao(e.id);
+                    value={this.state.valueMoeda} // Passa o objeto selecionado ou `null`
+                    onChange={(selectedOption) => {
+                      console.log(selectedOption);
+                      this.setState({ valueMoeda: selectedOption }); // Atualiza o estado com o objeto selecionado
+                      this.cotacao(selectedOption.value); // Passa `value` para a função `cotacao`
                     }}
                     isSearchable
                     styles={{

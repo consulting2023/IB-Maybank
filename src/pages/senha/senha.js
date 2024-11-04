@@ -32,7 +32,7 @@ export default class Senha extends Component {
     this.enviarToken();
   };
   modalSenhaTransfer = () => {
-    this.setState({ modalShowLogin: true });
+    this.setState({ modalShowTransfer: true });
 
     this.enviarToken();
   };
@@ -76,19 +76,21 @@ export default class Senha extends Component {
       };
 
       Funcoes.Geral_API(data, true).then((res) => {
+        console.log(res)
         if (res === 1) {
           alert("Senha alterada com sucesso! Sera preciso Logar novamente");
           Funcoes.logout();
         } else {
           alert("Erro em alterar a senha, tente novamente mais tarde");
-          location.reload;
+          location.reload();
         }
       });
     }
   };
 
   trocarSenhaTransfer = () => {
-    if (this.state.senha == "") {
+    
+    if (this.state.senhaTransfer == "") {
       alert("É Obrigatorio preencher a senha para seguir adiante");
     } else if (this.state.OTP == "") {
       alert("É Obrigatorio preencher a o token para seguir adiante");
@@ -110,10 +112,10 @@ export default class Senha extends Component {
       Funcoes.Geral_API(data, true).then((res) => {
         if (res === 1) {
           alert("Senha alterada com sucesso!");
-          location.reload;
+          location.reload();
         } else {
           alert("Erro em alterar a senha, tente novamente mais tarde");
-          location.reload;
+          location.reload();
         }
       });
     }
@@ -235,7 +237,7 @@ export default class Senha extends Component {
           <Modal.Header closeButton>
             <Modal.Title>Senha Transação</Modal.Title>
           </Modal.Header>
-          <Modal.Body style="align-items: center">
+          <Modal.Body >
             <Container>
               <Row>
                 <h3>Token enviado para seu email</h3>
