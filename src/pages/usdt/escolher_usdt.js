@@ -26,6 +26,7 @@ export default class Cambio extends Component {
       token: "",
       btnComprar: false,
       viewValidar: true,
+      disabled: false,
     };
   }
 
@@ -82,6 +83,7 @@ export default class Cambio extends Component {
   };
 
   valida_token2f = () => {
+    this.setState({ disabled: true });
     console.log(this.state.token);
     const data = {
       url: "token2f/valida",
@@ -96,7 +98,10 @@ export default class Cambio extends Component {
       console.log(responseJson);
       if (responseJson) {
         this.travarCotacao();
-      } else alert("Token Invalido");
+      } else {
+        alert("Token Invalido");
+        this.setState({disabled: false})
+      }
     });
   };
 
@@ -112,7 +117,7 @@ export default class Cambio extends Component {
       const data = {
         url: "cambio/cambio/travar-cotacao",
         data: JSON.stringify({
-          moeda: this.state.valueMoeda.id,
+          moeda: this.state.valueMoeda.value,
           amount: this.state.valueCompra,
           operation: "BUY",
           conta_id: Funcoes.pessoa.conta_id,
@@ -124,19 +129,17 @@ export default class Cambio extends Component {
         tela: "comprar_moeda",
       };
 
-      console.log(data)
+      Funcoes.Geral_API(data).then((responseJson) => {
+        console.log(responseJson);
 
-      /* Funcoes.Geral_API(data).then((responseJson) => {
-        if (responseJson.error == 0) {
+        if (responseJson.message != "success") {
           alert(responseJson.message);
+          this.setState({disabled: false})
         } else {
-          const parsedData = JSON.parse(responseJson.data); // Faz o parse da string JSON
-          const id = parsedData.result.id; // Acessa o id dentro do objeto result
-          console.log(id);
-          this.setState({ idCotacao: id });
+          this.setState({ idCotacao: responseJson.data.result.id });
           this.buyMoeda();
         }
-      }); */
+      });
     }
   };
 
@@ -155,12 +158,13 @@ export default class Cambio extends Component {
     };
 
     Funcoes.Geral_API(data).then((responseJson) => {
-      if (responseJson.data.success == false) {
+      console.log(responseJson)
+      /* if (responseJson.data.success == false) {
         Alert.alert(responseJson.data.msg);
       } else {
         alert("Compra realizada com Sucesso");
         location.reload();
-      }
+      } */
     });
   };
 
@@ -256,29 +260,21 @@ export default class Cambio extends Component {
                   marginTop: 3,
                 }}
               >
-                <MaskedInput
-                  className="inputBoxValor" // Aplique a classe para os estilos
-                  mask={[
-                    "R",
-                    "$",
-                    " ",
-                    /\d/,
-                    ".",
-                    /\d/,
-                    /\d/,
-                    /\d/,
-                    ",",
-                    /\d/,
-                    /\d/,
-                  ]} // Máscara para o valor monetário no formato "R$ 1.234,56"
-                  placeholder="R$ 0,00" // Placeholder para exibir a entrada de unidade
-                  value={this.state.valueCompra}
-                  onChange={(e) =>
-                    this.setState({ valueCompra: e.target.value })
-                  } // Atualiza o estado com o valor da entrada
+                <input
+                  value={this.state.valueCompra.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                  placeholder="R$ 00,00"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[R$\s.,]/g, ""); // Remove caracteres não numéricos
+                    const valorNumerico = Number(value) / 100; // Converte para valor em reais
+
+                    this.setState({ valueCompra: valorNumerico });
+                  }}
                 />
 
-                <span>
+                <span style={{marginLeft: 10}}>
                   {this.state.valorCotacao.price_buy
                     ? "Valor Moeda: " + this.state.valorCotacao.price_buy
                     : null}
@@ -315,7 +311,7 @@ export default class Cambio extends Component {
             </Container>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={this.valida_token2f}>
+            <Button variant="primary" disabled={this.state.disabled} onClick={this.valida_token2f}>
               Confirmar Compra
             </Button>
           </Modal.Footer>
