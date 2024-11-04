@@ -158,13 +158,14 @@ export default class Cambio extends Component {
     };
 
     Funcoes.Geral_API(data).then((responseJson) => {
-      console.log(responseJson)
-      /* if (responseJson.data.success == false) {
-        Alert.alert(responseJson.data.msg);
+      
+      
+      if (responseJson.data.success == false) {
+       alert("Erro ao realizar compra, tente novamente");
       } else {
         alert("Compra realizada com Sucesso");
         location.reload();
-      } */
+      }
     });
   };
 
