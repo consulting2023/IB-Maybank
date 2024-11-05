@@ -7,7 +7,7 @@ const depostio_mostrar = true;
 const comprovante_mostar = true;
 const pagar_mostrar = true;
 const cobrar_mostrar = true;
-const cartao_mostrar = false;
+const cartao_mostrar = true;
 const servicos_mostrar = false;
 const qrcode_mostrar = true;
 const tarifas_mostrar = true;
@@ -260,4 +260,12 @@ export default {
 
   // Cambio
   cambio: true,
+
+  // Tela Cartao
+  escolha_cartao: {
+    ativar: {
+      cor2: false,
+    },
+    detalhes: false,
+  },
 };

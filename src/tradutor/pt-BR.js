@@ -418,7 +418,7 @@ export default {
 
   escolha_cartao: {
     ativar: 'Ativar Cartão',
-    carregar: 'Carregar Cartão',
+    carregar1: 'Carregar Cartão',
     trocarSenha: 'Trocar Senha',
     detalhes: 'Detalhes',
     aquisicao: '• Todas as vantagens em um só click!',
@@ -459,7 +459,8 @@ export default {
     bloquear: 'Aqui você consegue bloquear ou desbloquear seu cartão %{nome_banco}',
     cartao: 'Cartão: ',
     id: 'ID: ',
-    status: 'Status: '
+    status: 'Status: ',
+    solicitar: 'Solicitar Cartão'
   },
 
   ajustes: {
