@@ -19,7 +19,7 @@ import * as Funcoes from "../../constants/Funcoes";
 import ReactLoading from "react-loading";
 import Password from "../../components/password/Password";
 import QRCode from "react-qr-code";
-
+import InputMask from "react-input-mask";
 export default class Pix extends Component {
   constructor() {
     super();
@@ -46,6 +46,8 @@ export default class Pix extends Component {
       showModalComprovante: false,
       titleModalComprovante: "",
       comprovante_pdf: {},
+      cpfPagador: "",
+      nomePagador: "",
 
       chaves_disponiveis: {},
       minhas_chaves_pix: {},
@@ -374,7 +376,7 @@ export default class Pix extends Component {
       console.log(responseJson);
       if (responseJson.cod == 0) {
         this.closeModalTransferencia();
-        alert("Erro desconhecido.");
+        alert("Pix temporariamente fora do ar, tente novamente mais tarde.");
       } else if (responseJson.cod == 1) {
         setTimeout(() => {
           this.closeModalTransferencia();
@@ -400,7 +402,7 @@ export default class Pix extends Component {
         );
       } else {
         this.setState({ loading: false });
-        alert("Erro desconhecido");
+        alert("Pix temporariamente fora do ar, tente novamente mais tarde.");
       }
     });
   };
@@ -447,7 +449,7 @@ export default class Pix extends Component {
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
       console.log(responseJson);
-      this.setState({ comprovante_pdf: responseJson});
+      this.setState({ comprovante_pdf: responseJson });
       setTimeout(() => {
         this.setState({
           titleModalComprovante: "Transação Pix efetuada com sucesso!",
@@ -458,19 +460,18 @@ export default class Pix extends Component {
   };
 
   abrirComprovante = () => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     const pdfBase64 = this.state.comprovante_pdf; // Supondo que você já tenha o Base64 armazenado no estado
 
     // Definir o tipo de conteúdo como PDF e criar a URL com a string Base64
     link.href = `data:application/pdf;base64,${pdfBase64}`;
 
     // Definir o nome do arquivo para ser baixado
-    link.download = 'comprovante.pdf';
+    link.download = "comprovante.pdf";
 
     // Simular o clique no link para iniciar o download
     link.click();
-};
-
+  };
 
   AgendarPix = () => {
     const dados = {
@@ -625,6 +626,8 @@ export default class Pix extends Component {
       funcao: "pesquisarChave",
       tela: "pix",
       data: {
+        nome_pagador: this.state.nomePagador,
+        cpf_pagador: this.state.cpfPagador,
         conta_id: Funcoes.pessoa.conta_id,
         valor: valor_qrcodeenviar,
         pixels_modulo: 20,
@@ -708,6 +711,8 @@ export default class Pix extends Component {
       loading: false,
       selectQrChave: {},
       valorQr: "",
+      cpfPagador: "",
+      nomePagador: "",
     });
   };
 
@@ -717,6 +722,8 @@ export default class Pix extends Component {
       loading: false,
       qrImg: "",
       qrCopypaste: "",
+      cpfPagador: "",
+      nomePagador: "",
     });
   };
 
@@ -751,6 +758,16 @@ export default class Pix extends Component {
         }
       });
     }, 300);
+  };
+
+  maskaraInput = (value) => {
+    value = value.replace(/[^\d]+/g, "");
+    if (value.length <= 11) {
+      this.setState({ mask: "999.999.999-99*" });
+    } else {
+      this.setState({ mask: "99.999.999/9999-99" });
+    }
+    this.setState({ cpfPagador: value });
   };
   render() {
     const pixTypesPagar = [
@@ -1449,7 +1466,40 @@ export default class Pix extends Component {
                           onChange={(event) => {
                             this.setState({ valorQr: event });
                           }}
-                          className="text-center"
+                          className="form-control"
+                        />
+                      </Col>
+                    </Row>
+                    <Row className="mt-5">
+                      <Col>
+                        <label>Nome Pagador:</label>
+                      </Col>
+                      <Col>
+                        <input
+                          type="text"
+                          value={this.state.nomePagador}
+                          onChange={(event) => {
+                            this.setState({ nomePagador: event.target.value });
+                          }}
+                          placeholder="Digite seu nome"
+                          className="form-control"
+                        />
+                      </Col>
+                    </Row>
+                    <Row className="mt-5">
+                      <Col>
+                        <label>Documento Pagador:</label>
+                      </Col>
+                      <Col>
+                        <InputMask
+                          className="form-control"
+                          id="cpfBusca"
+                          required
+                          value={this.state.cpfPagador}
+                          onChange={(event) =>
+                            this.maskaraInput(event.target.value)
+                          }
+                          mask={this.state.mask}
                         />
                       </Col>
                     </Row>
@@ -1488,7 +1538,17 @@ export default class Pix extends Component {
                   />
                 </Row>
                 <Row style={{ fontSize: "9pt" }} className="p-2 text-center">
-                  <span className="my-4">{this.state.qrCopypaste}</span>
+                  <span className="my-4" style={{ margin: "auto" }}>
+                    {this.state.qrCopypaste
+                      .replace(/(.{20})/g, "$1\n")
+                      .split("\n")
+                      .map((line, index) => (
+                        <React.Fragment key={index}>
+                          {line}
+                          <br />
+                        </React.Fragment>
+                      ))}
+                  </span>
                   <Button
                     className="w-100"
                     onClick={() => {
