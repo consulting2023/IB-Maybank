@@ -210,7 +210,7 @@ export default class EscolhaCartao extends Component {
     }
 
     const dados = {
-      url: "tarifa/consulta",
+      url: "pedido-cartao/novo",
       data: {
         conta_id: this.state.pessoa.conta_id,
         corCartao: cartao,
@@ -218,7 +218,7 @@ export default class EscolhaCartao extends Component {
       },
       method: "POST",
     };
-
+    console.log(dados);
     if (parseFloat(this.state.saldoDigital) < parseFloat(valor_cartao)) {
       alert(
         "Saldo insuficiente, " +
@@ -228,6 +228,7 @@ export default class EscolhaCartao extends Component {
       alert("Você precisa aceitar os termos de uso para solicitar um cartão");
     } else {
       Funcoes.Geral_API(dados, true).then((res) => {
+        console.log(res);
         var nome = this.state.pessoa.nome;
         if (res == 0) {
           alert(
