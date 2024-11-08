@@ -5,7 +5,7 @@ import ReactLoading from "react-loading";
 import i18n from "../../tradutor/tradutor";
 import * as Formatar from "../../constants/Formatar";
 
-export default class RelatorioEntrada extends Component {
+export default class RelatorioSaida extends Component {
   constructor() {
     super();
     this.state = {
@@ -19,6 +19,7 @@ export default class RelatorioEntrada extends Component {
       hasMore: true, // Se há mais dados a serem carregados
       lastItemId: null, // ID do último item carregado
       pessoa: [],
+      endToEnd: "",
     };
     this.observer = null; // Controla o observador
   }
@@ -55,7 +56,7 @@ export default class RelatorioEntrada extends Component {
         hasMore: true, // Reseta o controle de carregamento infinito
       });
 
-      const { dataDe, dataAte, id, pessoa } = this.state;
+      const { dataDe, dataAte, id, pessoa, endToEnd } = this.state;
 
       const data = {
         url: "pix/relatorio-pix",
@@ -65,11 +66,13 @@ export default class RelatorioEntrada extends Component {
           data_ate: dataAte,
           ultimo_id: "", // Inicia a pesquisa sem último item carregado
           tipo_relatorio: "PixIn",
-          end_to_end: "",
+          end_to_end: endToEnd || "",
           custom_id: id || "",
         },
         method: "POST",
       };
+
+      console.log(data)
 
       Funcoes.Geral_API(data, true).then((res) => {
         if (res.status && res.dados.length > 0) {
@@ -117,7 +120,7 @@ export default class RelatorioEntrada extends Component {
 
   // Função para carregar mais dados
   loadMoreData = () => {
-    const { dataDe, dataAte, id, lastItemId, pessoa } = this.state;
+    const { dataDe, dataAte, id, lastItemId, pessoa, endToEnd } = this.state;
 
     this.setState({ loading: true });
 
@@ -129,7 +132,7 @@ export default class RelatorioEntrada extends Component {
         data_ate: dataAte,
         ultimo_id: lastItemId || "",
         tipo_relatorio: "PixIn",
-        end_to_end: "",
+        end_to_end: endToEnd || "",
         custom_id: id || "",
       },
       method: "POST",
@@ -157,7 +160,7 @@ export default class RelatorioEntrada extends Component {
       <div className="extrato">
         <Container className="p-3 col-md-10">
           <Row className="baseWindow px-5 py-4">
-            <Col md={4}>
+            <Col md={3}>
               <Form.Group>
                 <Form.Label>Data De</Form.Label>
                 <Form.Control
@@ -169,7 +172,7 @@ export default class RelatorioEntrada extends Component {
               </Form.Group>
             </Col>
 
-            <Col md={4}>
+            <Col md={3}>
               <Form.Group>
                 <Form.Label>Data Até</Form.Label>
                 <Form.Control
@@ -181,13 +184,26 @@ export default class RelatorioEntrada extends Component {
               </Form.Group>
             </Col>
 
-            <Col md={4}>
+            <Col md={3}>
               <Form.Group>
                 <Form.Label>Custom ID</Form.Label>
                 <Form.Control
                   type="text"
                   name="id"
                   value={this.state.id}
+                  onChange={this.handleInputChange}
+                  placeholder="Informe o ID"
+                />
+              </Form.Group>
+            </Col>
+
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>End to End</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="endToEnd"
+                  value={this.state.endToEnd}
                   onChange={this.handleInputChange}
                   placeholder="Informe o ID"
                 />
@@ -224,6 +240,7 @@ export default class RelatorioEntrada extends Component {
                           {i18n.t("extrato.descrData")}
                         </th>
                         <th>Custom ID</th>
+                        <th>End To End ID</th>
                       </tr>
                     </thead>
 
@@ -244,6 +261,7 @@ export default class RelatorioEntrada extends Component {
                             {Formatar.formatarDate(dado.data_hora)}
                           </td>
                           <td className="text-right">{dado.mensagem}</td>
+                          <td className="text-right">{dado.end_to_end_id}</td>
                         </tr>
                       ))}
                     </tbody>
