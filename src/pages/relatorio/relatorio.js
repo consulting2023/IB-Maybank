@@ -30,12 +30,12 @@ export default class Relatorio extends Component {
         <Container className="p-3 d-flex justify-content-center">
           <Col md={8} className="baseWindow px-5 py-4">
             <Row>
-              <p
+            {/*   <p
                 className="mb-2 w-100 text-center"
                 style={{ fontSize: "1.30em" }}
               >
                 <strong>Escolha o extrato que deseja sacar:</strong>
-              </p>
+              </p> */}
             </Row>
             <Row className="text-center px-3">
               <Col className="p-3">
