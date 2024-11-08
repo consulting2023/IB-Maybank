@@ -15,6 +15,7 @@ const perfil_mostrar = true;
 const pix_mostrar = true;
 const senha_mostrar = true;
 const cambio_mostrar = true;
+const relatorio_mostrar = true;
 
 const getListaProdutos = () => {
   const nivel = Number(localStorage.getItem("nivel"));
@@ -110,6 +111,13 @@ const getListaProdutos = () => {
       titulo: "sidebar.cambio",
       rota: "/cambio",
       mostrar: cambio_mostrar,
+    },
+    {
+      key: 13,
+      icone: Icones.relatorio,
+      titulo: "sidebar.relatorio",
+      rota: "/relatorio",
+      mostrar: relatorio_mostrar,
     },
     {
       key: 17,
@@ -267,5 +275,11 @@ export default {
       cor2: false,
     },
     detalhes: false,
+  },
+
+  relatorio: true,
+  relatorio_escolha: {
+    relatorioSaida: true,
+    relatorioEntrada: true,
   },
 };

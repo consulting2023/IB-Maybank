@@ -50,6 +50,11 @@ import TransferenciaLote from '../pages/transferencia/Transferencia_Lote';
 import NoMatch from '../components/noMatch/NoMatch';
 import Senha from "../pages/senha/senha";
 import Cambio from "../pages/usdt/escolher_usdt";
+import Relatorio from "../pages/relatorio/relatorio";
+import RelatorioSaida from "../pages/relatorio/relatorio_saida";
+import RelatorioEntrada from "../pages/relatorio/relatorio_entrada";
+
+
 
 
 
@@ -68,7 +73,7 @@ function Router(props) {
     return (
       <Routes>
         <Route exact path="/" element={<Login langProp={traduzir} alerts={props.alerts}/>}/>
-        <Route exact path="/cambio_test" element={<Cambio langProp={traduzir} alerts={props.alerts}/>}/>
+        
         <Route path="*" element={<NoMatch langProp={traduzir} alerts={props.alerts}/>}/>
         {/* <Route exact path="/siso" component={Siso} /> */}
 
@@ -124,6 +129,10 @@ function Router(props) {
             <Route exact path="/comprovantes_servico" element={<ComprovanteServico langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.comprovantesServicos} />
 
             <Route exact path="/cambio" element={<Cambio langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.cambio} />
+
+            <Route exact path="/relatorio" element={<Relatorio langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.relatorio} />
+            <Route exact path="/relatorio_saida" element={<RelatorioSaida langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.relatorio_escolha.relatorioSaida} />
+            <Route exact path="/relatorio_entrada" element={<RelatorioEntrada langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.relatorio_escolha.relatorioEntrada} />
 
             <Route exact path="/qr_code" element={<QRCode langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.qrcode} />
 

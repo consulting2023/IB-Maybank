@@ -546,6 +546,7 @@ export default {
     tarifaFechar: 'Fechar',
     senha: "Senhas",
     cambio: "Cambio",
+    relatorio: "Relatorio"
   },
 
   header: {

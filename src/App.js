@@ -54,7 +54,10 @@ function App() {
     "/qr_code",
     "/perfil",
     "/senha",
-    "/cambio"
+    "/cambio",
+    "/relatorio",
+    "/relatorio_saida",
+    "/relatorio_entrada",
   ];
 
   var isPrivate = privatePaths.includes(document.location.pathname)
