@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "../../templates/style_transferencia.scss";
-import { Container, Col, Row, Button, Modal } from "react-bootstrap";
+import { Container, Col, Row, Button, Modal, Alert } from "react-bootstrap";
 import Select from "react-select";
 import Icones from "../../constants/Icon";
 import BannerTitle from "../../components/bannerTitle/bannerTitle";
@@ -9,16 +9,19 @@ import i18n from "../../tradutor/tradutor";
 import * as Funcoes from "../../constants/Funcoes";
 import OtpInput from "react-otp-input";
 import MaskedInput from "react-text-mask";
+import Produtos from "../../constants/Produtos";
 
 export default class Cambio extends Component {
   constructor(props) {
     super(props);
     this.state = {
       modalComprar: false,
+      modalConfirmComprar: false,
       moeda: [],
       valueMoeda: null, // Moeda selecionada
       valueCompra: "",
       senha: "",
+      senhaConfirm: "",
       hidePassword: true,
       idCotacao: "",
       disabled: false,
@@ -27,6 +30,8 @@ export default class Cambio extends Component {
       btnComprar: false,
       viewValidar: true,
       disabled: false,
+      moedaNome: "",
+      tempo: 0,
     };
   }
 
@@ -100,7 +105,7 @@ export default class Cambio extends Component {
         this.travarCotacao();
       } else {
         alert("Token Invalido");
-        this.setState({disabled: false})
+        this.setState({ disabled: false });
       }
     });
   };
@@ -113,15 +118,58 @@ export default class Cambio extends Component {
     ) {
       alert("Por favor, preencha os campos para prosseguir");
     } else {
-      this.setState({ viewValidar: false });
+      if (this.state.valueCompra < 1000) {
+        alert("Valor Minimo de Compra é de 1.000,00");
+      } else {
+        this.setState({ viewValidar: false });
+        const data = {
+          url: "cambio/cambio/travar-cotacao",
+          data: JSON.stringify({
+            moeda: this.state.valueMoeda.value,
+            amount: this.state.valueCompra,
+            operation: "BUY",
+            conta_id: Funcoes.pessoa.conta_id,
+            senha: this.state.senha,
+          }),
+          method: "POST",
+          console: false,
+          funcao: "trazer moeda crypto",
+          tela: "comprar_moeda",
+        };
+
+        Funcoes.Geral_API(data).then((responseJson) => {
+          console.log(responseJson);
+
+          if (responseJson.message != "success") {
+            alert(responseJson.message);
+            this.setState({ disabled: false });
+          } else {
+            this.setState({ idCotacao: responseJson.data.result.id });
+            this.setState({ modalConfirmComprar: true, modalComprar: false });
+            this.setState({ modalConfirmComprar: true, modalComprar: false });
+            this.startTimer();
+          }
+        });
+      }
+    }
+  };
+
+  buyMoeda = () => {
+    console.log("Id Cotacao: " + this.state.idCotacao);
+    console.log(this.state.tempo);
+
+    if (this.state.senhaConfirm == "") {
+      alert("É necessário informar a senha de transação para comprar");
+      return;
+    } else if (this.state.senhaConfirm != this.state.senha) {
+      alert("Senha incorreta");
+    } else {
+      // Define um temporizador para exibir alerta após 15 segundos
+
       const data = {
-        url: "cambio/cambio/travar-cotacao",
+        url: "cambio/cambio/comprar",
         data: JSON.stringify({
-          moeda: this.state.valueMoeda.value,
-          amount: this.state.valueCompra,
-          operation: "BUY",
-          conta_id: Funcoes.pessoa.conta_id,
-          senha: this.state.senha,
+          id: this.state.idCotacao,
         }),
         method: "POST",
         console: false,
@@ -131,42 +179,33 @@ export default class Cambio extends Component {
 
       Funcoes.Geral_API(data).then((responseJson) => {
         console.log(responseJson);
+        // Cancela o temporizador caso a resposta chegue antes de 15 segundos
 
-        if (responseJson.message != "success") {
-          alert(responseJson.message);
-          this.setState({disabled: false})
+        if (responseJson.data.success == false) {
+          alert("Erro ao realizar compra, tente novamente");
         } else {
-          this.setState({ idCotacao: responseJson.data.result.id });
-          this.buyMoeda();
+          alert("Compra realizada com sucesso");
+          location.reload();
         }
       });
     }
   };
 
-  buyMoeda = () => {
-    console.log("Id Cotacao: " + this.state.idCotacao);
-
-    const data = {
-      url: "cambio/cambio/comprar",
-      data: JSON.stringify({
-        id: this.state.idCotacao,
-      }),
-      method: "POST",
-      console: false,
-      funcao: "trazer moeda crypto",
-      tela: "comprar_moeda",
-    };
-
-    Funcoes.Geral_API(data).then((responseJson) => {
-      
-      
-      if (responseJson.data.success == false) {
-       alert("Erro ao realizar compra, tente novamente");
-      } else {
-        alert("Compra realizada com Sucesso");
-        location.reload();
-      }
-    });
+  startTimer = () => {
+    // Inicia o temporizador de 15 segundos.
+    this.intervalId = setInterval(() => {
+      this.setState(
+        (prevState) => ({ tempo: prevState.tempo + 1 }),
+        () => {
+          // Se o tempo ultrapassar 15 segundos, executa a ação desejada.
+          if (this.state.tempo > 15) {
+            alert("Tempo de compra Expirado, tente novamente");
+            location.reload();
+            clearInterval(this.intervalId);
+          }
+        }
+      );
+    }, 1000);
   };
 
   render() {
@@ -194,7 +233,7 @@ export default class Cambio extends Component {
                   className="baseButtonPrimary"
                   onClick={() => {
                     this.setState({ modalComprar: true });
-                    this.enviar_token2f();
+                    Produtos.cambioTela.token ? this.enviar_token2f() : null;
                   }}
                 >
                   <Row className="w-80 m-auto">
@@ -233,7 +272,10 @@ export default class Cambio extends Component {
                     value={this.state.valueMoeda} // Passa o objeto selecionado ou `null`
                     onChange={(selectedOption) => {
                       console.log(selectedOption);
-                      this.setState({ valueMoeda: selectedOption }); // Atualiza o estado com o objeto selecionado
+                      this.setState({
+                        valueMoeda: selectedOption,
+                        moedaNome: selectedOption.label,
+                      }); // Atualiza o estado com o objeto selecionado
                       this.cotacao(selectedOption.value); // Passa `value` para a função `cotacao`
                     }}
                     isSearchable
@@ -275,26 +317,30 @@ export default class Cambio extends Component {
                   }}
                 />
 
-                <span style={{marginLeft: 10}}>
+                <span style={{ marginLeft: 10 }}>
                   {this.state.valorCotacao.price_buy
                     ? "Valor Moeda: " + this.state.valorCotacao.price_buy
                     : null}
                 </span>
               </div>
+              {Produtos.cambioTela.token ? (
+                <div>
+                  <Row>
+                    <h3>Token enviado para seu email</h3>
+                  </Row>
+                  <Row>
+                    <OtpInput
+                      focusInput={1}
+                      isInputNum={true}
+                      value={this.state.token}
+                      onChange={(value) => this.setState({ token: value })}
+                      numInputs={6}
+                      className="tokenValidacao"
+                    />
+                  </Row>
+                </div>
+              ) : null}
 
-              <Row>
-                <h3>Token enviado para seu email</h3>
-              </Row>
-              <Row>
-                <OtpInput
-                  focusInput={1}
-                  isInputNum={true}
-                  value={this.state.token}
-                  onChange={(value) => this.setState({ token: value })}
-                  numInputs={6}
-                  className="tokenValidacao"
-                />
-              </Row>
               <Row>
                 <h6>Senha</h6>
               </Row>
@@ -312,7 +358,70 @@ export default class Cambio extends Component {
             </Container>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" disabled={this.state.disabled} onClick={this.valida_token2f}>
+            <Button
+              variant="primary"
+              disabled={this.state.disabled}
+              onClick={() => {
+                Produtos.cambioTela.token
+                  ? this.valida_token2f
+                  : this.travarCotacao();
+              }}
+            >
+              Confirmar Compra
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          size="lg"
+          show={this.state.modalConfirmComprar}
+          onHide={() => this.setState({ modalConfirmComprar: false })}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Confirmar Conta</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Container>
+              <Alert style={{ fontSize: "13px" }} variant="secondary">
+                <Row>
+                  <Col>
+                    <h4>
+                      Moeda: <b>{this.state.moedaNome}</b>
+                    </h4>
+                  </Col>
+                  <Col>
+                    <h4>
+                      Valor da Moeda: <b>{this.state.valorCotacao.price_buy}</b>
+                    </h4>
+                  </Col>
+                </Row>
+                <h4>
+                  Quantidade que quer: <b>{this.state.valueCompra}</b>
+                </h4>
+              </Alert>
+
+              <Row>
+                <h6>Senha</h6>
+              </Row>
+              <Row>
+                <OtpInput
+                  focusInput={1}
+                  isInputNum={true}
+                  value={this.state.senhaConfirm}
+                  onChange={(value) => this.setState({ senhaConfirm: value })}
+                  numInputs={6}
+                  className="tokenValidacao"
+                  inputType="password"
+                />
+              </Row>
+            </Container>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="primary"
+              disabled={this.state.disabled}
+              onClick={this.buyMoeda}
+            >
               Confirmar Compra
             </Button>
           </Modal.Footer>

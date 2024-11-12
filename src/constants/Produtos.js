@@ -268,6 +268,9 @@ export default {
 
   // Cambio
   cambio: true,
+  cambioTela: {
+    token: false
+  },
 
   // Tela Cartao
   escolha_cartao: {
