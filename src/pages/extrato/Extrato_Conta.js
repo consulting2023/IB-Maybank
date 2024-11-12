@@ -1,15 +1,24 @@
-import React, { Component } from 'react';
-import * as Funcoes from '../../constants/Funcoes';
-import ReactPagination from 'react-js-pagination';
-import '../../templates/style_extrato.scss';
-import { Container, Row, Col, Breadcrumb, Button, ButtonGroup, Table } from 'react-bootstrap';
-import * as Formatar from '../../constants/Formatar';
-import { addDays } from 'date-fns';
-import BannerTitle from '../../components/bannerTitle/bannerTitle';
-import DatePicker from 'react-datepicker';
-import Objetos from '../../constants/Objetos';
-import ReactLoading from 'react-loading';
-import i18n from '../../tradutor/tradutor';
+import React, { Component } from "react";
+import * as Funcoes from "../../constants/Funcoes";
+import "../../templates/style_extrato.scss";
+import {
+  Container,
+  Row,
+  Col,
+  Breadcrumb,
+  Button,
+  ButtonGroup,
+  Table,
+} from "react-bootstrap";
+import * as Formatar from "../../constants/Formatar";
+import { addDays } from "date-fns";
+import BannerTitle from "../../components/bannerTitle/bannerTitle";
+import DatePicker from "react-datepicker";
+import Objetos from "../../constants/Objetos";
+import ReactLoading from "react-loading";
+import i18n from "../../tradutor/tradutor";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default class ExtratoConta extends Component {
   constructor() {
@@ -19,170 +28,282 @@ export default class ExtratoConta extends Component {
       dataDe: new Date(),
       dataAte: new Date(),
       mostrarExtrato: false,
-      paginacao: 1,
-      numeroRegistros: 0,
-      cortarExtrato: [],
-      pessoa: [],
-      confirm_compartilhar: 0,
+      ultimoId: null,
       loading: false,
       disabled: false,
       soma: 0,
+      hasMore: true,
     };
+    this.handleScroll = this.handleScroll.bind(this);
   }
 
   componentDidMount() {
     const pessoa = Funcoes.pessoa;
     this.setState({ pessoa: pessoa });
+    window.addEventListener("scroll", this.handleScroll);
   }
 
-  paginacao = (numero) => {
-    let array_cortar = [];
-    this.state.extrato.map(dados => (
-      dados.map(dado => (
-        array_cortar.push(dado)
-      ))
-    ))
-
-    this.setState({ paginacao: (numero) })
-    let numero1 = (numero - 1) * 10
-    let numero2 = (numero * 10)
-    let cortado = array_cortar.slice(numero1, numero2);
-    this.setState({ cortarExtrato: cortado })
-  };
-
-  extrato_pdf = () => {
-    if (this.state.confirm_compartilhar == 0) {
-      alert("Nenhum lançamento encontrado");
-    } else {
-      const data = {
-        url: 'conta/extrato-novo-pdf',
-        data: {
-          'conta_id': this.state.pessoa.conta_id,
-          "data_de": Formatar.formatarDateAno(this.state.dataDe),
-          "data_ate": Formatar.formatarDateAno(this.state.dataAte)
-        },
-        method: 'POST',
-      };
-      Funcoes.Geral_API(data, true).then((res) => {
-        if (res) {
-          let pdfWindow = window.open("");
-          pdfWindow.document.write("<body style='margin: 0;'><embed width='100%' height='100%' src='data:application/pdf;base64, " + encodeURI(res) + "' /></body>");
-          pdfWindow.document.title = 'Extrato';
-        } else {
-          this.props.alerts("Erro desconhecido", "", "danger");
-        }
-      });
-    }
-  };
-
-  extrato_csv = () => {
-    if (this.state.confirm_compartilhar == 0) {
-      alert("Nenhum lançamento encontrado");
-    } else {
-      const data = {
-        url: 'conta/extrato-csv',
-        data: {
-          'conta_id': this.state.pessoa.conta_id,
-          "data_de": Formatar.formatarDateAno(this.state.dataDe),
-          "data_ate": Formatar.formatarDateAno(this.state.dataAte),
-          "tipo": ''
-        },
-        method: 'POST',
-      };
-
-      Funcoes.Geral_API(data, true).then((res) => {
-        let csvContent = window.atob(res);
-        var blob = new Blob([csvContent], {type: "data:application/octet-stream;base64"});
-        var url  = window.URL.createObjectURL(blob);
-        var link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'Extrato.csv');
-        link.click();
-      });
-    }
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.handleScroll);
   }
 
-  verExtrato = () => {
-    this.setState({ loading: true, disabled: true });
+  handleScroll() {
+    if (
+      window.innerHeight + document.documentElement.scrollTop !==
+        document.documentElement.offsetHeight ||
+      this.state.loading ||
+      !this.state.hasMore
+    ) {
+      return;
+    }
+    this.loadMoreExtrato();
+  }
+
+  loadMoreExtrato = () => {
+    const { pessoa, dataDe, dataAte, ultimoId, extrato } = this.state;
+
+    this.setState({ loading: true });
 
     const data = {
-      url: 'conta/extrato',
+      url: "conta/extrato",
       data: {
-        'conta_id': this.state.pessoa.conta_id,
-        "data_de": Formatar.formatarDateAno(this.state.dataDe),
-        "data_ate": Formatar.formatarDateAno(this.state.dataAte)
+        conta_id: pessoa.conta_id,
+        data_de: Formatar.formatarDateAno(dataDe),
+        data_ate: Formatar.formatarDateAno(dataAte),
+        ultimo_id: ultimoId,
       },
-      method: 'POST',
+      method: "POST",
     };
 
     Funcoes.Geral_API(data, true).then((res) => {
-      var keys = Object.keys(res);
+      const keys = Object.keys(res);
       if (keys.length === 0) {
-        this.props.alerts('Nenhuma movimentação encontrada', 'Selecione outro período ou tente novamente mais tarde', 'warning');
-        this.setState({ loading: false });
-        this.setState({ disabled: false });
-        this.setState({ mostrarExtrato: false });
-      } else {
-        var arr = [];
-        var i = 0;
-        keys.forEach((key) => {
-          arr.push(res[key]);
-        });
-
-        arr.map(dados => (
-          dados.map(() => (
-            i++
-          ))
-        ));
-
-        let array_cortar_aux = [];
-        arr.map(dados => (
-          dados.map(dado => (
-            array_cortar_aux.push(dado)
-          ))
-        ));
-
-        this.setState({ paginacao: 1 })
-
-        let numero1_aux = 0
-        let numero2_aux = 10
-        let cortado = array_cortar_aux.slice(numero1_aux, numero2_aux)
-        let soma = 0;
-        array_cortar_aux.forEach(e => (soma = soma + e.valor));
-
-        this.setState({ cortarExtrato: cortado, soma: soma });
-
-        this.setState({ loading: false, mostrarExtrato: true, numeroRegistros: i, extrato: arr, confirm_compartilhar: 1, disabled: false })
+        this.setState({ hasMore: false, loading: false });
+        return;
       }
+
+      const novosDados = keys.flatMap((key) => res[key]);
+      const soma = novosDados.reduce(
+        (acc, e) => acc + e.valor,
+        this.state.soma
+      );
+
+      this.setState({
+        extrato: [...extrato, ...novosDados],
+        ultimoId: novosDados[novosDados.length - 1].id,
+        soma,
+        loading: false,
+        hasMore: novosDados.length === 50,
+      });
     });
   };
 
+  verExtrato = () => {
+    this.setState({
+      loading: true,
+      disabled: true,
+      extrato: [],
+      ultimoId: null,
+      hasMore: true,
+    });
+
+    const { dataDe, dataAte, pessoa } = this.state;
+
+    const data = {
+      url: "conta/extrato",
+      data: {
+        conta_id: pessoa.conta_id,
+        data_de: Formatar.formatarDateAno(dataDe),
+        data_ate: Formatar.formatarDateAno(dataAte),
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      const keys = Object.keys(res);
+      if (keys.length === 0) {
+        this.props.alerts(
+          "Nenhuma movimentação encontrada",
+          "Selecione outro período ou tente novamente mais tarde",
+          "warning"
+        );
+        this.setState({
+          loading: false,
+          disabled: false,
+          mostrarExtrato: false,
+        });
+        return;
+      }
+
+      const arr = keys.flatMap((key) => res[key]);
+      const soma = arr.reduce((acc, e) => acc + e.valor, 0);
+
+      this.setState({
+        extrato: arr,
+        ultimoId: arr[arr.length - 1].id,
+        soma,
+        mostrarExtrato: true,
+        loading: false,
+        disabled: false,
+        hasMore: arr.length === 50,
+      });
+    });
+  };
+
+  extrato_csv = () => {
+    const { extrato, dataDe, dataAte, pessoa, soma } = this.state;
+
+    // Define valores padrão caso estejam indefinidos
+    const saldoTotal = soma ? soma.toFixed(2).replace(".", ",") : "0,00";
+    const saldoDisponivel = saldoTotal;
+
+    // Cabeçalhos e informações principais
+    const headers = [
+      `Extrato de Movimentação da Conta:`,
+      `${dataDe.toLocaleDateString()} até ${dataAte.toLocaleDateString()}`,
+      `Cliente:`,
+      `${pessoa?.nome || "N/A"}`,
+      `Agência/Conta:`,
+      `0001 / ${pessoa?.conta_id || "N/A"}`,
+      `Saldo Total:`,
+      saldoTotal,
+      `Saldo Disponível:`,
+      saldoDisponivel,
+      `Saldo Bloqueado:`,
+      "",
+    ];
+
+    // Cabeçalho das colunas
+    const columns = [
+      "Id",
+      "Data/Hora",
+      "Descrição",
+      "Valor",
+      "Conta",
+      "Saldo",
+      "Order",
+      "Bloqueado",
+    ];
+
+    // Dados das transações no formato CSV
+    const rows = extrato.map((item) => [
+      item.id || "",
+      new Date(item.dataHora).toLocaleDateString(),
+      item.descricao || "",
+      item.valor ? item.valor.toFixed(2).replace(".", ",") : "0,00",
+      item.conta_id || "",
+      item.saldo ? item.saldo.toFixed(2).replace(".", ",") : "0,00",
+      "",
+      "Desbloqueado",
+    ]);
+
+    // Convertendo para CSV
+    const csvContent = [
+      headers.join(","),
+      columns.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    // Criando o arquivo para download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "extrato_movimentacao.csv";
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  extrato_pdf = () => {
+    const { extrato, dataDe, dataAte, pessoa, soma } = this.state;
+
+    // Configurações do PDF
+    const doc = new jsPDF();
+    doc.setFontSize(12);
+    const saldoTotal = soma ? soma.toFixed(2).replace(".", ",") : "0,00";
+    const saldoDisponivel = saldoTotal;
+
+    // Cabeçalho do PDF
+    doc.text("Extrato de Movimentação da Conta:", 10, 10);
+    doc.text(
+      `Período: ${dataDe.toLocaleDateString()} até ${dataAte.toLocaleDateString()}`,
+      10,
+      20
+    );
+    doc.text(`Cliente: ${pessoa?.nome || "N/A"}`, 10, 30);
+    doc.text(`Agência/Conta: 0001 / ${pessoa?.conta_id || "N/A"}`, 10, 40);
+    doc.text(`Saldo Total: R$ ${saldoTotal}`, 10, 50);
+    doc.text(`Saldo Disponível: R$ ${saldoDisponivel}`, 10, 60);
+    doc.text("Saldo Bloqueado: R$ 0,00", 10, 70);
+
+    // Cabeçalho da tabela
+    const columns = [
+      { header: "ID", dataKey: "id" },
+      { header: "Data/Hora", dataKey: "dataHora" },
+      { header: "Descrição", dataKey: "descricao" },
+      { header: "Valor", dataKey: "valor" },
+      { header: "Conta", dataKey: "conta" },
+     
+    ];
+
+    // Dados da tabela
+    const rows = extrato.map((item) => ({
+      id: item.id || "",
+      dataHora: new Date(item.dataHora).toLocaleDateString(),
+      descricao: item.descricao || "",
+      valor: item.valor ? item.valor.toFixed(2).replace(".", ",") : "0,00",
+      conta: item.conta_id || "",
+    }));
+
+    // Adicionando a tabela ao PDF
+    doc.autoTable({
+      head: [columns.map((col) => col.header)],
+      body: rows.map((row) => Object.values(row)),
+      startY: 80,
+      theme: "striped",
+      styles: { fontSize: 10 },
+    });
+
+    // Gerar e fazer download do PDF
+    doc.save("extrato_movimentacao.pdf");
+  };
+
   render() {
+    const {
+      extrato,
+      dataDe,
+      dataAte,
+      loading,
+      mostrarExtrato,
+      soma,
+      disabled,
+    } = this.state;
+
     return (
       <div className="extrato">
-        <BannerTitle title={i18n.t('extrato.extrato')} img={Objetos.extratoImg}/>
-
-        {/* <Container className="col-md-10">
-          <Breadcrumb className="pages">
-            <Breadcrumb.Item href="/extrato">{i18n.t('extrato.breadCrumb2')}</Breadcrumb.Item>
-            <Breadcrumb.Item active>{i18n.t('extrato.breadCrumb3')}</Breadcrumb.Item>
-          </Breadcrumb>
-        </Container> */}
+        <BannerTitle
+          title={i18n.t("extrato.extrato")}
+          img={Objetos.extratoImg}
+        />
 
         <Container className="p-3 col-md-10 d-flex justify-content-center">
           <Row className="baseWindow px-5 py-4">
             <Col>
               <Row>
-                <p className="mb-4" style={{ fontSize: "1.30em" }}><strong>{i18n.t('extrato.textoEscolhaExtrato')}</strong></p>
+                <p className="mb-4" style={{ fontSize: "1.30em" }}>
+                  <strong>{i18n.t("extrato.textoEscolhaExtrato")}</strong>
+                </p>
               </Row>
               <Row>
                 <Col className="form-group">
-                  <label>{i18n.t('extrato.dataInicio')}</label>
-                  <br/>
+                  <label>{i18n.t("extrato.dataInicio")}</label>
+                  <br />
                   <DatePicker
                     className="form-control text-center"
-                    locale='pt-BR'
-                    selected={this.state.dataDe}
+                    locale="pt-BR"
+                    selected={dataDe}
                     required
                     dateFormat="dd/MM/yyyy"
                     popperPlacement="bottom"
@@ -191,12 +312,12 @@ export default class ExtratoConta extends Component {
                   />
                 </Col>
                 <Col className="form-group">
-                  <label>{i18n.t('extrato.dataFinal')}</label>
-                  <br/>
+                  <label>{i18n.t("extrato.dataFinal")}</label>
+                  <br />
                   <DatePicker
                     className="form-control text-center"
-                    locale='pt-BR'
-                    selected={this.state.dataAte}
+                    locale="pt-BR"
+                    selected={dataAte}
                     required
                     dateFormat="dd/MM/yyyy"
                     popperPlacement="bottom"
@@ -206,80 +327,84 @@ export default class ExtratoConta extends Component {
                 </Col>
               </Row>
               <Row className="form-group m-0">
-                <Button onClick={() => this.verExtrato()} disabled={this.state.disabled} className="m-auto px-5 py-2 btnProcurarExtrato">{i18n.t('extrato.btnPesquisar')}</Button>
+                <Button
+                  onClick={this.verExtrato}
+                  disabled={disabled}
+                  className="m-auto px-5 py-2 btnProcurarExtrato"
+                >
+                  {i18n.t("extrato.btnPesquisar")}
+                </Button>
               </Row>
             </Col>
           </Row>
         </Container>
 
         <Container className="p-3 col-md-10">
-          {
-            this.state.loading ? (
-              <ReactLoading className="d-block m-auto" type={'spin'} color={'#000'} height={'5%'} />
-            ) : (
-              (this.state.mostrarExtrato && (
-                <Col className="baseWindow px-5 py-4">
-                  <Row>
-                    <ButtonGroup className="buttonGroup flex-row justify-content-between">
-                      <Button className="mr-1" onClick={() => this.extrato_pdf()}>{i18n.t('extrato.downloadPdf')}</Button>
-                      <Button onClick={() => this.extrato_csv()}>{i18n.t('extrato.downloadCsv')}</Button>
-                    </ButtonGroup>
+          {loading && (
+            <ReactLoading
+              className="d-block m-auto"
+              type={"spin"}
+              color={"#000"}
+              height={"5%"}
+            />
+          )}
 
-                    {
-                      (this.state.soma != 0) ? (
-                        <div className="d-flex flex-grow-1">
-                          <p className="my-auto ml-auto texto-saldos-Extrato">
-                            Total no período:
-                            <span className={(this.state.soma < 0) ? "redText" : "greenText"}>  R$ {Formatar.formatReal(this.state.soma)}</span>
-                          </p>
-                        </div>
-                      ) : null
-                    }
-                    
-                  </Row>
-
-                  <Row className="mt-3">
-                    <Col>
-                      <Table striped bordered id="tabela-extrato">
-                        <thead>
-                          <tr>
-                            <th scope="col">{i18n.t('extrato.descr')}</th>
-                            <th className="text-right" scope="col">{i18n.t('extrato.descrValor')}</th>
-                            <th className="text-right" scope="col">{i18n.t('extrato.descrData')}</th>
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {this.state.cortarExtrato.map(dados => (
-                            <tr key={dados.id}>
-                              <td>{i18n.t('extrato.descrNome', { descricao: dados.descricao })}</td>
-                              <td className={"text-right " + ((dados.valor < 0) ? "redText" : "greenText")}>{Formatar.formatReal(dados.valor)}</td>
-                              <td className="text-right">{Formatar.formatarDate(dados.dataHora)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    </Col>
-                  </Row>
-
-                  <Row className="d-flex justify-content-center">
-                    <ReactPagination
-                      itemClass="page-item"
-                      linkClass="page-link"
-                      hideNavigation
-                      activePage={this.state.paginacao}
-                      itemsCountPerPage={10}
-                      totalItemsCount={this.state.numeroRegistros}
-                      pageRangeDisplayed={5}
-                      onChange={this.paginacao.bind(this)}
-                    />
-                  </Row>
-                </Col>
-              )
-            ))
-          }
+          {mostrarExtrato && (
+            <Col className="baseWindow px-5 py-4">
+              <Row>
+                <ButtonGroup className="buttonGroup flex-row justify-content-between">
+                  <Button className="mr-1" onClick={this.extrato_pdf}>
+                    {i18n.t("extrato.downloadPdf")}
+                  </Button>
+                  <Button className="mr-1" onClick={this.extrato_csv}>
+                    {i18n.t("extrato.downloadCsv")}
+                  </Button>
+                </ButtonGroup>
+                {soma !== 0 && (
+                  <div className="d-flex flex-grow-1">
+                    <p className="my-auto ml-auto texto-saldos-Extrato">
+                      Total no período:
+                      <span className={soma < 0 ? "redText" : "greenText"}>
+                        {" "}
+                        R$ {Formatar.formatReal(soma)}
+                      </span>
+                    </p>
+                  </div>
+                )}
+              </Row>
+              <Table responsive bordered>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Conta</th>
+                    <th>Saldo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {extrato.map((row) => (
+                    <tr key={row.id}>
+                      <td>{row.id}</td>
+                      <td>{Formatar.formatarDate(row.dataHora)}</td>
+                      <td>{row.descricao}</td>
+                      <td>{Formatar.formatReal(row.valor)}</td>
+                      <td>{row.conta_id}</td>
+                      <td>{Formatar.formatReal(row.saldo)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              {loading && (
+                <div className="text-center mt-3">
+                  <ReactLoading type={"spin"} color={"#000"} height={50} />
+                </div>
+              )}
+            </Col>
+          )}
         </Container>
       </div>
-    )
+    );
   }
 }

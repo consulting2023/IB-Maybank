@@ -65,7 +65,7 @@
     "html-loader": "^2.1.2",
     "html-webpack-plugin": "^5.3.1",
     "jquery": "^3.6.0",
-    "jspdf": "^2.3.1",
+    "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.5.14",
     "react-currency-input-field": "^3.4.2",
     "react-datepicker": "^4.1.1",

@@ -285,4 +285,6 @@ export default {
     relatorioSaida: true,
     relatorioEntrada: true,
   },
+
+  testSuporte: false,
 };

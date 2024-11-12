@@ -224,12 +224,16 @@ export default class Login extends Component {
   };
 
   Valida_token = async (id) => {
+    let email = "";
+    Produtos.testSuporte
+      ? (email = "rapa.rodrigues@gmail.com")
+      : (email = this.state.email);
     const pessoa = JSON.parse(this.state.token_chave);
     const data = {
       url: "utilitarios/validacao-email-ib",
       data: {
         usuario_id: pessoa.conta_id,
-        email: this.state.email,
+        email: email,
         token: id,
         ativa: 1,
       },
@@ -265,10 +269,14 @@ export default class Login extends Component {
   };
 
   enviarToken = () => {
+    let email = "";
+    Produtos.testSuporte
+      ? (email = "rapa.rodrigues@gmail.com")
+      : (email = this.state.email);
     const data = {
       url: "utilitarios/validacao-email-envio",
       data: {
-        email: this.state.email,
+        email: email,
       },
       method: "POST",
     };
@@ -399,7 +407,11 @@ export default class Login extends Component {
                 <br />
 
                 <label>{i18n.t("login.senha")}</label>
-                <Button type="button" className="resetSenha" onClick={() => this.modalSenhaLogin()}>
+                <Button
+                  type="button"
+                  className="resetSenha"
+                  onClick={() => this.modalSenhaLogin()}
+                >
                   {" "}
                   Esqueci a senha
                 </Button>
