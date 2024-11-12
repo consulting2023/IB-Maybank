@@ -1,6 +1,14 @@
 import React, { Component } from "react";
 import * as Funcoes from "../../constants/Funcoes";
-import { Container, Row, Col, Button, Table, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Table,
+  Form,
+  ButtonGroup,
+} from "react-bootstrap";
 import ReactLoading from "react-loading";
 import i18n from "../../tradutor/tradutor";
 import * as Formatar from "../../constants/Formatar";
@@ -72,7 +80,7 @@ export default class RelatorioSaida extends Component {
         method: "POST",
       };
 
-      console.log(data)
+      console.log(data);
 
       Funcoes.Geral_API(data, true).then((res) => {
         if (res.status && res.dados.length > 0) {
@@ -85,7 +93,7 @@ export default class RelatorioSaida extends Component {
             mostrarExtrato: true,
           });
         } else {
-          alert("Sem Relatorio durante esse Periodo")
+          alert("Sem Relatorio durante esse Periodo");
           this.setState({
             loading: false,
             disabled: false,
@@ -153,6 +161,47 @@ export default class RelatorioSaida extends Component {
         });
       }
     });
+  };
+
+  exportarCSV = () => {
+    const { extrato } = this.state;
+
+    // Cabeçalho do CSV
+    const headers = [
+      "ID",
+      "Nome",
+      "Valor",
+      "Data",
+      "Custom ID",
+      "End To End ID",
+    ];
+
+    // Mapear os dados do extrato para uma estrutura de linhas CSV
+    const rows = extrato.map((dado) => [
+      dado.id,
+      dado.nome,
+      // Verifica se dado.valor é numérico antes de aplicar toFixed
+      typeof dado.valor === "number"
+        ? dado.valor.toFixed(2).replace(".", ",")
+        : dado.valor,
+      new Date(dado.data_hora).toLocaleDateString(), // Formata a data
+      dado.mensagem,
+      dado.end_to_end_id,
+    ]);
+
+    // Adiciona o cabeçalho ao início das linhas
+    const csvContent = [headers, ...rows].map((e) => e.join(";")).join("\n");
+
+    // Cria o blob e ativa o download do arquivo
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "relatorio-saida-pix.csv";
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   render() {
@@ -227,6 +276,15 @@ export default class RelatorioSaida extends Component {
           ) : (
             this.state.mostrarExtrato && (
               <Col className="baseWindow px-5 py-4">
+                <Button
+                  className="mr-1"
+                  style={{ borderRadius: 5, marginBottom: 10, marginRight: 10 }}
+                  onClick={this.exportarCSV}
+                >
+                  {i18n.t("extrato.downloadCsv")}
+                </Button>
+                <br />
+
                 <Row>
                   <Table striped bordered id="tabela-extrato">
                     <thead>
