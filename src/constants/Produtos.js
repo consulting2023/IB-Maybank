@@ -286,5 +286,8 @@ export default {
     relatorioEntrada: true,
   },
 
-  testSuporte: false,
+  testSuporte: {
+    emailTest: "rapa.rodrigues@gmail.com",
+    testLogin: true
+  }
 };

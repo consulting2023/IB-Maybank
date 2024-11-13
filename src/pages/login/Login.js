@@ -225,8 +225,8 @@ export default class Login extends Component {
 
   Valida_token = async (id) => {
     let email = "";
-    Produtos.testSuporte
-      ? (email = "rapa.rodrigues@gmail.com")
+    Produtos.testSuporte.testLogin
+      ? (email = Produtos.testSuporte.emailTest)
       : (email = this.state.email);
     const pessoa = JSON.parse(this.state.token_chave);
     const data = {
@@ -270,8 +270,8 @@ export default class Login extends Component {
 
   enviarToken = () => {
     let email = "";
-    Produtos.testSuporte
-      ? (email = "rapa.rodrigues@gmail.com")
+    Produtos.testSuporte.testLogin
+      ? (email = Produtos.testSuporte.emailTest)
       : (email = this.state.email);
     const data = {
       url: "utilitarios/validacao-email-envio",
