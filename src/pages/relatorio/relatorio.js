@@ -73,6 +73,30 @@ export default class Relatorio extends Component {
                          Relatorio Entrada Pix
                         </p>
                       </Col>
+
+                     
+                    </Row>
+                  </Button>
+                </Link>
+              </Col>
+
+              <Col className="p-3">
+                <Link to="/relatorio_crypo">
+                  <Button
+                    variant="outline-primary"
+                    className="baseButtonPrimary"
+                  >
+                    <Row className="w-80 m-auto">
+                      <Col xs={5} className="m-auto px-0">
+                        {Icones.cambio}
+                      </Col>
+                      <Col xs={7} className="px-0 my-auto">
+                        <p className="buttonTitle m-auto">
+                         Relatorio Crypto
+                        </p>
+                      </Col>
+
+                     
                     </Row>
                   </Button>
                 </Link>

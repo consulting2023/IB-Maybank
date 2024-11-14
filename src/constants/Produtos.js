@@ -1,3 +1,4 @@
+import RelatorioCrypo from "../pages/relatorio/relatorio_crypo";
 import Icones from "./Icon";
 
 const home_mostrar = true;
@@ -269,7 +270,8 @@ export default {
   // Cambio
   cambio: true,
   cambioTela: {
-    token: false
+    token: false,
+    tokenSaque: true
   },
 
   // Tela Cartao
@@ -284,10 +286,12 @@ export default {
   relatorio_escolha: {
     relatorioSaida: true,
     relatorioEntrada: true,
+    RelatorioCrypo: true,
   },
 
   testSuporte: {
     emailTest: "rapa.rodrigues@gmail.com",
-    testLogin: true
+    testLogin: false,
+    testCambio: false
   }
 };

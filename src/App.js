@@ -58,6 +58,7 @@ function App() {
     "/relatorio",
     "/relatorio_saida",
     "/relatorio_entrada",
+    "/relatorio_crypo",
   ];
 
   var isPrivate = privatePaths.includes(document.location.pathname)

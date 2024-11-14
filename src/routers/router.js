@@ -53,6 +53,8 @@ import Cambio from "../pages/usdt/escolher_usdt";
 import Relatorio from "../pages/relatorio/relatorio";
 import RelatorioSaida from "../pages/relatorio/relatorio_saida";
 import RelatorioEntrada from "../pages/relatorio/relatorio_entrada";
+import RelatorioCrypo from "../pages/relatorio/relatorio_crypo";
+
 
 
 
@@ -133,6 +135,7 @@ function Router(props) {
             <Route exact path="/relatorio" element={<Relatorio langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.relatorio} />
             <Route exact path="/relatorio_saida" element={<RelatorioSaida langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.relatorio_escolha.relatorioSaida} />
             <Route exact path="/relatorio_entrada" element={<RelatorioEntrada langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.relatorio_escolha.relatorioEntrada} />
+            <Route exact path="/relatorio_crypo" element={<RelatorioCrypo langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.relatorio_escolha.relatorioEntrada} />
 
             <Route exact path="/qr_code" element={<QRCode langProp={traduzir} alerts={props.alerts}/>} notBlocked={Produtos.qrcode} />
 
