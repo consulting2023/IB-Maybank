@@ -175,6 +175,7 @@ export default class ExtratoConta extends Component {
 
     // Cabeçalho das colunas
     const columns = [
+      "Custom ID", // Nova coluna para custom_id
       "Id",
       "Data/Hora",
       "Descrição",
@@ -187,6 +188,7 @@ export default class ExtratoConta extends Component {
 
     // Dados das transações no formato CSV
     const rows = extrato.map((item) => [
+      item.custom_id || "N/A", // Adiciona o custom_id
       item.id || "",
       new Date(item.dataHora).toLocaleDateString(),
       item.descricao || "",
@@ -199,9 +201,9 @@ export default class ExtratoConta extends Component {
 
     // Convertendo para CSV
     const csvContent = [
-      headers.join(","),
-      columns.join(","),
-      ...rows.map((row) => row.join(",")),
+      headers.join(","), // Cabeçalhos principais
+      columns.join(","), // Cabeçalho das colunas
+      ...rows.map((row) => row.join(",")), // Dados das linhas
     ].join("\n");
 
     // Criando o arquivo para download
@@ -245,7 +247,6 @@ export default class ExtratoConta extends Component {
       { header: "Descrição", dataKey: "descricao" },
       { header: "Valor", dataKey: "valor" },
       { header: "Conta", dataKey: "conta" },
-     
     ];
 
     // Dados da tabela

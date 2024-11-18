@@ -159,6 +159,13 @@ const getListaProdutos = () => {
       mostrar: senha_mostrar,
     },
     {
+      key: 13,
+      icone: Icones.relatorio,
+      titulo: "sidebar.relatorio",
+      rota: "/relatorio",
+      mostrar: relatorio_mostrar,
+    },
+    {
       key: 17,
       icone: Icones.tarifas,
       titulo: "sidebar.tarifas",
@@ -271,7 +278,7 @@ export default {
   cambio: true,
   cambioTela: {
     token: false,
-    tokenSaque: true
+    tokenSaque: false,
   },
 
   // Tela Cartao
@@ -292,6 +299,8 @@ export default {
   testSuporte: {
     emailTest: "rapa.rodrigues@gmail.com",
     testLogin: false,
-    testCambio: false
-  }
+    testCambio: false,
+  },
+
+  nivelPerfil: Number(localStorage.getItem("nivel")),
 };

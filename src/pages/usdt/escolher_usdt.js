@@ -42,6 +42,10 @@ export default class Cambio extends Component {
       liberarSaque: true,
       saldoForSaque: 0,
       travarSaque: false,
+      taxa: 0,
+      totalLiquido: 0,
+      tarifa: "00,00",
+      totalPagar: "",
     };
   }
 
@@ -86,6 +90,7 @@ export default class Cambio extends Component {
       url: "cambio/cambio/cotacao",
       data: JSON.stringify({
         moeda: id,
+        conta_id: Funcoes.pessoa.conta_id,
       }),
       method: "POST",
       console: false,
@@ -94,11 +99,13 @@ export default class Cambio extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
+      console.log(responseJson);
       // Defina o valorCotacao diretamente como o valor recebido
       const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
 
       // Atualize o estado após o valor estar pronto
       this.setState({ valorCotacao });
+      this.setState({ taxa: responseJson.taxa });
     });
   };
 
@@ -162,6 +169,7 @@ export default class Cambio extends Component {
             operation: "BUY",
             conta_id: Funcoes.pessoa.conta_id,
             senha: this.state.senha,
+            amount_total: this.state.totalPagar,
           }),
           method: "POST",
           console: false,
@@ -171,6 +179,7 @@ export default class Cambio extends Component {
 
         Funcoes.Geral_API(data, true).then((responseJson) => {
           console.log(responseJson);
+          /* this.setState({ modalConfirmComprar: true, modalComprar: false }); */
 
           if (responseJson.message != "success") {
             alert(responseJson.message);
@@ -178,8 +187,6 @@ export default class Cambio extends Component {
           } else {
             this.setState({ idCotacao: responseJson.data.result.id });
             this.setState({ modalConfirmComprar: true, modalComprar: false });
-            this.setState({ modalConfirmComprar: true, modalComprar: false });
-            Produtos.testSuporte.testCambio ? null : this.startTimer();
           }
         });
       }
@@ -275,7 +282,7 @@ export default class Cambio extends Component {
       console.log(responseJson);
       if (responseJson.status) {
         alert("Saque em processamento! Verificar relatorio de Saque");
-        window.location.href = "/relatorio_crypo"
+        window.location.href = "/relatorio_crypo";
       } else {
         alert("Erro em solicitar o saque, tente novamente");
         location.reload();
@@ -298,6 +305,19 @@ export default class Cambio extends Component {
         }
       );
     }, 1000);
+  };
+
+  calcularTotalPagar = () => {
+    const taxa = this.state.taxa / 100 || 0; // Taxa padrão 0 se não definida
+    const valorCotacao = this.state.valorCotacao.price_buy || 0; // Valor padrão 0
+    const valueCompra = this.state.valueCompra || 0; // Valor padrão 0
+
+    // Cálculo de totalTaxa e totalPagar
+    const totalTaxa = valorCotacao * valueCompra * taxa;
+    const totalPagar = valorCotacao * valueCompra + totalTaxa;
+
+    // Atualiza o estado com o valor numérico de totalPagar
+    this.setState({ totalPagar });
   };
 
   render() {
@@ -342,6 +362,7 @@ export default class Cambio extends Component {
                   onClick={() => {
                     this.setState({ modalComprar: true });
                     Produtos.cambioTela.token ? this.enviar_token2f() : null;
+                    Produtos.testSuporte.testCambio ? null : this.startTimer();
                   }}
                 >
                   <Row className="w-80 m-auto">
@@ -392,8 +413,9 @@ export default class Cambio extends Component {
           </Modal.Header>
           <Modal.Body>
             <Container>
-              <Row className="mb-3">
+              <Row>
                 <Col>
+                  <h3>Moeda</h3>
                   <Select
                     options={this.state.saque.map((moeda) => ({
                       value: moeda.id,
@@ -424,36 +446,107 @@ export default class Cambio extends Component {
                   />
                 </Col>
               </Row>
+              <br />
+              <Row className="mb-3">
+                <Col>
+                  <h3>Valor Desejado</h3>
+                  <input
+                    value={this.state.valueCompra.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                    placeholder="R$ 00,00"
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[R$\s.,]/g, ""); // Remove caracteres não numéricos
+                      const valorNumerico = Number(value) / 100; // Converte para valor em reais
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: 3,
-                }}
-              >
-                <input
-                  value={this.state.valueCompra.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                  placeholder="R$ 00,00"
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/[R$\s.,]/g, ""); // Remove caracteres não numéricos
-                    const valorNumerico = Number(value) / 100; // Converte para valor em reais
+                      this.setState({ valueCompra: valorNumerico }, () => {
+                        this.calcularTotalPagar(); // Chama a função para recalcular totalPagar
+                      });
+                    }}
+                  />
+                </Col>
+                <Col>
+                  <h3>Valor Moeda</h3>
+                  <span style={{ marginLeft: 10 }}>
+                    <input
+                      value={
+                        this.state.valorCotacao.price_buy
+                          ? `R$ ${this.state.valorCotacao.price_buy}`
+                          : "R$ 00,00"
+                      }
+                      placeholder="R$ 00,00"
+                      disabled
+                    />
 
-                    this.setState({ valueCompra: valorNumerico });
-                  }}
-                />
+                    {/* {this.state.valorCotacao.price_buy
+                      ? this.state.valorCotacao.price_buy
+                      : "R$ 00,00"} */}
+                  </span>
+                </Col>
+                <Col>
+                  <h3>Valor Liquido</h3>
+                  <input
+                    value={
+                      this.state.valorCotacao.price_buy
+                        ? new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(
+                            this.state.valorCotacao.price_buy *
+                              (this.state.valueCompra || 0)
+                          )
+                        : "R$ 00,00"
+                    }
+                    placeholder="R$ 00,00"
+                    disabled
+                    onChange={() => {
+                      this.setState({
+                        totalLiquido:
+                          this.state.valorCotacao.price_buy *
+                          this.state.valueCompra,
+                      });
+                    }} // Adicionado para evitar warnings
+                  />
+                </Col>
+              </Row>
+              <hr />
+              <Row className="mb-3">
+                <Col>
+                  <h3>Taxa</h3>
+                  <input
+                    value={this.state.taxa + "%"}
+                    placeholder="R$ 00,00"
+                    disabled
+                  />
+                </Col>
+                <Col>
+                  <h3>Tarifa</h3>
+                  <span style={{ marginLeft: 10 }}>
+                    <input
+                      value={"R$ " + this.state.tarifa}
+                      placeholder="R$ 00,00"
+                      disabled
+                    />
 
-                <span style={{ marginLeft: 10 }}>
-                  {this.state.valorCotacao.price_buy
-                    ? "Valor Moeda: " + this.state.valorCotacao.price_buy
-                    : null}
-                </span>
-              </div>
+                    {/* {this.state.valorCotacao.price_buy
+                      ? this.state.valorCotacao.price_buy
+                      : "R$ 00,00"} */}
+                  </span>
+                </Col>
+                <Col>
+                  <h3>Total a Pagar</h3>
+                  <input
+                    value={this.state.totalPagar.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })} // Exibe o totalPagar ou "R$ 00,00" caso esteja vazio
+                    placeholder="R$ 00,00"
+                    disabled
+                  />
+                </Col>
+              </Row>
+
               {Produtos.cambioTela.token ? (
                 <div>
                   <Row>
@@ -473,18 +566,18 @@ export default class Cambio extends Component {
               ) : null}
 
               <Row>
-                <h6>Senha</h6>
-              </Row>
-              <Row>
-                <OtpInput
-                  focusInput={1}
-                  isInputNum={true}
-                  value={this.state.senha}
-                  onChange={(value) => this.setState({ senha: value })}
-                  numInputs={6}
-                  className="tokenValidacao"
-                  inputType="password"
-                />
+                <Col>
+                  <h3>Senha de Transição</h3>
+                  <OtpInput
+                    focusInput={1}
+                    isInputNum={true}
+                    value={this.state.senha}
+                    onChange={(value) => this.setState({ senha: value })}
+                    numInputs={6}
+                    className="tokenValidacao"
+                    inputType="password"
+                  />
+                </Col>
               </Row>
             </Container>
           </Modal.Body>
@@ -522,17 +615,44 @@ export default class Cambio extends Component {
                   </Col>
                   <Col>
                     <h4>
-                      Valor da Moeda: <b>{this.state.valorCotacao.price_buy}</b>
+                      Valor da Moeda:{" "}
+                      <b>
+                        {this.state.valorCotacao.price_buy
+                          ? `R$ ${this.state.valorCotacao.price_buy}`
+                          : "R$ 00,00"}{" "}
+                        {/* Valor padrão caso não exista */}
+                      </b>
                     </h4>
                   </Col>
                 </Row>
-                <h4>
-                  Quantidade que quer: <b>{this.state.valueCompra}</b>
-                </h4>
+                <Row>
+                  <Col>
+                    <h4>
+                      Quantidade que quer:{" "}
+                      <b>
+                        {this.state.valueCompra.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </b>
+                    </h4>
+                  </Col>
+                  <Col>
+                    <h4>
+                      Valor Total a Pagar:{" "}
+                      <b>
+                        {this.state.totalPagar.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </b>
+                    </h4>
+                  </Col>
+                </Row>
               </Alert>
 
               <Row>
-                <h6>Senha</h6>
+                <h6>Senha de Transação</h6>
               </Row>
               <Row>
                 <OtpInput
@@ -661,8 +781,9 @@ export default class Cambio extends Component {
                   </Row>
                 </div>
               ) : null}
+              <br />
               <Row>
-                <h6>Senha</h6>
+                <h6>Senha de Transação</h6>
               </Row>
               <Row>
                 <OtpInput
