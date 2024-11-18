@@ -46,6 +46,7 @@ export default class Cambio extends Component {
       totalLiquido: 0,
       tarifa: "00,00",
       totalPagar: "",
+      idMoeda: 0,
     };
   }
 
@@ -84,29 +85,51 @@ export default class Cambio extends Component {
 
   // Função de troca de senha para o modal
   cotacao = (id) => {
-    console.log(id);
+    if (id == undefined) {
+      const data = {
+        url: "cambio/cambio/cotacao",
+        data: JSON.stringify({
+          moeda: this.state.idMoeda,
+          conta_id: Funcoes.pessoa.conta_id,
+        }),
+        method: "POST",
+        console: false,
+        funcao: "trazer moeda crypto",
+        tela: "comprar_moeda",
+      };
 
-    const data = {
-      url: "cambio/cambio/cotacao",
-      data: JSON.stringify({
-        moeda: id,
-        conta_id: Funcoes.pessoa.conta_id,
-      }),
-      method: "POST",
-      console: false,
-      funcao: "trazer moeda crypto",
-      tela: "comprar_moeda",
-    };
+      Funcoes.Geral_API(data, true).then((responseJson) => {
+        console.log(responseJson);
+        // Defina o valorCotacao diretamente como o valor recebido
+        const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
 
-    Funcoes.Geral_API(data, true).then((responseJson) => {
-      console.log(responseJson);
-      // Defina o valorCotacao diretamente como o valor recebido
-      const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
+        // Atualize o estado após o valor estar pronto
+        this.setState({ valorCotacao });
+        this.setState({ taxa: responseJson.taxa });
+      });
+    } else {
+      const data = {
+        url: "cambio/cambio/cotacao",
+        data: JSON.stringify({
+          moeda: id,
+          conta_id: Funcoes.pessoa.conta_id,
+        }),
+        method: "POST",
+        console: false,
+        funcao: "trazer moeda crypto",
+        tela: "comprar_moeda",
+      };
 
-      // Atualize o estado após o valor estar pronto
-      this.setState({ valorCotacao });
-      this.setState({ taxa: responseJson.taxa });
-    });
+      Funcoes.Geral_API(data, true).then((responseJson) => {
+        console.log(responseJson);
+        // Defina o valorCotacao diretamente como o valor recebido
+        const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
+
+        // Atualize o estado após o valor estar pronto
+        this.setState({ valorCotacao });
+        this.setState({ taxa: responseJson.taxa });
+      });
+    }
   };
 
   enviar_token2f = () => {
@@ -290,17 +313,18 @@ export default class Cambio extends Component {
     });
   };
 
-  startTimer = () => {
-    // Inicia o temporizador de 15 segundos.
+  startTimer = (id) => {
+    this.setState({ idMoeda: id.value, tempo: 0 }); // Reinicia o tempo e define o idMoeda
+
+    // Define o temporizador de 1 segundo
     this.intervalId = setInterval(() => {
       this.setState(
         (prevState) => ({ tempo: prevState.tempo + 1 }),
         () => {
-          // Se o tempo ultrapassar 15 segundos, executa a ação desejada.
+          // Quando atinge 15 segundos, reinicia o tempo e chama a cotação
           if (this.state.tempo > 15) {
-            alert("Tempo de compra Expirado, tente novamente");
-            location.reload();
-            clearInterval(this.intervalId);
+            this.cotacao(id.value);
+            this.setState({ tempo: 0 }); // Reinicia o contador
           }
         }
       );
@@ -362,7 +386,6 @@ export default class Cambio extends Component {
                   onClick={() => {
                     this.setState({ modalComprar: true });
                     Produtos.cambioTela.token ? this.enviar_token2f() : null;
-                    Produtos.testSuporte.testCambio ? null : this.startTimer();
                   }}
                 >
                   <Row className="w-80 m-auto">
@@ -429,7 +452,8 @@ export default class Cambio extends Component {
                         valueMoeda: selectedOption,
                         moedaNome: selectedOption.label,
                       }); // Atualiza o estado com o objeto selecionado
-                      this.cotacao(selectedOption.value); // Passa `value` para a função `cotacao`
+                      this.cotacao(selectedOption.value);
+                      this.startTimer(selectedOption); // Passa `value` para a função `cotacao`
                     }}
                     isSearchable
                     styles={{
