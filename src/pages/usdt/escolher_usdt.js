@@ -204,7 +204,7 @@ export default class Cambio extends Component {
           console.log(responseJson);
           /* this.setState({ modalConfirmComprar: true, modalComprar: false }); */
 
-          if (!responseJson || responseJson.message !== "success") {
+          if (typeof responseJson!=="object" || responseJson.message !== "success") {
             console.error("Erro na resposta:", responseJson);
             
             alert(responseJson?.message || "Erro inesperado ao processar a solicitação.");
