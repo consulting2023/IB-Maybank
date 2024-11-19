@@ -8,7 +8,7 @@ import BannerTitle from "../../components/bannerTitle/bannerTitle";
 import Objetos from "../../constants/Objetos";
 import * as Funcoes from "../../constants/Funcoes";
 import * as Formatar from "../../constants/Formatar";
-import { Container, Row, Col, Breadcrumb } from "react-bootstrap";
+import { Container, Row, Col, Breadcrumb, Form, Button } from "react-bootstrap";
 import ReactLoading from "react-loading";
 import i18n from "../../tradutor/tradutor";
 import jsPDF from "jspdf";
@@ -30,6 +30,7 @@ export default class ComprovanteConta extends Component {
       cortarComprovante: [],
       loading: false,
       disabled: false,
+      custom_id: "",
     };
   }
   componentDidiMout() {
@@ -40,18 +41,33 @@ export default class ComprovanteConta extends Component {
 
   verComprovante = () => {
     this.setState({ loading: true, disabled: true });
+    let data = {};
 
-    const data = {
-      url: "comprovante/lista",
-      data: {
-        conta_id: Funcoes.pessoa.conta_id,
-        data_de: Formatar.formatarDateAno(this.state.dataDe),
-        data_ate: Formatar.formatarDateAno(this.state.dataAte),
-      },
-      method: "POST",
-    };
+    if (this.state.custom_id == "") {
+      data = {
+        url: "comprovante/lista",
+        data: {
+          conta_id: Funcoes.pessoa.conta_id,
+          data_de: Formatar.formatarDateAno(this.state.dataDe),
+          data_ate: Formatar.formatarDateAno(this.state.dataAte),
+        },
+        method: "POST",
+      };
+    } else {
+      data = {
+        url: "comprovante/lista",
+        data: {
+          conta_id: Funcoes.pessoa.conta_id,
+          data_de: Formatar.formatarDateAno(this.state.dataDe),
+          data_ate: Formatar.formatarDateAno(this.state.dataAte),
+          custom_id: this.state.custom_id || "",
+        },
+        method: "POST",
+      };
+    }
 
     Funcoes.Geral_API(data, true).then((res) => {
+      console.log(res);
       if (res) {
         var arr = [];
         Object.keys(res).forEach((key) => {
@@ -80,7 +96,7 @@ export default class ComprovanteConta extends Component {
       } else {
         // alert("Não Foram Encontrados Comprovantes Para o Período Solicitado");
         alert(i18n.t("comprovante.nenhumComprovante"));
-        this.setState({ loading: false });
+        this.setState({ loading: false, disabled: false });
       }
     });
   };
@@ -214,7 +230,7 @@ export default class ComprovanteConta extends Component {
         };
 
         const image = new Image();
-        image.src = require('../../assets/images/logos/icon_logo.png').default;
+        image.src = require("../../assets/images/logos/icon_logo.png").default;
 
         image.onload = () => {
           const canvas = document.createElement("canvas");
@@ -262,11 +278,11 @@ export default class ComprovanteConta extends Component {
             <p className="text-center">
               <strong>{i18n.t("comprovante.textEscolhaComprovante")}</strong>
             </p>
-            <Col>
-              <Row>
-                <div className="form-group col-lg-5">
-                  <label>{i18n.t("comprovante.dataInicio")}</label>
-                  <br></br>
+
+            <Row className=" px-5 py-4">
+              <Col md={3}>
+                <Form.Group>
+                  <Form.Label>{i18n.t("comprovante.dataInicio")}</Form.Label>
                   <DatePicker
                     className="form-control"
                     locale="pt-BR"
@@ -276,10 +292,12 @@ export default class ComprovanteConta extends Component {
                     popperPlacement="down"
                     onChange={(data) => this.setState({ dataDe: data })}
                   />
-                </div>
-                <div className="form-group col-lg-5">
-                  <label>{i18n.t("comprovante.dataFinal")}</label>
-                  <br></br>
+                </Form.Group>
+              </Col>
+
+              <Col md={3}>
+                <Form.Group>
+                  <Form.Label>{i18n.t("comprovante.dataFinal")}</Form.Label>
                   <DatePicker
                     className="form-control"
                     locale="pt-BR"
@@ -290,22 +308,38 @@ export default class ComprovanteConta extends Component {
                     maxDate={addDays(new Date(), 0)}
                     onChange={(data) => this.setState({ dataAte: data })}
                   />
-                </div>
+                </Form.Group>
+              </Col>
 
-                <div
-                  className="form-group col-lg-2"
-                  style={{ marginTop: "auto" }}
+              <Col md={3}>
+                <Form.Group>
+                  <Form.Label>Custom ID</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="id"
+                    value={this.state.custom_id}
+                    onChange={(e) =>
+                      this.setState({ custom_id: e.target.value })
+                    }
+                    placeholder="Informe o ID"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <div
+                className="form-group col-lg-2"
+                style={{ marginTop: "auto" }}
+              >
+                <button
+                  onClick={() => this.verComprovante()}
+                  disabled={this.state.disabled}
+                  className="btn btnProcurarComprovante btn-sm btn-success"
                 >
-                  <button
-                    onClick={() => this.verComprovante()}
-                    disabled={this.state.disabled}
-                    className="btn btnProcurarComprovante btn-sm btn-success"
-                  >
-                    {i18n.t("comprovante.btnPesquisar")}
-                  </button>
-                </div>
-              </Row>
-            </Col>
+                  {i18n.t("comprovante.btnPesquisar")}
+                </button>
+              </div>
+            </Row>
           </div>
         </Container>
         {this.state.loading ? (
