@@ -214,7 +214,7 @@ export default class ComprovanteConta extends Component {
         };
 
         const image = new Image();
-        image.src = require("../assets/images/logos/icon_logo.png").default;
+        image.src = require('../../assets/images/logos/icon_logo.png').default;
 
         image.onload = () => {
           const canvas = document.createElement("canvas");
