@@ -214,7 +214,7 @@ export default class ComprovanteConta extends Component {
         };
 
         const image = new Image();
-        image.src = "src/assets/images/logos/icon_logo.png"; // Verifique o caminho do logotipo
+        image.src = "../../assets/images/logos/icon_logo.png"; // Verifique o caminho do logotipo
 
         image.onload = () => {
           const canvas = document.createElement("canvas");
