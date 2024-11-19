@@ -204,7 +204,7 @@ export default class Cambio extends Component {
           console.log(responseJson);
           /* this.setState({ modalConfirmComprar: true, modalComprar: false }); */
 
-          if (!responseJson || responseJson.message !== "success" || responseJson.status === "error") {
+          if (!responseJson || responseJson.message !== "success") {
             console.error("Erro na resposta:", responseJson);
             
             alert(responseJson?.message || "Erro inesperado ao processar a solicitação.");
@@ -218,7 +218,9 @@ export default class Cambio extends Component {
             });
           } else {
             console.warn("Resposta recebida, mas faltam informações necessárias:", responseJson);
+            
             alert("Resposta recebida, mas faltam informações necessárias.");
+            
             this.setState({ disabled: false });
           }
           
