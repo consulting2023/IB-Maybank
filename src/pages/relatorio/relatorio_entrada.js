@@ -13,7 +13,7 @@ import ReactLoading from "react-loading";
 import i18n from "../../tradutor/tradutor";
 import * as Formatar from "../../constants/Formatar";
 
-export default class RelatorioSaida extends Component {
+export default class RelatorioEntrada extends Component {
   constructor() {
     super();
     this.state = {
@@ -139,7 +139,7 @@ export default class RelatorioSaida extends Component {
         data_de: dataDe,
         data_ate: dataAte,
         ultimo_id: lastItemId || "",
-        tipo_relatorio: "PixIn",
+        tipo_relatorio: "PixOut",
         end_to_end: endToEnd || "",
         custom_id: id || "",
       },
@@ -173,6 +173,7 @@ export default class RelatorioSaida extends Component {
       "Valor",
       "Data",
       "Custom ID",
+      "Status",
       "End To End ID",
     ];
 
@@ -186,6 +187,11 @@ export default class RelatorioSaida extends Component {
         : dado.valor,
       new Date(dado.data_hora).toLocaleDateString(), // Formata a data
       dado.mensagem,
+      dado.cod_retorno == 1
+        ? "Concluido"
+        : dado.cod_retorno == 2
+        ? "Estornado"
+        : "em analise",
       dado.end_to_end_id,
     ]);
 
@@ -283,6 +289,8 @@ export default class RelatorioSaida extends Component {
                 >
                   {i18n.t("extrato.downloadCsv")}
                 </Button>
+                <br />
+
                 <Row>
                   <Table striped bordered id="tabela-extrato">
                     <thead>
@@ -295,6 +303,7 @@ export default class RelatorioSaida extends Component {
                         <th className="text-right" scope="col">
                           {i18n.t("extrato.descrData")}
                         </th>
+                        <th>Status</th>
                         <th>Custom ID</th>
                         <th>End To End ID</th>
                       </tr>
@@ -315,6 +324,13 @@ export default class RelatorioSaida extends Component {
                           </td>
                           <td className="text-right">
                             {Formatar.formatarDate(dado.data_hora)}
+                          </td>
+                          <td className="text-right">
+                            {dado.cod_retorno == 1
+                              ? "Concluido"
+                              : dado.cod_retorno == 2
+                              ? "Estornado"
+                              : "em analise"}
                           </td>
                           <td className="text-right">{dado.mensagem}</td>
                           <td className="text-right">{dado.end_to_end_id}</td>
