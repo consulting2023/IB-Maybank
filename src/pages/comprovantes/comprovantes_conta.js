@@ -129,7 +129,7 @@ export default class ComprovanteConta extends Component {
         const cellHeight = 10;
         let cursorY = startY;
 
-        // Adiciona o logotipo
+        // Adiciona o logotipo com a variável Objetos.logo
         const addLogoAndGeneratePDF = (logoBase64) => {
           if (logoBase64) {
             doc.addImage(logoBase64, "PNG", 10, 10, 40, 40);
@@ -213,8 +213,9 @@ export default class ComprovanteConta extends Component {
           doc.save("comprovante.pdf");
         };
 
+        // Agora a imagem usa a variável Objetos.logo
         const image = new Image();
-        image.src = "../../assets/images/logos/icon_logo.png"; // Verifique o caminho do logotipo
+        image.src = Objetos.logoComprovante; // Substitui o caminho fixo pela variável Objetos.logo
 
         image.onload = () => {
           const canvas = document.createElement("canvas");

@@ -5,6 +5,7 @@ export default {
 
     /* Login */
     logo_banco_login: <Image draggable="false" className="logoLogin" src={require('../assets/images/logos/logo.png').default} />,
+    logoComprovante: <Image draggable="false" className="logoLogin" src={require('../assets/images/logos/icon_logo.png').default} />,
 
     logo_banco_siso: <Image draggable="false" className="logoSiso" src={require('../assets/images/logos/logo.png').default} />,
 
