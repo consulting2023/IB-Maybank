@@ -12,6 +12,8 @@ import * as Iconai from "react-icons/ai";
 import * as Iconfa from "react-icons/fa";
 import * as Funcoes from '../../constants/Funcoes';
 import i18n from '../../tradutor/tradutor';
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 export default class Comprovante extends Component {
 
     constructor() {
