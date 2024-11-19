@@ -200,11 +200,12 @@ export default class Cambio extends Component {
           
         };
 
-        Funcoes.Geral_API(data, true).then((responseJson) => {
-          console.log(responseJson);
-          /* this.setState({ modalConfirmComprar: true, modalComprar: false }); */
+        Funcoes.Geral_API(data, true).then((jsonstring) => {
+          console.log(jsonstring);
+           this.setState({ modalConfirmComprar: true, modalComprar: false }); 
+          const responseJson = JSON.parse(jsonstring);
 
-          if (typeof responseJson!=="object" || responseJson.message !== "success") {
+          if (responseJson.message !== "success") {
             console.error("Erro na resposta:", responseJson);
             
             alert(responseJson?.message || "Erro inesperado ao processar a solicitação.");
@@ -222,7 +223,7 @@ export default class Cambio extends Component {
             alert("Resposta recebida, mas faltam informações necessárias.");
             
             this.setState({ disabled: false });
-          }
+          } 
           
         });
       }
