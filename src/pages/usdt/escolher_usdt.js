@@ -71,9 +71,9 @@ export default class Cambio extends Component {
       tela: "comprar_moeda",
     };
 
-    console.log(dados);
+    
     Funcoes.Geral_API(dados, true).then((res) => {
-      console.log("Resposta da API:", res);
+      
       if (res.status == 1 && res.saldos && res.saldos.length > 0) {
         this.setState({ liberarSaque: false, saque: res.saldos });
       } else {
@@ -99,7 +99,7 @@ export default class Cambio extends Component {
       };
 
       Funcoes.Geral_API(data, true).then((responseJson) => {
-        console.log(responseJson);
+        
         // Defina o valorCotacao diretamente como o valor recebido
         const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
 
@@ -121,7 +121,7 @@ export default class Cambio extends Component {
       };
 
       Funcoes.Geral_API(data, true).then((responseJson) => {
-        console.log(responseJson);
+        
         // Defina o valorCotacao diretamente como o valor recebido
         const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
 
@@ -146,7 +146,7 @@ export default class Cambio extends Component {
   };
 
   valida_token2f = () => {
-    console.log(this.state.token);
+    
     const data = {
       url: "token2f/valida",
       data: {
@@ -157,7 +157,7 @@ export default class Cambio extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data, true).then((responseJson) => {
-      console.log(responseJson);
+      
       if (responseJson) {
         if (Produtos.cambioTela.token) {
           this.travarCotacao();
@@ -195,16 +195,16 @@ export default class Cambio extends Component {
             amount_total: this.state.totalPagar,
           }),
           method: "POST",
-          console: false,
-          funcao: "trazer moeda crypto",
-          tela: "comprar_moeda",
+          
+          
+          
         };
 
         Funcoes.Geral_API(data, true).then((responseJson) => {
           console.log(responseJson);
           /* this.setState({ modalConfirmComprar: true, modalComprar: false }); */
 
-          if (responseJson.message != "success") {
+          if (responseJson.message != "success" || responseJson.status == "error") {
             alert(responseJson.message);
             this.setState({ disabled: false });
           } else {
@@ -217,8 +217,7 @@ export default class Cambio extends Component {
   };
 
   buyMoeda = () => {
-    console.log("Id Cotacao: " + this.state.idCotacao);
-    console.log(this.state.tempo);
+    
 
     if (this.state.senhaConfirm == "") {
       alert("É necessário informar a senha de transação para comprar");
@@ -243,7 +242,7 @@ export default class Cambio extends Component {
       };
 
       Funcoes.Geral_API(data).then((responseJson) => {
-        console.log(responseJson);
+        
         // Cancela o temporizador caso a resposta chegue antes de 15 segundos
 
         if (responseJson.data.success == false) {
@@ -299,10 +298,10 @@ export default class Cambio extends Component {
       method: "POST",
     };
 
-    console.log(data);
+    
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
-      console.log(responseJson);
+      
       if (responseJson.status) {
         alert("Saque em processamento! Verificar relatorio de Saque");
         window.location.href = "/relatorio_crypo";
@@ -365,7 +364,7 @@ export default class Cambio extends Component {
             {this.state.liberarSaque == false && this.state.saque.length > 0 ? (
               <Row>
                 {this.state.saque.map((data, index) => {
-                  console.log(data);
+                  
                   return (
                     <Col key={data.key || index}>
                       <h5>Moeda: {data.symbol || "N/A"}</h5>
@@ -447,7 +446,7 @@ export default class Cambio extends Component {
                     placeholder="Escolher Moeda"
                     value={this.state.valueMoeda} // Passa o objeto selecionado ou `null`
                     onChange={(selectedOption) => {
-                      console.log(selectedOption);
+                      
                       this.setState({
                         valueMoeda: selectedOption,
                         moedaNome: selectedOption.label,
