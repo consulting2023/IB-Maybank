@@ -71,7 +71,9 @@ export default class Cambio extends Component {
       tela: "comprar_moeda",
     };
 
+    
     Funcoes.Geral_API(dados, true).then((res) => {
+      
       if (res.status == 1 && res.saldos && res.saldos.length > 0) {
         this.setState({ liberarSaque: false, saque: res.saldos });
       } else {
@@ -97,6 +99,7 @@ export default class Cambio extends Component {
       };
 
       Funcoes.Geral_API(data, true).then((responseJson) => {
+        
         // Defina o valorCotacao diretamente como o valor recebido
         const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
 
@@ -118,6 +121,7 @@ export default class Cambio extends Component {
       };
 
       Funcoes.Geral_API(data, true).then((responseJson) => {
+        
         // Defina o valorCotacao diretamente como o valor recebido
         const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
 
@@ -142,6 +146,7 @@ export default class Cambio extends Component {
   };
 
   valida_token2f = () => {
+    
     const data = {
       url: "token2f/valida",
       data: {
@@ -152,6 +157,7 @@ export default class Cambio extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data, true).then((responseJson) => {
+      
       if (responseJson) {
         if (Produtos.cambioTela.token) {
           this.travarCotacao();
@@ -189,21 +195,17 @@ export default class Cambio extends Component {
             amount_total: this.state.totalPagar,
           }),
           method: "POST",
+          
+          
+          
         };
 
         Funcoes.Geral_API(data, true).then((responseJson) => {
           console.log(responseJson);
           /* this.setState({ modalConfirmComprar: true, modalComprar: false }); */
 
-          if (responseJson.message && responseJson.status !== "success") {
-            alert(responseJson.message); // Exibe a mensagem do retorno
-            this.setState({ disabled: false });
-          } else if (responseJson.errors) {
-            // Exibe erros adicionais, se existirem
-            const errorMessages = Object.values(responseJson.errors)
-              .flat()
-              .join(", ");
-            alert(`Erro(s): ${errorMessages}`);
+          if (responseJson.message != "success" || responseJson.status == "error") {
+            alert(responseJson.message);
             this.setState({ disabled: false });
           } else {
             this.setState({ idCotacao: responseJson.data.result.id });
@@ -215,6 +217,8 @@ export default class Cambio extends Component {
   };
 
   buyMoeda = () => {
+    
+
     if (this.state.senhaConfirm == "") {
       alert("É necessário informar a senha de transação para comprar");
       return;
@@ -238,6 +242,7 @@ export default class Cambio extends Component {
       };
 
       Funcoes.Geral_API(data).then((responseJson) => {
+        
         // Cancela o temporizador caso a resposta chegue antes de 15 segundos
 
         if (responseJson.data.success == false) {
@@ -293,7 +298,10 @@ export default class Cambio extends Component {
       method: "POST",
     };
 
+    
+
     Funcoes.Geral_API(data, true).then((responseJson) => {
+      
       if (responseJson.status) {
         alert("Saque em processamento! Verificar relatorio de Saque");
         window.location.href = "/relatorio_crypo";
@@ -356,6 +364,7 @@ export default class Cambio extends Component {
             {this.state.liberarSaque == false && this.state.saque.length > 0 ? (
               <Row>
                 {this.state.saque.map((data, index) => {
+                  
                   return (
                     <Col key={data.key || index}>
                       <h5>Moeda: {data.symbol || "N/A"}</h5>
@@ -437,6 +446,7 @@ export default class Cambio extends Component {
                     placeholder="Escolher Moeda"
                     value={this.state.valueMoeda} // Passa o objeto selecionado ou `null`
                     onChange={(selectedOption) => {
+                      
                       this.setState({
                         valueMoeda: selectedOption,
                         moedaNome: selectedOption.label,
