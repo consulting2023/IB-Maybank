@@ -204,13 +204,24 @@ export default class Cambio extends Component {
           console.log(responseJson);
           /* this.setState({ modalConfirmComprar: true, modalComprar: false }); */
 
-          if (responseJson.message != "success" || responseJson.status == "error") {
-            alert(responseJson.message);
+          if (!responseJson || responseJson.message !== "success" || responseJson.status === "error") {
+            console.error("Erro na resposta:", responseJson);
+            
+            alert(responseJson?.message || "Erro inesperado ao processar a solicitação.");
+            
             this.setState({ disabled: false });
+          } else if (responseJson.data?.result?.id) {
+            this.setState({ 
+              idCotacao: responseJson.data.result.id, 
+              modalConfirmComprar: true, 
+              modalComprar: false 
+            });
           } else {
-            this.setState({ idCotacao: responseJson.data.result.id });
-            this.setState({ modalConfirmComprar: true, modalComprar: false });
+            console.warn("Resposta recebida, mas faltam informações necessárias:", responseJson);
+            alert("Resposta recebida, mas faltam informações necessárias.");
+            this.setState({ disabled: false });
           }
+          
         });
       }
     }
