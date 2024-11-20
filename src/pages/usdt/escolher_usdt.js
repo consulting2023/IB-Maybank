@@ -493,9 +493,9 @@ export default class Cambio extends Component {
                       style: "currency",
                       currency: "BRL",
                     })}
-                    placeholder="R$ 00,00"
+                    placeholder=" 00,00"
                     onChange={(e) => {
-                      const value = e.target.value.replace(/[R$\s.,]/g, ""); // Remove caracteres não numéricos
+                      const value = e.target.value.replace(/[\s.,]/g, ""); // Remove caracteres não numéricos
                       const valorNumerico = Number(value) / 100; // Converte para valor em reais
 
                       this.setState({ valueCompra: valorNumerico }, () => {
@@ -510,16 +510,16 @@ export default class Cambio extends Component {
                     <input
                       value={
                         this.state.valorCotacao.price_buy
-                          ? `R$ ${this.state.valorCotacao.price_buy}`
-                          : "R$ 00,00"
+                          ? ` ${this.state.valorCotacao.price_buy}`
+                          : " 00,00"
                       }
-                      placeholder="R$ 00,00"
+                      placeholder=" 00,00"
                       disabled
                     />
 
                     {/* {this.state.valorCotacao.price_buy
                       ? this.state.valorCotacao.price_buy
-                      : "R$ 00,00"} */}
+                      : " 00,00"} */}
                   </span>
                 </Col>
                 <Col>
@@ -534,9 +534,9 @@ export default class Cambio extends Component {
                             this.state.valorCotacao.price_buy *
                               (this.state.valueCompra || 0)
                           )
-                        : "R$ 00,00"
+                        : " 00,00"
                     }
-                    placeholder="R$ 00,00"
+                    placeholder=" 00,00"
                     disabled
                     onChange={() => {
                       this.setState({
@@ -554,7 +554,7 @@ export default class Cambio extends Component {
                   <h3>Taxa</h3>
                   <input
                     value={this.state.taxa + "%"}
-                    placeholder="R$ 00,00"
+                    placeholder=" 00,00"
                     disabled
                   />
                 </Col>
@@ -562,14 +562,14 @@ export default class Cambio extends Component {
                   <h3>Tarifa</h3>
                   <span style={{ marginLeft: 10 }}>
                     <input
-                      value={"R$ " + this.state.tarifa}
-                      placeholder="R$ 00,00"
+                      value={" " + this.state.tarifa}
+                      placeholder=" 00,00"
                       disabled
                     />
 
                     {/* {this.state.valorCotacao.price_buy
                       ? this.state.valorCotacao.price_buy
-                      : "R$ 00,00"} */}
+                      : " 00,00"} */}
                   </span>
                 </Col>
                 <Col>
@@ -578,8 +578,8 @@ export default class Cambio extends Component {
                     value={this.state.totalPagar.toLocaleString("pt-BR", {
                       style: "currency",
                       currency: "BRL",
-                    })} // Exibe o totalPagar ou "R$ 00,00" caso esteja vazio
-                    placeholder="R$ 00,00"
+                    })} // Exibe o totalPagar ou " 00,00" caso esteja vazio
+                    placeholder=" 00,00"
                     disabled
                   />
                 </Col>
@@ -656,8 +656,8 @@ export default class Cambio extends Component {
                       Valor da Moeda:{" "}
                       <b>
                         {this.state.valorCotacao.price_buy
-                          ? `R$ ${this.state.valorCotacao.price_buy}`
-                          : "R$ 00,00"}{" "}
+                          ? ` ${this.state.valorCotacao.price_buy}`
+                          : " 00,00"}{" "}
                         {/* Valor padrão caso não exista */}
                       </b>
                     </h4>
@@ -765,8 +765,8 @@ export default class Cambio extends Component {
                   <h3>Saldo Moeda</h3>
                   <h4>
                     {this.state.saldoForSaque != 0
-                      ? "R$ " + this.state.saldoForSaque
-                      : "R$ 00,00"}
+                      ? " " + this.state.saldoForSaque
+                      : " 00,00"}
                   </h4>
                 </Col>
                 <Col>
@@ -777,10 +777,10 @@ export default class Cambio extends Component {
                         style: "currency",
                         currency: "BRL",
                       })}
-                      placeholder="R$ 00,00"
+                      placeholder=" 00,00"
                       style={{ height: 40 }}
                       onChange={(e) => {
-                        const value = e.target.value.replace(/[R$\s.,]/g, ""); // Remove caracteres não numéricos
+                        const value = e.target.value.replace(/[\s.,]/g, ""); // Remove caracteres não numéricos
                         const valorNumerico = Number(value) / 100; // Converte para valor em reais
 
                         this.setState({ valorSaque: valorNumerico });
