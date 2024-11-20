@@ -248,6 +248,7 @@ export default class Cambio extends Component {
           moeda: this.state.valueMoeda.value,
           conta_id: Funcoes.pessoa.conta_id,
           amount: this.state.valueCompra,
+          amount_total: this.state.totalPagar
         }),
         method: "POST",
         console: false,
@@ -263,8 +264,8 @@ export default class Cambio extends Component {
           alert(responseJson.data.mensagem);
           location.reload();
         } else {
-          alert("Compra realizada com sucesso");
-          location.reload();
+          alert("Compra realizada com sucesso")
+          window.location.href = "/relatorio_crypto"
         }
       });
     }
