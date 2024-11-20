@@ -265,7 +265,7 @@ export default class Cambio extends Component {
           location.reload();
         } else {
           alert("Compra realizada com sucesso")
-          window.location.href = "/relatorio_crypto"
+          window.location.href = "/relatorio_crypo"
         }
       });
     }
