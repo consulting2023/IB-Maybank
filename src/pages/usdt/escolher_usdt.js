@@ -840,7 +840,7 @@ export default class Cambio extends Component {
             <Button
               variant="primary"
               disabled={this.state.travarSaque}
-              onClick={this.valida_token2f}
+              onClick={this.saque()}
             >
               Sacar
             </Button>
