@@ -66,6 +66,7 @@ export default class Header extends Component {
           icone: Icones.saldo1,
           titulo: i18n.t("home.saldoDigital"),
           saldo: Formatar.formatarMoeda(res.digital),
+          saldoBloqueado: Formatar.formatarMoeda(res.bloqueados),
           saldoTrue: res.digital,
         };
 
@@ -80,14 +81,14 @@ export default class Header extends Component {
   };
 
   setBlur = () => {
-    this.SaldoConta()
+    this.SaldoConta();
     setTimeout(() => {
       const newSaldos = this.state.saldos;
-    newSaldos.digital.show = !this.state.saldos.digital.show;
-    
-    this.setState({ saldos: newSaldos });
+      newSaldos.digital.show = !this.state.saldos.digital.show;
+      newSaldos.digital.showBloqueado = !this.state.saldos.digital.showBloqueado;
+
+      this.setState({ saldos: newSaldos });
     }, 500);
-    
   };
 
   exibir_msg = (dados) => {
@@ -197,6 +198,60 @@ export default class Header extends Component {
               </Navbar.Brand>
 
               <ul className="navbar-nav align-items-center">
+                <li className="nav-item mx-1">
+                  {this.state.saldos.digital ? (
+                    <div className="saldosWrapper">
+                      <Button
+                        className="saldosBtn btn-light w-100 p-1"
+                        onClick={() => this.setBlur()}
+                      >
+                        <Container className="saldosContainer textoOverlay cursor-pointer py-2 justify-content-center position-relative">
+                          <Row className="select-none">
+                            <Col xs={3} className="px-0 pr-2">
+                              <p className="mt-2">
+                                {this.state.saldos.digital.icone}
+                              </p>
+                            </Col>
+
+                            <Col xs={9}>
+                              <Row className="saldosHome justify-content-center">
+                                <p className="text-nowrap texto-saldos select-none">
+                                  {/* {this.state.saldos.digital.titulo} */}
+                                  {this.state.saldos.digital.id === "1"
+                                    ? i18n.t("home.saldoBloqueado")
+                                    : "var_error"}
+                                </p>
+                              </Row>
+
+                              <Row className="justify-content-center">
+                                <span style={{color: "red"}}
+                                  className={
+                                    "texto-saldos select-none saldoValor " +
+                                    (this.state.saldos.digital.showBloqueado
+                                      ? "deblurred"
+                                      : null)
+                                  }
+                                >
+                                  - {this.state.saldos.digital.saldoBloqueado}
+                                </span>
+                              </Row>
+                            </Col>
+                          </Row>
+                          <span className="p-2 px-3 mt-8 position-absolute text-center textoHeader">
+                            Saldo Bloqueado
+                          </span>
+                        </Container>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="saldosWrapper">
+                      <ReactLoading
+                        type={"spin"}
+                        className="p-2 m-auto d-block"
+                      />
+                    </div>
+                  )}
+                </li>
                 <li className="nav-item mx-1">
                   {this.state.saldos.digital ? (
                     <div className="saldosWrapper">

@@ -37,6 +37,7 @@ export default {
 
   home: {
     saldoDigital: 'Conta Digital',
+    saldoBloqueado: 'Saldo Bloqueado',
     saldoCartao: 'Cartão',
     saldoConvenio: 'Convênio',
     saldoInvestimento: 'Investimento',
