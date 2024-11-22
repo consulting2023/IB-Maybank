@@ -34,6 +34,7 @@ export default class Cambio extends Component {
       disabled: false,
       moedaNome: "",
       tempo: 0,
+      tempoConfirm: 0,
       modalSaque: false,
       carteiraSaque: "",
       valorSaque: "",
@@ -46,7 +47,9 @@ export default class Cambio extends Component {
       totalLiquido: 0,
       tarifa: "00,00",
       totalPagar: "",
+      totalPagarConfirmar: "",
       idMoeda: 0,
+      valorMoedaTravar: 0,
     };
   }
 
@@ -71,9 +74,7 @@ export default class Cambio extends Component {
       tela: "comprar_moeda",
     };
 
-    
     Funcoes.Geral_API(dados, true).then((res) => {
-      
       if (res.status == 1 && res.saldos && res.saldos.length > 0) {
         this.setState({ liberarSaque: false, saque: res.saldos });
       } else {
@@ -99,7 +100,7 @@ export default class Cambio extends Component {
       };
 
       Funcoes.Geral_API(data, true).then((responseJson) => {
-        
+        console.log(responseJson);
         // Defina o valorCotacao diretamente como o valor recebido
         const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
 
@@ -121,7 +122,6 @@ export default class Cambio extends Component {
       };
 
       Funcoes.Geral_API(data, true).then((responseJson) => {
-        
         // Defina o valorCotacao diretamente como o valor recebido
         const valorCotacao = JSON.parse(responseJson.data); // Certifique-se de parsear o JSON se necessário
 
@@ -145,8 +145,6 @@ export default class Cambio extends Component {
     });
   };
 
- 
-
   travarCotacao = () => {
     if (
       this.state.senha == "" ||
@@ -154,6 +152,8 @@ export default class Cambio extends Component {
       this.state.valueMoeda == []
     ) {
       alert("Por favor, preencha os campos para prosseguir");
+    } else if (this.state.valueCompra < 1000) {
+      alert("Compra minima de 1.000");
     } else {
       if (this.state.valueCompra < 0) {
         alert("Valor Minimo de Compra é de 1.000,00");
@@ -170,44 +170,65 @@ export default class Cambio extends Component {
             amount_total: this.state.totalPagar,
           }),
           method: "POST",
-          
-          
-          
         };
 
-        Funcoes.Geral_API(data, true).then((jsonstring) => {
-          console.log(jsonstring);
-           this.setState({ modalConfirmComprar: true, modalComprar: false }); 
+        Funcoes.Geral_API(data, true).then((res) => {
+          console.log(res);
+
+          if (res.error == 1) {
+            alert(res.message);
+          } else if (res.message == "success") {
+            // Atualiza o valor da moeda antes de calcular
+            this.setState({ valorMoedaTravar: res.data.result.price }, () => {
+              // Chama a função de cálculo após atualizar o estado
+              this.calcularTotalPagarConfirmar();
+            });
+
+            // Configurações adicionais com delay
+            setTimeout(() => {
+              this.startTimerCancel();
+              this.setState({
+                idCotacao: res.data.result.id,
+                modalConfirmComprar: true,
+                modalComprar: false,
+              });
+            }, 300);
+          }
+
+          /* this.setState({ modalConfirmComprar: true, modalComprar: false });
           const responseJson = JSON.parse(jsonstring);
 
           if (responseJson.message !== "success") {
             console.error("Erro na resposta:", responseJson);
-            
-            alert(responseJson?.message || "Erro inesperado ao processar a solicitação.");
-            
+
+            alert(
+              responseJson?.message ||
+                "Erro inesperado ao processar a solicitação."
+            );
+
             this.setState({ disabled: false });
           } else if (responseJson.data?.result?.id) {
-            this.setState({ 
-              idCotacao: responseJson.data.result.id, 
-              modalConfirmComprar: true, 
-              modalComprar: false 
+            this.setState({
+              idCotacao: responseJson.data.result.id,
+              modalConfirmComprar: true,
+              modalComprar: false,
             });
           } else {
-            console.warn("Resposta recebida, mas faltam informações necessárias:", responseJson);
-            
+            console.warn(
+              "Resposta recebida, mas faltam informações necessárias:",
+              responseJson
+            );
+
             alert("Resposta recebida, mas faltam informações necessárias.");
-            
+
             this.setState({ disabled: false });
-          } 
-          
+          } */
         });
       }
     }
   };
 
   buyMoeda = () => {
-    
-
     if (this.state.senhaConfirm == "") {
       alert("É necessário informar a senha de transação para comprar");
       return;
@@ -223,7 +244,7 @@ export default class Cambio extends Component {
           moeda: this.state.valueMoeda.value,
           conta_id: Funcoes.pessoa.conta_id,
           amount: this.state.valueCompra,
-          amount_total: this.state.totalPagar
+          amount_total: this.state.totalPagarConfirmar,
         }),
         method: "POST",
         console: false,
@@ -232,15 +253,14 @@ export default class Cambio extends Component {
       };
 
       Funcoes.Geral_API(data).then((responseJson) => {
-        
         // Cancela o temporizador caso a resposta chegue antes de 15 segundos
 
         if (responseJson.data.success == false) {
           alert(responseJson.data.mensagem);
           location.reload();
         } else {
-          alert("Compra realizada com sucesso")
-          window.location.href = "/relatorio_crypo"
+          alert("Compra realizada com sucesso");
+          window.location.href = "/relatorio_crypo";
         }
       });
     }
@@ -283,16 +303,16 @@ export default class Cambio extends Component {
         conta_id: Funcoes.pessoa.conta_id,
         amount: valorSaque,
         senha: senhaSaque,
-        carteira: carteiraSaque,
+        wallet: carteiraSaque,
       }),
       method: "POST",
     };
 
-    
+    console.log(data)
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
-      
-      if (responseJson.status) {
+      console.log(responseJson);
+      if (responseJson.success) {
         alert("Saque em processamento! Verificar relatorio de Saque");
         window.location.href = "/relatorio_crypo";
       } else {
@@ -320,6 +340,24 @@ export default class Cambio extends Component {
     }, 1000);
   };
 
+  startTimerCancel = () => {
+    this.setState({ tempoConfirm: 0 }); // Reinicia o tempo e define o idMoeda
+
+    // Define o temporizador de 1 segundo
+    this.intervalId = setInterval(() => {
+      this.setState(
+        (prevState) => ({ tempoConfirm: prevState.tempoConfirm + 1 }),
+        () => {
+          // Quando atinge 60 segundos, dá um reload na página
+          if (this.state.tempoConfirm >= 60) {
+            clearInterval(this.intervalId); // Cancela o temporizador para evitar múltiplos reloads
+            window.location.reload(); // Recarrega a página
+          }
+        }
+      );
+    }, 1000);
+  };
+
   calcularTotalPagar = () => {
     const taxa = this.state.taxa / 100 || 0; // Taxa padrão 0 se não definida
     const valorCotacao = this.state.valorCotacao.price_buy || 0; // Valor padrão 0
@@ -331,6 +369,21 @@ export default class Cambio extends Component {
 
     // Atualiza o estado com o valor numérico de totalPagar
     this.setState({ totalPagar });
+  };
+
+  calcularTotalPagarConfirmar = () => {
+    const taxa = this.state.taxa / 100 || 0; // Taxa padrão 0 se não definida
+    const valorCotacao = this.state.valorMoedaTravar; // Valor padrão 0
+    const valueCompra = this.state.valueCompra || 0; // Valor padrão 0
+
+    // Cálculo de totalTaxa e totalPagar
+    const totalTaxa = valorCotacao * valueCompra * taxa;
+    const totalPagarConfirmar = valorCotacao * valueCompra + totalTaxa;
+
+    console.log(totalPagarConfirmar);
+
+    // Atualiza o estado com o valor numérico de totalPagar
+    this.setState({ totalPagarConfirmar });
   };
 
   render() {
@@ -354,7 +407,6 @@ export default class Cambio extends Component {
             {this.state.liberarSaque == false && this.state.saque.length > 0 ? (
               <Row>
                 {this.state.saque.map((data, index) => {
-                  
                   return (
                     <Col key={data.key || index}>
                       <h5>Moeda: {data.symbol || "N/A"}</h5>
@@ -436,7 +488,6 @@ export default class Cambio extends Component {
                     placeholder="Escolher Moeda"
                     value={this.state.valueMoeda} // Passa o objeto selecionado ou `null`
                     onChange={(selectedOption) => {
-                      
                       this.setState({
                         valueMoeda: selectedOption,
                         moedaNome: selectedOption.label,
@@ -465,16 +516,16 @@ export default class Cambio extends Component {
                   <h3>Valor Desejado</h3>
                   <input
                     value={this.state.valueCompra.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
+                      minimumFractionDigits: 2, // Garante que exiba sempre duas casas decimais
+                      maximumFractionDigits: 2,
                     })}
-                    placeholder="R$ 00,00"
+                    placeholder="00,00"
                     onChange={(e) => {
-                      const value = e.target.value.replace(/[R$\s.,]/g, ""); // Remove caracteres não numéricos
-                      const valorNumerico = Number(value) / 100; // Converte para valor em reais
+                      const value = e.target.value.replace(/[^\d]/g, ""); // Remove tudo que não é número
+                      const valorNumerico = Number(value) / 100; // Divide por 100 para ajustar o valor
 
                       this.setState({ valueCompra: valorNumerico }, () => {
-                        this.calcularTotalPagar(); // Chama a função para recalcular totalPagar
+                        this.calcularTotalPagar(); // Recalcula o total
                       });
                     }}
                   />
@@ -485,16 +536,16 @@ export default class Cambio extends Component {
                     <input
                       value={
                         this.state.valorCotacao.price_buy
-                          ? `R$ ${this.state.valorCotacao.price_buy}`
-                          : "R$ 00,00"
+                          ? ` ${this.state.valorCotacao.price_buy}`
+                          : " 00,00"
                       }
-                      placeholder="R$ 00,00"
+                      placeholder=" 00,00"
                       disabled
                     />
 
                     {/* {this.state.valorCotacao.price_buy
                       ? this.state.valorCotacao.price_buy
-                      : "R$ 00,00"} */}
+                      : " 00,00"} */}
                   </span>
                 </Col>
                 <Col>
@@ -503,15 +554,15 @@ export default class Cambio extends Component {
                     value={
                       this.state.valorCotacao.price_buy
                         ? new Intl.NumberFormat("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
+                            minimumFractionDigits: 2, // Garante duas casas decimais
+                            maximumFractionDigits: 2,
                           }).format(
                             this.state.valorCotacao.price_buy *
                               (this.state.valueCompra || 0)
                           )
-                        : "R$ 00,00"
+                        : "00,00"
                     }
-                    placeholder="R$ 00,00"
+                    placeholder="00,00"
                     disabled
                     onChange={() => {
                       this.setState({
@@ -529,7 +580,7 @@ export default class Cambio extends Component {
                   <h3>Taxa</h3>
                   <input
                     value={this.state.taxa + "%"}
-                    placeholder="R$ 00,00"
+                    placeholder=" 00,00"
                     disabled
                   />
                 </Col>
@@ -537,24 +588,28 @@ export default class Cambio extends Component {
                   <h3>Tarifa</h3>
                   <span style={{ marginLeft: 10 }}>
                     <input
-                      value={"R$ " + this.state.tarifa}
-                      placeholder="R$ 00,00"
+                      value={" " + this.state.tarifa}
+                      placeholder=" 00,00"
                       disabled
                     />
 
                     {/* {this.state.valorCotacao.price_buy
                       ? this.state.valorCotacao.price_buy
-                      : "R$ 00,00"} */}
+                      : " 00,00"} */}
                   </span>
                 </Col>
                 <Col>
                   <h3>Total a Pagar</h3>
                   <input
-                    value={this.state.totalPagar.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })} // Exibe o totalPagar ou "R$ 00,00" caso esteja vazio
-                    placeholder="R$ 00,00"
+                    value={
+                      this.state.totalPagar
+                        ? this.state.totalPagar.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2, // Garante duas casas decimais
+                            maximumFractionDigits: 2,
+                          })
+                        : "00,00"
+                    } // Exibe o totalPagar formatado ou "00,00" caso esteja vazio
+                    placeholder="00,00"
                     disabled
                   />
                 </Col>
@@ -630,9 +685,7 @@ export default class Cambio extends Component {
                     <h4>
                       Valor da Moeda:{" "}
                       <b>
-                        {this.state.valorCotacao.price_buy
-                          ? `R$ ${this.state.valorCotacao.price_buy}`
-                          : "R$ 00,00"}{" "}
+                        {this.state.valorMoedaTravar}{" "}
                         {/* Valor padrão caso não exista */}
                       </b>
                     </h4>
@@ -644,8 +697,8 @@ export default class Cambio extends Component {
                       Quantidade que quer:{" "}
                       <b>
                         {this.state.valueCompra.toLocaleString("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
+                          minimumFractionDigits: 2, // Garante duas casas decimais
+                          maximumFractionDigits: 2,
                         })}
                       </b>
                     </h4>
@@ -654,10 +707,13 @@ export default class Cambio extends Component {
                     <h4>
                       Valor Total a Pagar:{" "}
                       <b>
-                        {this.state.totalPagar.toLocaleString("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                        })}
+                        {this.state.totalPagarConfirmar.toLocaleString(
+                          "pt-BR",
+                          {
+                            style: "currency",
+                            currency: "BRL",
+                          }
+                        )}
                       </b>
                     </h4>
                   </Col>
@@ -740,23 +796,27 @@ export default class Cambio extends Component {
                   <h3>Saldo Moeda</h3>
                   <h4>
                     {this.state.saldoForSaque != 0
-                      ? "R$ " + this.state.saldoForSaque
-                      : "R$ 00,00"}
+                      ? " " + this.state.saldoForSaque
+                      : " 00,00"}
                   </h4>
                 </Col>
                 <Col>
                   <h3>Valor de Saque</h3>
                   <div>
                     <input
-                      value={this.state.valorSaque.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                      placeholder="R$ 00,00"
+                      value={
+                        this.state.valorSaque
+                          ? this.state.valorSaque.toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }) // Exibe o valor formatado sem "R$"
+                          : "00,00"
+                      }
+                      placeholder="00,00"
                       style={{ height: 40 }}
                       onChange={(e) => {
-                        const value = e.target.value.replace(/[R$\s.,]/g, ""); // Remove caracteres não numéricos
-                        const valorNumerico = Number(value) / 100; // Converte para valor em reais
+                        const value = e.target.value.replace(/[\s.,]/g, ""); // Remove espaços e vírgulas
+                        const valorNumerico = Number(value) / 100; // Divide por 100 para obter o valor em reais
 
                         this.setState({ valorSaque: valorNumerico });
                       }}
