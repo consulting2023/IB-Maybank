@@ -316,9 +316,12 @@ export default class Cambio extends Component {
         window.location.href = "/relatorio_crypo";
       } else {
         alert("Erro em solicitar o saque, tente novamente");
+        this.setState({travarSaque: false})
         location.reload();
       }
     });
+
+    
   };
 
   startTimer = (id) => {
@@ -648,6 +651,7 @@ export default class Cambio extends Component {
               </Row>
             </Container>
           </Modal.Body>
+          
           <Modal.Footer>
             <Button
               variant="primary"
