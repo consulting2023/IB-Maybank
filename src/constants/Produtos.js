@@ -4,10 +4,10 @@ import Icones from "./Icon";
 const home_mostrar = true;
 const extrato_mostar = true;
 const transferencia_mostrar = true;
-const depostio_mostrar = true;
+const depostio_mostrar = false;
 const comprovante_mostar = true;
-const pagar_mostrar = true;
-const cobrar_mostrar = true;
+const pagar_mostrar = false;
+const cobrar_mostrar = false;
 const cartao_mostrar = true;
 const servicos_mostrar = false;
 const qrcode_mostrar = true;
@@ -297,7 +297,7 @@ export default {
   },
 
   testSuporte: {
-    emailTest: "rapa.rodrigues@gmail.com",
+    emailTest: "",
     testLogin: false,
     testCambio: false,
   },

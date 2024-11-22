@@ -246,7 +246,7 @@ export default class RelatorioEntrada extends Component {
                   type="text"
                   name="id"
                   value={this.state.id}
-                  onChange={this.handleInputChange}
+                  onChange={(e) => this.setState({id: e.target.value})}
                   placeholder="Informe o ID"
                 />
               </Form.Group>

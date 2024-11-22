@@ -61,7 +61,7 @@ export default {
 
     //Header
 
-    notificacoes: <Iconbs.BsBell className="icon" />,
+    notificacoes: <Iconbs.BsBell className="iconHeader" />,
 
     //Saldos 
 

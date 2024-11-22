@@ -33,6 +33,7 @@ export default class ExtratoConta extends Component {
       disabled: false,
       soma: 0,
       hasMore: true,
+      custom_id: "",
     };
     this.handleScroll = this.handleScroll.bind(this);
   }
@@ -115,6 +116,7 @@ export default class ExtratoConta extends Component {
         conta_id: pessoa.conta_id,
         data_de: Formatar.formatarDateAno(dataDe),
         data_ate: Formatar.formatarDateAno(dataAte),
+        custom_id: this.state.custom_id || "",
       },
       method: "POST",
     };
@@ -326,6 +328,20 @@ export default class ExtratoConta extends Component {
                     popperPlacement="bottom"
                     maxDate={addDays(new Date(), 0)}
                     onChange={(data) => this.setState({ dataAte: data })}
+                  />
+                </Col>
+                <Col className="form-group">
+                  <label>Custom ID</label>
+                  <br />
+                  <input
+                    type="text"
+                    className="form-control text-center"
+                    value={this.state.custom_id || ""}
+                    required
+                    onChange={(e) =>
+                      this.setState({ custom_id: e.target.value })
+                    }
+                    placeholder="Digite o custom_id"
                   />
                 </Col>
               </Row>

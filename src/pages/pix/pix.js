@@ -20,6 +20,8 @@ import ReactLoading from "react-loading";
 import Password from "../../components/password/Password";
 import QRCode from "react-qr-code";
 import InputMask from "react-input-mask";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 export default class Pix extends Component {
   constructor() {
     super();
@@ -439,24 +441,82 @@ export default class Pix extends Component {
 
     const data = {
       url: "conta/comprovante-pdf",
-      data: {
-        id: id,
-      },
+      data: { id: id, app: 1 },
       method: "POST",
-      funcao: "comprovante_ver",
-      tela: "pix",
     };
 
-    Funcoes.Geral_API(data, true).then((responseJson) => {
-      console.log(responseJson);
-      this.setState({ comprovante_pdf: responseJson });
-      setTimeout(() => {
-        this.setState({
-          titleModalComprovante: "Transação Pix efetuada com sucesso!",
-          loading: false,
-        });
-      }, 1000);
-    });
+    Funcoes.Geral_API(data, true)
+      .then((res) => {
+        console.log("Resposta da API:", res);
+
+        if (!res || !res.pix) {
+          console.error("Dados inválidos ou ausentes.");
+          return;
+        }
+
+        const pix = res.pix;
+        const { dados_pagador, dados_recebedor, dados_transacao } = pix;
+
+        const doc = new jsPDF();
+        const startY = 20;
+        const cellHeight = 10;
+        let cursorY = startY;
+
+        // Adiciona título
+        doc.setFontSize(16);
+        doc.text("Comprovante de Transferência PIX", 10, cursorY);
+        cursorY += 10;
+
+        // Função para adicionar linhas com rótulo e valor
+        const addRow = (label, value) => {
+          doc.setFontSize(12);
+          doc.text(`${label}:`, 10, cursorY);
+          doc.text(value ? String(value) : "N/A", 70, cursorY); // Converte o valor para string
+          cursorY += cellHeight;
+        };
+
+        // Dados da transação
+        doc.setFontSize(14);
+        doc.text("Dados da Transação", 10, cursorY);
+        cursorY += 10;
+
+        addRow("Data da Transação", dados_transacao.data_transacao);
+        addRow("Valor Pago", `R$ ${dados_transacao.valor_pago}`);
+        addRow("Descrição", dados_transacao.descricao);
+        addRow("Chave PIX", dados_transacao.chave_pix);
+        addRow("ID Transação", dados_transacao.identificador_transacao);
+        addRow("Status", dados_transacao.status);
+
+        cursorY += 10;
+
+        // Dados do pagador
+        doc.text("Dados do Pagador", 10, cursorY);
+        cursorY += 10;
+
+        addRow("Nome", dados_pagador.nome);
+        addRow("Documento", dados_pagador.documento);
+        addRow("Conta Origem", dados_pagador.conta_origem);
+        addRow("Banco", dados_pagador.banco);
+        addRow("Tipo", dados_pagador.tipo);
+
+        cursorY += 10;
+
+        // Dados do recebedor
+        doc.text("Dados do Recebedor", 10, cursorY);
+        cursorY += 10;
+
+        addRow("Nome", dados_recebedor.nome);
+        addRow("Banco", dados_recebedor.banco);
+        addRow("Agência", dados_recebedor.agencia);
+        addRow("Conta", dados_recebedor.conta);
+        addRow("Documento", dados_recebedor.documento);
+
+        // Salva o PDF
+        doc.save("comprovante_pix.pdf");
+      })
+      .catch((error) => {
+        console.error("Erro na requisição ou ao gerar o PDF", error);
+      });
   };
 
   abrirComprovante = () => {
