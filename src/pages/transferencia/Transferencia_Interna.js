@@ -21,6 +21,7 @@ import * as Formatar from "../../constants/Formatar";
 import ReactLoading from "react-loading";
 import i18n from "../../tradutor/tradutor";
 import Password from "../../components/password/Password";
+import { jsPDF } from "jspdf";
 
 export default class TransferenciaInterna extends Component {
   constructor() {
@@ -491,36 +492,85 @@ export default class TransferenciaInterna extends Component {
   };
 
   comprovante_ver = (id) => {
-    this.setState({ modal_confirmacao: false });
-    this.setState({ contaSelecionada: false });
-    this.setState({ token_app: false });
-    this.setState({
-      loading: true,
-      showModalComprovante: true,
-      titleModalComprovante: "Gerando comprovante...",
-    });
-
     const data = {
       url: "conta/comprovante-pdf",
-      data: {
-        id: id,
-      },
+      data: { id: id, app: 1 },
       method: "POST",
-      funcao: "comprovante_ver",
-      tela: "pix",
     };
-
-    Funcoes.Geral_API(data, true).then((responseJson) => {
-      console.log(responseJson);
-      this.setState({ comprovante_pdf: responseJson });
-      setTimeout(() => {
-        this.setState({
-          titleModalComprovante: "Pagamento efetuado com sucesso!",
-          loading: false,
-        });
-      }, 1000);
-    });
+  
+    Funcoes.Geral_API(data, true)
+      .then((res) => {
+        console.log("Resposta da API:", res);
+  
+        if (!res || !res.transferencia) {
+          console.error("Dados inválidos ou ausentes.");
+          return;
+        }
+  
+        const transferencia = res.transferencia;
+        const { dados_pagador, dados_recebedor, dados_transacao } = transferencia;
+  
+        const doc = new jsPDF();
+        const startY = 20;
+        const cellHeight = 10;
+        let cursorY = startY;
+  
+        // Adiciona título
+        doc.setFontSize(16);
+        doc.text("Comprovante de Transferência", 10, cursorY);
+        cursorY += 10;
+  
+        // Função para adicionar linhas com rótulo e valor
+        const addRow = (label, value) => {
+          doc.setFontSize(12);
+          doc.text(`${label}:`, 10, cursorY);
+          doc.text(value || "N/A", 70, cursorY);
+          cursorY += cellHeight;
+        };
+  
+        // Dados da transação
+        doc.setFontSize(14);
+        doc.text("Dados da Transação", 10, cursorY);
+        cursorY += 10;
+  
+        addRow("Data", dados_transacao.data);
+        addRow("Valor Pago", `R$ ${dados_transacao.valor_pago}`);
+        addRow("Finalidade", dados_transacao.finalidade);
+        addRow("ID Transação", dados_transacao.codigo_identificacao);
+        addRow("Status", dados_transacao.status);
+  
+        cursorY += 10;
+  
+        // Dados do pagador
+        doc.text("Dados do Pagador", 10, cursorY);
+        cursorY += 10;
+  
+        addRow("Nome", dados_pagador.nome);
+        addRow("Documento", dados_pagador.documento);
+        addRow("Conta Origem", dados_pagador.conta_origem);
+        addRow("Banco", dados_pagador.banco);
+        addRow("Tipo", dados_pagador.tipo);
+  
+        cursorY += 10;
+  
+        // Dados do recebedor
+        doc.text("Dados do Recebedor", 10, cursorY);
+        cursorY += 10;
+  
+        addRow("Nome", dados_recebedor.nome);
+        addRow("Conta Destino", dados_recebedor.conta_destino);
+        addRow("Tipo de Conta", dados_recebedor.tipo_conta);
+        addRow("Documento", dados_recebedor.documento);
+        addRow("Banco", dados_recebedor.banco);
+  
+        // Salva o PDF
+        doc.save("comprovante_transferencia.pdf");
+      })
+      .catch((error) => {
+        console.error("Erro na requisição ou ao gerar o PDF", error);
+      });
   };
+  
 
   getPass = async (data) => {
     this.setState({ password: data });
