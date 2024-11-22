@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "../../templates/style_transferencia.scss";
-import { Container, Col, Row, Button, Modal, Alert } from "react-bootstrap";
+import { Container, Col, Row, Button, Modal, Alert, Spinner  } from "react-bootstrap";
 import Select from "react-select";
 import Icones from "../../constants/Icon";
 import BannerTitle from "../../components/bannerTitle/bannerTitle";
@@ -887,13 +887,31 @@ export default class Cambio extends Component {
             </Container>
           </Modal.Body>
           <Modal.Footer>
-            <Button
-              variant="primary"
-              disabled={this.state.travarSaque}
-              onClick={this.saqueCrypto}
-            >
-              Sacar
-            </Button>
+            {this.state.travarSaque ? (
+              // Exibe o spinner enquanto a ação está travada
+              <div className="d-flex justify-content-center align-items-center">
+                <Spinner
+                  animation="border"
+                  role="status"
+                  variant="primary"
+                  style={{ width: "2rem", height: "2rem" }}
+                >
+                  <span className="sr-only">Carregando...</span>
+                </Spinner>
+              </div>
+            ) : (
+              // Exibe o botão quando travarSaque é falso
+              <Button
+                variant="primary"
+                disabled={this.state.travarSaque}
+                onClick={() => {
+                  this.setState({ travarSaque: true }); // Ativa o estado de loading
+                  this.saqueCrypto(); // Chama a função
+                }}
+              >
+                Sacar
+              </Button>
+            )}
           </Modal.Footer>
         </Modal>
       </div>
