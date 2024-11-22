@@ -50,6 +50,7 @@ export default class Cambio extends Component {
       totalPagarConfirmar: "",
       idMoeda: 0,
       valorMoedaTravar: 0,
+      disabledConfirm: false,
     };
   }
 
@@ -158,7 +159,7 @@ export default class Cambio extends Component {
       if (this.state.valueCompra < 0) {
         alert("Valor Minimo de Compra é de 1.000,00");
       } else {
-        this.setState({ viewValidar: false });
+        this.setState({ viewValidar: false, disabled: true });
         const data = {
           url: "cambio/cambio/travar-cotacao",
           data: JSON.stringify({
@@ -177,22 +178,19 @@ export default class Cambio extends Component {
 
           if (res.error == 1) {
             alert(res.message);
+            this.setState({ disabled: false });
           } else if (res.message == "success") {
             // Atualiza o valor da moeda antes de calcular
             this.setState({ valorMoedaTravar: res.data.result.price }, () => {
               // Chama a função de cálculo após atualizar o estado
               this.calcularTotalPagarConfirmar();
             });
-
-            // Configurações adicionais com delay
-            setTimeout(() => {
-              this.startTimerCancel();
-              this.setState({
-                idCotacao: res.data.result.id,
-                modalConfirmComprar: true,
-                modalComprar: false,
-              });
-            }, 300);
+            this.startTimerCancel();
+            this.setState({
+              idCotacao: res.data.result.id,
+              modalConfirmComprar: true,
+              modalComprar: false,
+            });
           }
 
           /* this.setState({ modalConfirmComprar: true, modalComprar: false });
@@ -235,6 +233,7 @@ export default class Cambio extends Component {
     } else if (this.state.senhaConfirm != this.state.senha) {
       alert("Senha incorreta");
     } else {
+      this.setState({ disabledConfirm: true });
       // Define um temporizador para exibir alerta após 15 segundos
 
       const data = {
@@ -308,7 +307,7 @@ export default class Cambio extends Component {
       method: "POST",
     };
 
-    console.log(data)
+    console.log(data);
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
       console.log(responseJson);
@@ -677,49 +676,65 @@ export default class Cambio extends Component {
               <Alert style={{ fontSize: "13px" }} variant="secondary">
                 <Row>
                   <Col>
-                    <h4>
-                      Moeda: <b>{this.state.moedaNome}</b>
-                    </h4>
+                    <h4>Moeda</h4>
+                    <input
+                      type="text"
+                      value={this.state.moedaNome}
+                      disabled
+                      style={{ width: "100%", padding: "5px" }}
+                    />
                   </Col>
                   <Col>
-                    <h4>
-                      Valor da Moeda:{" "}
-                      <b>
-                        {this.state.valorMoedaTravar}{" "}
-                        {/* Valor padrão caso não exista */}
-                      </b>
-                    </h4>
+                    <h4>Valor da Moeda</h4>
+                    <input
+                      type="text"
+                      value={this.state.valorMoedaTravar || "00,00"}
+                      disabled
+                      style={{ width: "100%", padding: "5px" }}
+                    />
+                  </Col>
+                  <Col>
+                    <h4>Taxa</h4>
+                    <input
+                      type="text"
+                      value={this.state.taxa + "%" || "00.00%"}
+                      disabled
+                      style={{ width: "100%", padding: "5px" }}
+                    />
                   </Col>
                 </Row>
+                <br />
                 <Row>
                   <Col>
-                    <h4>
-                      Quantidade que quer:{" "}
-                      <b>
-                        {this.state.valueCompra.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2, // Garante duas casas decimais
-                          maximumFractionDigits: 2,
-                        })}
-                      </b>
-                    </h4>
+                    <h4>Quantidade que quer</h4>
+                    <input
+                      type="text"
+                      value={this.state.valueCompra.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      disabled
+                      style={{ width: "100%", padding: "5px" }}
+                    />
                   </Col>
                   <Col>
-                    <h4>
-                      Valor Total a Pagar:{" "}
-                      <b>
-                        {this.state.totalPagarConfirmar.toLocaleString(
-                          "pt-BR",
-                          {
-                            style: "currency",
-                            currency: "BRL",
-                          }
-                        )}
-                      </b>
-                    </h4>
+                    <h4>Valor Total a Pagar</h4>
+                    <input
+                      type="text"
+                      value={this.state.totalPagarConfirmar.toLocaleString(
+                        "pt-BR",
+                        {
+                          style: "currency",
+                          currency: "BRL",
+                        }
+                      )}
+                      disabled
+                      style={{ width: "100%", padding: "5px" }}
+                    />
                   </Col>
                 </Row>
               </Alert>
-
+              <br />
               <Row>
                 <h6>Senha de Transação</h6>
               </Row>
@@ -739,7 +754,7 @@ export default class Cambio extends Component {
           <Modal.Footer>
             <Button
               variant="primary"
-              disabled={this.state.disabled}
+              disabled={this.state.disabledConfirm}
               onClick={this.buyMoeda}
             >
               Confirmar Compra
