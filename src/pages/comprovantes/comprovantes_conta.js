@@ -187,10 +187,6 @@ export default class ComprovanteConta extends Component {
             drawTableRow("Status", dados_transacao.status || "N/A");
           } else {
             drawTableRow("Finalidade", dados_transacao.finalidade || "N/A");
-            drawTableRow(
-              "ID Celcoin",
-              dados_transacao.codigo_identificacao_celcoin || "N/A"
-            );
             drawTableRow("Status", dados_transacao.status || "N/A");
           }
 
