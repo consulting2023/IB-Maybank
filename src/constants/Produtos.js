@@ -297,10 +297,14 @@ export default {
   },
 
   testSuporte: {
-    emailTest: "",
+    emailTest: "rapa.rodrigues@gmail.com",
     testLogin: false,
     testCambio: false,
   },
 
   nivelPerfil: Number(localStorage.getItem("nivel")),
+
+  pix: {
+    chavePix: false
+  }
 };

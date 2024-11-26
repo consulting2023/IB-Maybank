@@ -22,6 +22,7 @@ import QRCode from "react-qr-code";
 import InputMask from "react-input-mask";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import Produtos from "../../constants/Produtos";
 export default class Pix extends Component {
   constructor() {
     super();
@@ -381,6 +382,7 @@ export default class Pix extends Component {
         alert("Pix temporariamente fora do ar, tente novamente mais tarde.");
       } else if (responseJson.cod == 1) {
         setTimeout(() => {
+          alert("Pix realizado com Sucesso!");
           this.closeModalTransferencia();
           this.comprovante_ver(responseJson.mov_id);
         }, 1000);
@@ -397,14 +399,31 @@ export default class Pix extends Component {
       } else if (responseJson.cod == 5) {
         this.closeModalTransferencia();
         alert(responseJson.msg);
-      } else if (responseJson.cod == 10) {
+      } else if (responseJson.cod == 6) {
+        alert(responseJson.mensagem);
         this.closeModalTransferencia();
+      } else if (responseJson.cod == 7) {
+        alert(responseJson.mensagem);
+        this.closeModalTransferencia();
+      } else if (responseJson.cod == 9) {
+        alert("Transação não efetuada, tente novamente mais tarde.");
+        this.closeModalTransferencia();
+      } else if (responseJson.cod == 10) {
         alert(
           "Não é permitido a realização de múltiplas transferências Pix em menos de um minuto"
         );
+        this.closeModalTransferencia();
+      } else if (responseJson.cod == 11) {
+        alert(responseJson.mensagem);
+        this.closeModalTransferencia();
+        location.reload();
+      } else if (responseJson.cod == 100) {
+        alert("Senha de Transação Invalida");
+        this.closeModalTransferencia();
       } else {
         this.setState({ loading: false });
         alert("Pix temporariamente fora do ar, tente novamente mais tarde.");
+        location.href();
       }
     });
   };
@@ -513,6 +532,11 @@ export default class Pix extends Component {
 
         // Salva o PDF
         doc.save("comprovante_pix.pdf");
+
+        this.setState({
+          loading: false,
+          showModalComprovante: false,
+        });
       })
       .catch((error) => {
         console.error("Erro na requisição ou ao gerar o PDF", error);
@@ -914,27 +938,29 @@ export default class Pix extends Component {
           <br />
           Receber
           <Row>
-            <Col key={0} sm={4} className="my-3">
-              <Button
-                variant="outline-primary"
-                style={{ width: "200px", height: "100px" }}
-                onClick={() => {
-                  this.consultar_chaves_cliente();
-                  this.setState({ showModalChaves: true });
-                }}
-              >
-                <Container>
-                  <Row>
-                    <Col xs={4} className="align-self-center">
-                      {Icones.chave}
-                    </Col>
-                    <Col xs={8}>
-                      <p className="tituloBotoes">Minhas Chaves</p>
-                    </Col>
-                  </Row>
-                </Container>
-              </Button>
-            </Col>
+            {Produtos.pix.chavePix ? (
+              <Col key={0} sm={4} className="my-3">
+                <Button
+                  variant="outline-primary"
+                  style={{ width: "200px", height: "100px" }}
+                  onClick={() => {
+                    this.consultar_chaves_cliente();
+                    this.setState({ showModalChaves: true });
+                  }}
+                >
+                  <Container>
+                    <Row>
+                      <Col xs={4} className="align-self-center">
+                        {Icones.chave}
+                      </Col>
+                      <Col xs={8}>
+                        <p className="tituloBotoes">Minhas Chaves</p>
+                      </Col>
+                    </Row>
+                  </Container>
+                </Button>
+              </Col>
+            ) : null}
 
             <Col key={1} sm={4} className="my-3">
               <Button

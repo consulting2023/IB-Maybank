@@ -172,38 +172,23 @@ export default class TransferenciaInterna extends Component {
         );
       }
 
-      const data = {
-        url: "usuario/login",
-        data: {
-          email: Funcoes.pessoa.email,
-          password: texto,
-          sub_banco_id: "",
-          token_aparelho: "",
-          nome_aparelho: "",
-        },
-        method: "POST",
-      };
+      let chave = "";
 
-      Funcoes.Geral_API(data, false).then((res) => {
-        let chave = "";
-        if (res != 0) {
-          chave = texto;
-          i = Object.keys(output);
-        }
+      chave = texto;
+      i = Object.keys(output);
 
-        if (chave == "") {
-          this.setState({ loading: false });
-          this.props.alerts("Erro", "Senha Incorreta", "warning");
+      this.setState({ password: chave });
+      if (chave == "") {
+        this.setState({ loading: false });
+        this.props.alerts("Erro", "Senha Incorreta", "warning");
+      } else {
+        if (this.state.OTP.length == 6) {
+          this.Valida_token(this.state.OTP);
         } else {
-          if (this.state.OTP.length == 6) {
-            this.setState({ password: chave });
-            this.Valida_token(this.state.OTP);
-          } else {
-            this.setState({ loading: false });
-            this.props.alerts("Erro", "Preencha o token", "warning");
-          }
+          this.setState({ loading: false });
+          this.props.alerts("Erro", "Preencha o token", "warning");
         }
-      });
+      }
     }
   };
 
@@ -497,29 +482,30 @@ export default class TransferenciaInterna extends Component {
       data: { id: id, app: 1 },
       method: "POST",
     };
-  
+
     Funcoes.Geral_API(data, true)
       .then((res) => {
         console.log("Resposta da API:", res);
-  
+
         if (!res || !res.transferencia) {
           console.error("Dados inválidos ou ausentes.");
           return;
         }
-  
+
         const transferencia = res.transferencia;
-        const { dados_pagador, dados_recebedor, dados_transacao } = transferencia;
-  
+        const { dados_pagador, dados_recebedor, dados_transacao } =
+          transferencia;
+
         const doc = new jsPDF();
         const startY = 20;
         const cellHeight = 10;
         let cursorY = startY;
-  
+
         // Adiciona título
         doc.setFontSize(16);
         doc.text("Comprovante de Transferência", 10, cursorY);
         cursorY += 10;
-  
+
         // Função para adicionar linhas com rótulo e valor
         const addRow = (label, value) => {
           doc.setFontSize(12);
@@ -527,68 +513,70 @@ export default class TransferenciaInterna extends Component {
           doc.text(value || "N/A", 70, cursorY);
           cursorY += cellHeight;
         };
-  
+
         // Dados da transação
         doc.setFontSize(14);
         doc.text("Dados da Transação", 10, cursorY);
         cursorY += 10;
-  
+
         addRow("Data", dados_transacao.data);
         addRow("Valor Pago", `R$ ${dados_transacao.valor_pago}`);
         addRow("Finalidade", dados_transacao.finalidade);
         addRow("ID Transação", dados_transacao.codigo_identificacao);
         addRow("Status", dados_transacao.status);
-  
+
         cursorY += 10;
-  
+
         // Dados do pagador
         doc.text("Dados do Pagador", 10, cursorY);
         cursorY += 10;
-  
+
         addRow("Nome", dados_pagador.nome);
         addRow("Documento", dados_pagador.documento);
         addRow("Conta Origem", dados_pagador.conta_origem);
         addRow("Banco", dados_pagador.banco);
         addRow("Tipo", dados_pagador.tipo);
-  
+
         cursorY += 10;
-  
+
         // Dados do recebedor
         doc.text("Dados do Recebedor", 10, cursorY);
         cursorY += 10;
-  
+
         addRow("Nome", dados_recebedor.nome);
         addRow("Conta Destino", dados_recebedor.conta_destino);
         addRow("Tipo de Conta", dados_recebedor.tipo_conta);
         addRow("Documento", dados_recebedor.documento);
         addRow("Banco", dados_recebedor.banco);
-  
+
         // Salva o PDF
         doc.save("comprovante_transferencia.pdf");
+
+        alert("transferencia realizada com Sucesso!");
+        location.reload();
       })
       .catch((error) => {
         console.error("Erro na requisição ou ao gerar o PDF", error);
       });
   };
-  
 
   getPass = async (data) => {
     this.setState({ password: data });
   };
 
   abrirComprovante = () => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     const pdfBase64 = this.state.comprovante_pdf; // Supondo que você já tenha o Base64 armazenado no estado
 
     // Definir o tipo de conteúdo como PDF e criar a URL com a string Base64
     link.href = `data:application/pdf;base64,${pdfBase64}`;
 
     // Definir o nome do arquivo para ser baixado
-    link.download = 'comprovante.pdf';
+    link.download = "comprovante.pdf";
 
     // Simular o clique no link para iniciar o download
     link.click();
-};
+  };
 
   closeModalComprovante = () => {
     this.setState({
