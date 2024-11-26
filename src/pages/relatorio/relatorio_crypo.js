@@ -175,9 +175,9 @@ export default class RelatorioCrypo extends Component {
       new Date(dado.data_hora_transferencia).toLocaleString(), // Formata a data e hora
       dado.valor_cotacao_dolar
         ? parseFloat(dado.valor_cotacao_dolar).toFixed(2).replace(".", ",")
-        : "N/A", // Trata cotação nula
+        : "", // Trata cotação nula
       parseFloat(dado.valor_real).toFixed(2).replace(".", ","), // Formata valor real
-      dado.moeda_symbol || "N/A", // Exibe a moeda
+      dado.moeda_symbol || "", // Exibe a moeda
       // Determina o tipo de movimentação
     ]);
 
@@ -284,7 +284,7 @@ export default class RelatorioCrypo extends Component {
                           >
                             {dado.valor_cotacao_dolar
                               ? parseFloat(dado.valor_cotacao_dolar).toFixed(2)
-                              : "N/A"}
+                              : ""}
                           </td>
                           <td
                             className={
@@ -299,7 +299,7 @@ export default class RelatorioCrypo extends Component {
                               .replace(".", ",")}
                           </td>
 
-                          <td>{dado.moeda_symbol || "N/A"}</td>
+                          <td>{dado.moeda_symbol || ""}</td>
                         </tr>
                       ))}
                     </tbody>
