@@ -89,7 +89,7 @@ export async function Geral_API(dados, logado) {
   const [err, result] = await callbackWrapper(apiFunc);
   if (err) {
     // console.log("Erro: ", err);
-    alert('Erro desconhecido');
+    alert('Processamento Invalido, Contate seu Gerente!');
     // this.logout();
   } else {
     return result.data;

@@ -355,7 +355,7 @@ export default class TransferenciaOutros extends Component {
           this.comprovante_ver(res.mov_id);
         } else {
           //*algum erro não previsto
-          alert("Erro desconhecido");
+          alert("Processamento Invalido, Contate seu Gerente!");
           window.location.href = "/transferencia_outros";
         }
       });
