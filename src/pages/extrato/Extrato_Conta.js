@@ -48,18 +48,22 @@ export default class ExtratoConta extends Component {
     window.removeEventListener("scroll", this.handleScroll);
   }
 
-  handleScroll() {
-    if (
-      window.innerHeight + document.documentElement.scrollTop !==
-        document.documentElement.offsetHeight ||
-      this.state.loading ||
-      !this.state.hasMore
-    ) {
-      return;
-    }
-    this.loadMoreExtrato();
-  }
+  handleScroll = () => {
+    const { loading, hasMore } = this.state;
 
+    // Verifica se o scroll está próximo ao final da página
+    const scrollTop =
+      document.documentElement.scrollTop || document.body.scrollTop;
+    const scrollHeight =
+      document.documentElement.scrollHeight || document.body.scrollHeight;
+    const clientHeight =
+      document.documentElement.clientHeight || window.innerHeight;
+
+    // Executa a função somente se não estiver carregando e houver mais dados
+    if (!loading && hasMore && scrollTop + clientHeight >= scrollHeight - 50) {
+      this.loadMoreExtrato();
+    }
+  };
   loadMoreExtrato = () => {
     const { pessoa, dataDe, dataAte, ultimoId, extrato } = this.state;
 
@@ -94,7 +98,7 @@ export default class ExtratoConta extends Component {
         ultimoId: novosDados[novosDados.length - 1].id,
         soma,
         loading: false,
-        hasMore: novosDados.length === 50,
+        hasMore: novosDados.length === 50, // Verifica se ainda há mais resultados
       });
     });
   };
@@ -102,21 +106,18 @@ export default class ExtratoConta extends Component {
   verExtrato = () => {
     const { dataDe, dataAte, pessoa } = this.state;
 
-    // Obter a data atual (hoje) sem hora
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
+    const hoje = new Date() + 1;
 
-    // Validar as datas
     const dataInicio = new Date(dataDe);
     const dataFim = new Date(dataAte);
 
-    if (dataInicio > hoje+1 || dataFim > hoje+1) {
+    if (dataInicio > hoje || dataFim > hoje) {
       this.props.alerts(
         "Data inválida",
         "Informe no máximo a data do dia atual.",
         "warning"
       );
-      return; // Não executa o restante da função
+      return;
     }
 
     this.setState({
@@ -164,7 +165,7 @@ export default class ExtratoConta extends Component {
         mostrarExtrato: true,
         loading: false,
         disabled: false,
-        hasMore: arr.length === 50,
+        hasMore: arr.length === 50, // Verifica se ainda há mais resultados
       });
     });
   };
