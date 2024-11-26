@@ -80,13 +80,13 @@ export default class RelatorioCrypo extends Component {
       console.log(data);
 
       Funcoes.Geral_API(data, true).then((res) => {
-        if (res.status && res.dados.length > 0) {
+        if (res.status && res.data.length > 0) {
           this.setState({
-            extrato: res.dados,
+            extrato: res.data,
             loading: false,
             disabled: false,
-            hasMore: res.dados.length > 0,
-            lastItemId: res.dados[res.dados.length - 1].id, // Atualiza o último item carregado
+            hasMore: res.data.length > 0,
+            lastItemId: res.data[res.data.length - 1].id, // Atualiza o último item carregado
             mostrarExtrato: true,
           });
         } else {
@@ -141,12 +141,12 @@ export default class RelatorioCrypo extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((res) => {
-      if (res.status && res.dados.length > 0) {
+      if (res.status && res.data.length > 0) {
         this.setState((prevState) => ({
-          extrato: prevState.extrato.concat(res.dados),
+          extrato: prevState.extrato.concat(res.data),
           loading: false,
-          hasMore: res.dados.length > 0,
-          lastItemId: res.dados[res.dados.length - 1].id,
+          hasMore: res.data.length > 0,
+          lastItemId: res.data[res.data.length - 1].id,
         }));
       } else {
         this.setState({
@@ -162,25 +162,23 @@ export default class RelatorioCrypo extends Component {
 
     // Cabeçalho do CSV
     const headers = [
-      "ID",
-      "Nome",
-      "Valor",
-      "Data",
-      "Custom ID",
-      "End To End ID",
+      "Tipo de Movimentação", // Compra ou Saque
+      "Data e Hora",
+      "Valor Cotação Dólar",
+      "Valor Real",
+      "Moeda",
     ];
 
-    // Mapear os dados do extrato para uma estrutura de linhas CSV
+    // Mapear os dados do extrato para a estrutura desejada
     const rows = extrato.map((dado) => [
-      dado.id,
-      dado.nome,
-      // Verifica se dado.valor é numérico antes de aplicar toFixed
-      typeof dado.valor === "number"
-        ? dado.valor.toFixed(2).replace(".", ",")
-        : dado.valor,
-      new Date(dado.data_hora).toLocaleDateString(), // Formata a data
-      dado.mensagem,
-      dado.end_to_end_id,
+      parseFloat(dado.valor_real) < 0 ? "Saque" : "Compra",
+      new Date(dado.data_hora_transferencia).toLocaleString(), // Formata a data e hora
+      dado.valor_cotacao_dolar
+        ? parseFloat(dado.valor_cotacao_dolar).toFixed(2).replace(".", ",")
+        : "N/A", // Trata cotação nula
+      parseFloat(dado.valor_real).toFixed(2).replace(".", ","), // Formata valor real
+      dado.moeda_symbol || "N/A", // Exibe a moeda
+      // Determina o tipo de movimentação
     ]);
 
     // Adiciona o cabeçalho ao início das linhas
@@ -191,7 +189,7 @@ export default class RelatorioCrypo extends Component {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "relatorio-saida-pix.csv";
+    link.download = "relatorio-cambio.csv";
     link.style.display = "none";
     document.body.appendChild(link);
     link.click();
@@ -245,7 +243,11 @@ export default class RelatorioCrypo extends Component {
               <Col className="baseWindow px-5 py-4">
                 <Button
                   className="mr-1"
-                  style={{ borderRadius: 5, marginBottom: 10, marginRight: 10 }}
+                  style={{
+                    borderRadius: 5,
+                    marginBottom: 10,
+                    marginRight: 10,
+                  }}
                   onClick={this.exportarCSV}
                 >
                   {i18n.t("extrato.downloadCsv")}
@@ -254,37 +256,50 @@ export default class RelatorioCrypo extends Component {
                   <Table striped bordered id="tabela-extrato">
                     <thead>
                       <tr>
-                        <th>ID</th>
-                        <th scope="col">Nome</th>
-                        <th className="text-right" scope="col">
-                          {i18n.t("extrato.descrValor")}
-                        </th>
-                        <th className="text-right" scope="col">
-                          {i18n.t("extrato.descrData")}
-                        </th>
-                        <th>Custom ID</th>
-                        <th>End To End ID</th>
+                        <th>Movimentação</th>
+                        <th>Data e Hora</th>
+                        <th>Valor Cotação Dólar</th>
+                        <th>Valor Real</th>
+
+                        <th>Moeda</th>
                       </tr>
                     </thead>
 
                     <tbody>
                       {this.state.extrato.map((dado) => (
-                        <tr key={dado.id}>
-                          <td>{dado.id}</td>
-                          <td>{dado.nome}</td>
+                        <tr key={dado.transacao_id}>
+                          <td>{dado.valor_real < 0 ? "Saque" : "Compra"}</td>
+                          <td>
+                            {new Date(
+                              dado.data_hora_transferencia
+                            ).toLocaleString()}
+                          </td>
                           <td
                             className={
                               "text-right " +
-                              (dado.valor < 0 ? "redText" : "greenText")
+                              (parseFloat(dado.valor_cotacao_dolar) < null
+                                ? "redText"
+                                : "greenText")
                             }
                           >
-                            {Formatar.formatReal(dado.valor)}
+                            {dado.valor_cotacao_dolar
+                              ? parseFloat(dado.valor_cotacao_dolar).toFixed(2)
+                              : "N/A"}
                           </td>
-                          <td className="text-right">
-                            {Formatar.formatarDate(dado.data_hora)}
+                          <td
+                            className={
+                              "text-right " +
+                              (parseFloat(dado.valor_real) < 0
+                                ? "redText"
+                                : "greenText")
+                            }
+                          >
+                            {parseFloat(dado.valor_real)
+                              .toFixed(2)
+                              .replace(".", ",")}
                           </td>
-                          <td className="text-right">{dado.mensagem}</td>
-                          <td className="text-right">{dado.end_to_end_id}</td>
+
+                          <td>{dado.moeda_symbol || "N/A"}</td>
                         </tr>
                       ))}
                     </tbody>
