@@ -100,6 +100,25 @@ export default class ExtratoConta extends Component {
   };
 
   verExtrato = () => {
+    const { dataDe, dataAte, pessoa } = this.state;
+
+    // Obter a data atual (hoje) sem hora
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    // Validar as datas
+    const dataInicio = new Date(dataDe);
+    const dataFim = new Date(dataAte);
+
+    if (dataInicio > hoje+1 || dataFim > hoje+1) {
+      this.props.alerts(
+        "Data inválida",
+        "Informe no máximo a data do dia atual.",
+        "warning"
+      );
+      return; // Não executa o restante da função
+    }
+
     this.setState({
       loading: true,
       disabled: true,
@@ -107,8 +126,6 @@ export default class ExtratoConta extends Component {
       ultimoId: null,
       hasMore: true,
     });
-
-    const { dataDe, dataAte, pessoa } = this.state;
 
     const data = {
       url: "conta/extrato",
