@@ -76,7 +76,7 @@ export default class Senha extends Component {
       };
 
       Funcoes.Geral_API(data, true).then((res) => {
-        console.log(res)
+        console.log(res);
         if (res === 1) {
           alert("Senha alterada com sucesso! Sera preciso Logar novamente");
           Funcoes.logout();
@@ -89,7 +89,6 @@ export default class Senha extends Component {
   };
 
   trocarSenhaTransfer = () => {
-    
     if (this.state.senhaTransfer == "") {
       alert("É Obrigatorio preencher a senha para seguir adiante");
     } else if (this.state.OTP == "") {
@@ -209,6 +208,7 @@ export default class Senha extends Component {
               </Row>
               <Row>
                 <OtpInput
+                  isInputSecure={true}
                   focusInput={1}
                   isInputNum={true}
                   value={this.state.senha}
@@ -237,13 +237,14 @@ export default class Senha extends Component {
           <Modal.Header closeButton>
             <Modal.Title>Senha Transação</Modal.Title>
           </Modal.Header>
-          <Modal.Body >
+          <Modal.Body>
             <Container>
               <Row>
                 <h3>Token enviado para seu email</h3>
               </Row>
               <Row>
                 <OtpInput
+                  isInputSecure={true}
                   focusInput={1}
                   isInputNum={true}
                   value={this.state.OTP}
@@ -257,6 +258,7 @@ export default class Senha extends Component {
               </Row>
               <Row>
                 <OtpInput
+                  isInputSecure={true}
                   focusInput={1}
                   isInputNum={true}
                   value={this.state.senhaTransfer}

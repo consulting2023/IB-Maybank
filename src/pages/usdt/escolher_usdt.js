@@ -59,9 +59,6 @@ export default class Cambio extends Component {
       idMoeda: 0,
       valorMoedaTravar: 0,
       disabledConfirm: false,
-      senhaSaqueMasked: "",
-      senhaMasked: "",
-      senhaConfirmMasked: "",
     };
   }
 
@@ -164,11 +161,11 @@ export default class Cambio extends Component {
       this.state.valueMoeda == []
     ) {
       alert("Por favor, preencha os campos para prosseguir");
-    } else if (this.state.valueCompra < 10000) {
-      alert("Compra minima de 10.000");
+    } else if (this.state.valueCompra < 1000) {
+      alert("Compra minima de 1.000");
     } else {
-      if (this.state.valueCompra < 10000) {
-        alert("Valor Minimo de Compra é de 10.000,00");
+      if (this.state.valueCompra < 0) {
+        alert("Valor Minimo de Compra é de 1.000,00");
       } else {
         this.setState({ viewValidar: false, disabled: true });
         const data = {
@@ -417,47 +414,6 @@ export default class Cambio extends Component {
 
     // Atualiza o estado com o valor numérico de totalPagar
     this.setState({ totalPagarConfirmar });
-  };
-
-  handleSenhaChange = (value) => {
-    // Atualiza o estado com o valor real e a máscara
-    this.setState((prevState) => {
-      const realValue = value; // Valor real digitado
-      const maskedValue = realValue.replace(/./g, "*"); // Mascarar com '*'
-
-      return {
-        senhaSaque: realValue,
-
-        senhaSaqueMasked: maskedValue,
-      };
-    });
-  };
-
-  handleSenhaChangeCompra = (value) => {
-    // Atualiza o estado com o valor real e a máscara
-    this.setState((prevState) => {
-      const realValue = value; // Valor real digitado
-      const maskedValue = realValue.replace(/./g, "*"); // Mascarar com '*'
-
-      return {
-        senha: realValue,
-
-        senhaMasked: maskedValue,
-      };
-    });
-  };
-  handleSenhaChangeConfirm = (value) => {
-    // Atualiza o estado com o valor real e a máscara
-    this.setState((prevState) => {
-      const realValue = value; // Valor real digitado
-      const maskedValue = realValue.replace(/./g, "*"); // Mascarar com '*'
-
-      return {
-        senhaConfirm: realValue,
-
-        senhaConfirmMasked: maskedValue,
-      };
-    });
   };
 
   render() {
@@ -711,10 +667,11 @@ export default class Cambio extends Component {
                 <Col>
                   <h3>Senha de Transição</h3>
                   <OtpInput
+                  isInputSecure={true}
                     focusInput={1}
                     isInputNum={true}
-                    value={this.state.senhaMasked} // Valor mascarado
-                    onChange={(value) => this.handleSenhaChangeCompra(value)}
+                    value={this.state.senha}
+                    onChange={(value) => this.setState({ senha: value })}
                     numInputs={6}
                     className="tokenValidacao"
                     inputType="password"
@@ -816,10 +773,11 @@ export default class Cambio extends Component {
               </Row>
               <Row>
                 <OtpInput
+                isInputSecure={true}
                   focusInput={1}
                   isInputNum={true}
-                  value={this.state.senhaConfirmMasked} // Valor mascarado
-                  onChange={(value) => this.handleSenhaChangeConfirm(value)}
+                  value={this.state.senhaConfirm}
+                  onChange={(value) => this.setState({ senhaConfirm: value })}
                   numInputs={6}
                   className="tokenValidacao"
                   inputType="password"
@@ -953,11 +911,11 @@ export default class Cambio extends Component {
                 <OtpInput
                   focusInput={1}
                   isInputNum={true}
-                  value={this.state.senhaSaqueMasked} // Valor mascarado
-                  onChange={(value) => this.handleSenhaChange(value)}
+                  value={this.state.senhaSaque}
+                  onChange={(value) => this.setState({ senhaSaque: value })}
                   numInputs={6}
                   className="tokenValidacao"
-                  inputType="password"
+                  isInputSecure={true}
                 />
               </Row>
             </Container>
