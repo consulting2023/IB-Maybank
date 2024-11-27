@@ -610,7 +610,6 @@ export default class Login extends Component {
                   </Row>
                   <Row>
                     <OtpInput
-                      isInputSecure={true}
                       focusInput={1}
                       isInputNum={true}
                       value={this.state.senhaNew}

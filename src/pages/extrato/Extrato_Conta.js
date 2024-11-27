@@ -77,7 +77,7 @@ export default class ExtratoConta extends Component {
         conta_id: pessoa.conta_id,
         data_de: Formatar.formatarDateAno(dataDe),
         data_ate: Formatar.formatarDateAno(dataAte),
-        ultimo_id: ultimoId,
+        ulti_id: ultimoId,
       },
       method: "POST",
     };
@@ -173,107 +173,76 @@ export default class ExtratoConta extends Component {
   };
 
   carregarExtratoCsv = async () => {
-    const { pessoa, dataDe, dataAte, custom_id } = this.state;
-    const todosOsDados = new Map(); // Usamos Map para armazenar dados únicos baseados em IDs
-    let continuar = true;
-    let tentativas = 0;
-    const maxTentativas = 100; // Limite de tentativas para evitar loop infinito
+    const { dataDe, dataAte, pessoa } = this.state;
 
-    this.setState({ loadingCsv: true, disabledCsv: true });
+    console.log("Data de início:", dataDe);
+    console.log("Data de término:", dataAte);
 
-    while (continuar) {
-      try {
-        const data = {
-          url: "conta/extrato",
-          data: {
-            conta_id: pessoa.conta_id,
-            data_de: Formatar.formatarDateAno(dataDe),
-            data_ate: Formatar.formatarDateAno(dataAte),
-            ultimo_id: this.state.ultimoId,
-            custom_id: custom_id || "",
-          },
-          method: "POST",
-        };
+    const hoje = new Date();
+    const dataInicio = new Date(dataDe);
+    const dataFim = new Date(dataAte);
 
-        // Faz a requisição para buscar mais dados
-        const res = await Funcoes.Geral_API(data, true);
-        const keys = Object.keys(res);
+    console.log("Data atual:", hoje);
+    console.log("Data de início convertida:", dataInicio);
+    console.log("Data de término convertida:", dataFim);
 
-        // Verifica se não há mais dados
-        if (keys.length === 0) {
-          continuar = false;
-          break;
-        }
+    const data = {
+      url: "conta/extrato",
+      data: {
+        conta_id: pessoa.conta_id,
+        data_de: Formatar.formatarDateAno(dataDe), // Certifique-se de que o formato de data está correto
+        data_ate: Formatar.formatarDateAno(dataAte), // Certifique-se de que o formato de data está correto
+        isfile: true,
+      },
+      method: "POST",
+    };
 
-        const novosDados = keys.flatMap((key) => res[key]);
-
-        // Adiciona os novos dados ao Map, garantindo que não haja duplicados
-        novosDados.forEach((item) => {
-          if (!todosOsDados.has(item.id)) {
-            todosOsDados.set(item.id, item);
-          }
-        });
-
-        // Verifica se não há mais dados para carregar
-        if (novosDados.length === 0 || novosDados.length < 50) {
-          continuar = false;
-          break;
-        }
-
-        // Atualiza o `ultimoId` com o último registro retornado
-        this.setState({ ultimoId: novosDados[novosDados.length - 1].id });
-
-        // Incrementa o contador de tentativas
-        tentativas++;
-
-        // Interrompe se atingir o limite de tentativas
-        if (tentativas >= maxTentativas) {
-          console.warn("Limite de tentativas atingido.");
-          continuar = false;
-        }
-      } catch (error) {
-        console.error("Erro ao carregar dados para CSV:", error);
-        continuar = false; // Interrompe o loop em caso de erro
+    try {
+      const res = await Funcoes.Geral_API(data, true);
+      console.log("Resposta da API:", res); // Verifique se a resposta está correta
+      if (res && Object.keys(res).length > 0) {
+        return res;
       }
+      console.log("Nenhum dado retornado pela API");
+      return []; // Caso contrário, retorna um array vazio
+    } catch (error) {
+      console.error("Erro ao carregar extrato:", error);
+      this.props.alerts(
+        "Erro ao carregar extrato",
+        "Ocorreu um problema ao carregar os dados.",
+        "error"
+      );
+      return [];
     }
-
-    // Converte os valores únicos do Map para um array final
-    const dadosUnicos = Array.from(todosOsDados.values());
-
-    this.setState({ loadingCsv: false, disabledCsv: false });
-
-    return dadosUnicos;
   };
 
   extrato_csv = async () => {
     const { dataDe, dataAte, pessoa, soma } = this.state;
 
+    // Inicia o loading
+    this.setState({ loadingCsv: true, disabledCsv: true });
+
     try {
-      // Chama a função para carregar todos os dados paginados
-      const todosOsDados = await this.carregarExtratoCsv();
+      // Chama o endpoint uma única vez
+      const dadosExtrato = await this.carregarExtratoCsv();
+      console.log("Dados do extrato:", dadosExtrato); // Verifique se os dados foram carregados corretamente
+
+      if (!dadosExtrato || Object.keys(dadosExtrato).length === 0) {
+        this.props.alerts(
+          "Sem dados",
+          "Nenhum dado encontrado para o período selecionado.",
+          "info"
+        );
+        return;
+      }
 
       // Define valores padrão caso estejam indefinidos
       const saldoTotal = soma ? soma.toFixed(2).replace(".", ",") : "0,00";
       const saldoDisponivel = saldoTotal;
 
-      // Cabeçalhos e informações principais
-      const headers = [
-        `Extrato de Movimentação da Conta:`,
-        `${dataDe.toLocaleDateString()} até ${dataAte.toLocaleDateString()}`,
-        `Cliente:`,
-        `${pessoa?.nome || "N/A"}`,
-        `Agência/Conta:`,
-        `0001 / ${pessoa?.conta_id || "N/A"}`,
-        `Saldo Total:`,
-        saldoTotal,
-        `Saldo Disponível:`,
-        saldoDisponivel,
-        `Saldo Bloqueado:`,
-        "",
-      ];
-
       // Cabeçalho das colunas
       const columns = [
+        "Data",
         "Custom ID",
         "Id",
         "Data/Hora",
@@ -281,47 +250,68 @@ export default class ExtratoConta extends Component {
         "Valor",
         "Conta",
         "Saldo",
-        "Order",
-        "Bloqueado",
+        "Status",
       ];
 
-      // Dados das transações no formato CSV
-      const rows = todosOsDados.map((item) => [
-        item.custom_id || "N/A",
-        item.id || "",
-        new Date(item.dataHora).toLocaleDateString(),
-        item.descricao || "",
-        item.valor ? item.valor.toFixed(2).replace(".", ",") : "0,00",
-        item.conta_id || "",
-        item.saldo ? item.saldo.toFixed(2).replace(".", ",") : "0,00",
-        "",
-        "Desbloqueado",
-      ]);
+      // Processar o objeto de retorno
+      const rows = [];
 
-      // Convertendo para CSV
+      for (const [data, transacoes] of Object.entries(dadosExtrato)) {
+        transacoes.forEach((item) => {
+          rows.push([
+            data, // Adiciona a data como uma nova coluna
+            item.custom_id || "N/A",
+            item.id || "",
+            new Date(item.dataHora).toLocaleString(),
+            item.descricao || "",
+            item.valor ? item.valor.toFixed(2).replace(".", ",") : "0,00",
+            item.conta_id || "",
+            item.saldo ? item.saldo.toFixed(2).replace(".", ",") : "0,00",
+            item.bloqueado ? "Bloqueado" : "Desbloqueado",
+          ]);
+        });
+      }
+
+      // Conteúdo CSV
       const csvContent = [
-        headers.join(","), // Cabeçalhos principais
-        columns.join(","), // Cabeçalho das colunas
-        ...rows.map((row) => row.join(",")), // Dados das linhas
+        columns.join(","), // Cabeçalho
+        ...rows.map((row) => row.join(",")), // Dados
       ].join("\n");
 
       // Criando o arquivo para download
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
+
+      // Garantindo que a URL seja criada corretamente
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "extrato_movimentacao.csv";
-      link.style.visibility = "hidden";
+      link.setAttribute("download", "extrato_movimentacao.csv");
+
+      // Usar appendChild para garantir que o link esteja no DOM
       document.body.appendChild(link);
+
+      // Acionar o clique para download
       link.click();
+
+      // Remover o link após o download
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      this.props.alerts(
+        "CSV Gerado",
+        "O arquivo CSV foi gerado com sucesso.",
+        "success"
+      );
     } catch (error) {
       console.error("Erro ao gerar o CSV:", error);
       this.props.alerts(
         "Erro ao gerar CSV",
-        "Ocorreu um problema ao carregar todos os dados.",
+        "Ocorreu um problema ao carregar os dados.",
         "error"
       );
+    } finally {
+      // Finaliza o loading
+      this.setState({ loadingCsv: false, disabledCsv: false });
     }
   };
 
