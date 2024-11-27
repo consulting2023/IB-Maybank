@@ -315,19 +315,33 @@ export default class ExtratoConta extends Component {
     }
   };
 
-  extrato_pdf = () => {
+  extrato_pdf = async () => {
     const { extrato, dataDe, dataAte, pessoa, soma } = this.state;
+
+    // Verificação de dados antes de gerar o PDF
+    if (!extrato || extrato.length === 0) {
+      this.props.alerts(
+        "Sem dados",
+        "Nenhum dado encontrado para o período selecionado.",
+        "info"
+      );
+      return;
+    }
 
     // Configurações do PDF
     const doc = new jsPDF();
     doc.setFontSize(12);
+
+    // Definindo o saldo total e disponível
     const saldoTotal = soma ? soma.toFixed(2).replace(".", ",") : "0,00";
     const saldoDisponivel = saldoTotal;
 
     // Cabeçalho do PDF
     doc.text("Extrato de Movimentação da Conta:", 10, 10);
     doc.text(
-      `Período: ${dataDe.toLocaleDateString()} até ${dataAte.toLocaleDateString()}`,
+      `Período: ${new Date(dataDe).toLocaleDateString()} até ${new Date(
+        dataAte
+      ).toLocaleDateString()}`,
       10,
       20
     );
@@ -350,11 +364,11 @@ export default class ExtratoConta extends Component {
     // Dados da tabela
     const rows = extrato.map((item) => ({
       id: item.id || "",
-      dataHora: new Date(item.dataHora).toLocaleDateString(),
+      dataHora: new Date(item.dataHora).toLocaleString(), // Formata a data para incluir hora também
       descricao: item.descricao || "",
       valor: item.valor ? item.valor.toFixed(2).replace(".", ",") : "0,00",
       conta: item.conta_id || "",
-      custom_id: item.custom_id,
+      custom_id: item.custom_id || "N/A",
     }));
 
     // Adicionando a tabela ao PDF

@@ -23,6 +23,8 @@ import InputMask from "react-input-mask";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import Produtos from "../../constants/Produtos";
+import logo from "../../assets/images/logos/icon_logo.png"; // Importa a imagem
+
 export default class Pix extends Component {
   constructor() {
     super();
@@ -477,58 +479,78 @@ export default class Pix extends Component {
         const { dados_pagador, dados_recebedor, dados_transacao } = pix;
 
         const doc = new jsPDF();
-        const startY = 20;
-        const cellHeight = 10;
-        let cursorY = startY;
 
-        // Adiciona título
+        // Configurações iniciais
+
+        const pageWidth = doc.internal.pageSize.width;
+        let cursorY = 20;
+
+        // Adiciona o logotipo
+
+        doc.setFontSize(12);
+        doc.text("MAY BANK INTERMEDIACAO DE NEGOCIOS EIRELI", 60, cursorY + 10);
+        cursorY += 30;
+
+        // Título do comprovante
         doc.setFontSize(16);
-        doc.text("Comprovante de Transferência PIX", 10, cursorY);
+        doc.text("Comprovante PIX", pageWidth / 2, cursorY, {
+          align: "center",
+        });
         cursorY += 10;
 
-        // Função para adicionar linhas com rótulo e valor
-        const addRow = (label, value) => {
+        doc.setFontSize(10);
+        doc.text(
+          `DATA DE EMISSÃO: ${dados_transacao.data_transacao}`,
+          pageWidth - 60,
+          cursorY,
+          { align: "right" }
+        );
+        cursorY += 10;
+
+        // Função para adicionar seções
+        const addSection = (title, items) => {
           doc.setFontSize(12);
-          doc.text(`${label}:`, 10, cursorY);
-          doc.text(value ? String(value) : "N/A", 70, cursorY); // Converte o valor para string
-          cursorY += cellHeight;
+          doc.text(title, 10, cursorY);
+          cursorY += 8;
+
+          items.forEach(({ label, value }) => {
+            doc.setFontSize(10);
+            doc.text(`${label}:`, 10, cursorY);
+            doc.text(value ? String(value) : "N/A", 70, cursorY);
+            cursorY += 6;
+          });
+
+          cursorY += 8; // Espaço entre seções
         };
 
-        // Dados da transação
-        doc.setFontSize(14);
-        doc.text("Dados da Transação", 10, cursorY);
-        cursorY += 10;
+        // Dados do Pagador
+        addSection("Dados do Pagador", [
+          { label: "Nome", value: dados_pagador.nome },
+          { label: "CPF", value: dados_pagador.documento },
+          { label: "Conta de Origem", value: dados_pagador.conta_origem },
+          { label: "Banco", value: dados_pagador.banco },
+        ]);
 
-        addRow("Data da Transação", dados_transacao.data_transacao);
-        addRow("Valor Pago", `R$ ${dados_transacao.valor_pago}`);
-        addRow("Descrição", dados_transacao.descricao);
-        addRow("Chave PIX", dados_transacao.chave_pix);
-        addRow("ID Transação", dados_transacao.identificador_transacao);
-        addRow("Status", dados_transacao.status);
+        // Dados do Recebedor
+        addSection("Dados do Recebedor", [
+          { label: "Nome", value: dados_recebedor.nome },
+          { label: "Banco", value: dados_recebedor.banco },
+          { label: "Agência", value: dados_recebedor.agencia },
+          { label: "Conta", value: dados_recebedor.conta },
+          { label: "Documento", value: dados_recebedor.documento },
+          { label: "Chave PIX", value: dados_recebedor.chave_pix },
+        ]);
 
-        cursorY += 10;
-
-        // Dados do pagador
-        doc.text("Dados do Pagador", 10, cursorY);
-        cursorY += 10;
-
-        addRow("Nome", dados_pagador.nome);
-        addRow("Documento", dados_pagador.documento);
-        addRow("Conta Origem", dados_pagador.conta_origem);
-        addRow("Banco", dados_pagador.banco);
-        addRow("Tipo", dados_pagador.tipo);
-
-        cursorY += 10;
-
-        // Dados do recebedor
-        doc.text("Dados do Recebedor", 10, cursorY);
-        cursorY += 10;
-
-        addRow("Nome", dados_recebedor.nome);
-        addRow("Banco", dados_recebedor.banco);
-        addRow("Agência", dados_recebedor.agencia);
-        addRow("Conta", dados_recebedor.conta);
-        addRow("Documento", dados_recebedor.documento);
+        // Dados da Transação
+        addSection("Dados da Transação", [
+          { label: "Valor", value: `R$ ${dados_transacao.valor_pago}` },
+          { label: "Chave PIX", value: dados_transacao.chave_pix },
+          { label: "Hora da Transação", value: dados_transacao.hora_transacao },
+          {
+            label: "Identificador da Transação",
+            value: dados_transacao.identificador_transacao,
+          },
+        ]);
 
         // Salva o PDF
         doc.save("comprovante_pix.pdf");
@@ -539,7 +561,19 @@ export default class Pix extends Component {
         });
       })
       .catch((error) => {
+        console.error("Erro ao converter a imagem para Base64", error);
+        this.setState({
+          loading: false,
+          showModalComprovante: false,
+        });
+      })
+
+      .catch((error) => {
         console.error("Erro na requisição ou ao gerar o PDF", error);
+        this.setState({
+          loading: false,
+          showModalComprovante: false,
+        });
       });
   };
 
