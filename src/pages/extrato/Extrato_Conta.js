@@ -34,6 +34,8 @@ export default class ExtratoConta extends Component {
       soma: 0,
       hasMore: true,
       custom_id: "",
+      loadingCsv: false,
+      disabledCsv: false,
     };
     this.handleScroll = this.handleScroll.bind(this);
   }
@@ -170,72 +172,157 @@ export default class ExtratoConta extends Component {
     });
   };
 
-  extrato_csv = () => {
-    const { extrato, dataDe, dataAte, pessoa, soma } = this.state;
+  carregarExtratoCsv = async () => {
+    const { pessoa, dataDe, dataAte, custom_id } = this.state;
+    const todosOsDados = new Map(); // Usamos Map para armazenar dados únicos baseados em IDs
+    let continuar = true;
+    let tentativas = 0;
+    const maxTentativas = 100; // Limite de tentativas para evitar loop infinito
 
-    // Define valores padrão caso estejam indefinidos
-    const saldoTotal = soma ? soma.toFixed(2).replace(".", ",") : "0,00";
-    const saldoDisponivel = saldoTotal;
+    this.setState({ loadingCsv: true, disabledCsv: true });
 
-    // Cabeçalhos e informações principais
-    const headers = [
-      `Extrato de Movimentação da Conta:`,
-      `${dataDe.toLocaleDateString()} até ${dataAte.toLocaleDateString()}`,
-      `Cliente:`,
-      `${pessoa?.nome || "N/A"}`,
-      `Agência/Conta:`,
-      `0001 / ${pessoa?.conta_id || "N/A"}`,
-      `Saldo Total:`,
-      saldoTotal,
-      `Saldo Disponível:`,
-      saldoDisponivel,
-      `Saldo Bloqueado:`,
-      "",
-    ];
+    while (continuar) {
+      try {
+        const data = {
+          url: "conta/extrato",
+          data: {
+            conta_id: pessoa.conta_id,
+            data_de: Formatar.formatarDateAno(dataDe),
+            data_ate: Formatar.formatarDateAno(dataAte),
+            ultimo_id: this.state.ultimoId,
+            custom_id: custom_id || "",
+          },
+          method: "POST",
+        };
 
-    // Cabeçalho das colunas
-    const columns = [
-      "Custom ID", // Nova coluna para custom_id
-      "Id",
-      "Data/Hora",
-      "Descrição",
-      "Valor",
-      "Conta",
-      "Saldo",
-      "Order",
-      "Bloqueado",
-    ];
+        // Faz a requisição para buscar mais dados
+        const res = await Funcoes.Geral_API(data, true);
+        const keys = Object.keys(res);
 
-    // Dados das transações no formato CSV
-    const rows = extrato.map((item) => [
-      item.custom_id || "N/A", // Adiciona o custom_id
-      item.id || "",
-      new Date(item.dataHora).toLocaleDateString(),
-      item.descricao || "",
-      item.valor ? item.valor.toFixed(2).replace(".", ",") : "0,00",
-      item.conta_id || "",
-      item.saldo ? item.saldo.toFixed(2).replace(".", ",") : "0,00",
-      "",
-      "Desbloqueado",
-    ]);
+        // Verifica se não há mais dados
+        if (keys.length === 0) {
+          continuar = false;
+          break;
+        }
 
-    // Convertendo para CSV
-    const csvContent = [
-      headers.join(","), // Cabeçalhos principais
-      columns.join(","), // Cabeçalho das colunas
-      ...rows.map((row) => row.join(",")), // Dados das linhas
-    ].join("\n");
+        const novosDados = keys.flatMap((key) => res[key]);
 
-    // Criando o arquivo para download
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "extrato_movimentacao.csv";
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+        // Adiciona os novos dados ao Map, garantindo que não haja duplicados
+        novosDados.forEach((item) => {
+          if (!todosOsDados.has(item.id)) {
+            todosOsDados.set(item.id, item);
+          }
+        });
+
+        // Verifica se não há mais dados para carregar
+        if (novosDados.length === 0 || novosDados.length < 50) {
+          continuar = false;
+          break;
+        }
+
+        // Atualiza o `ultimoId` com o último registro retornado
+        this.setState({ ultimoId: novosDados[novosDados.length - 1].id });
+
+        // Incrementa o contador de tentativas
+        tentativas++;
+
+        // Interrompe se atingir o limite de tentativas
+        if (tentativas >= maxTentativas) {
+          console.warn("Limite de tentativas atingido.");
+          continuar = false;
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados para CSV:", error);
+        continuar = false; // Interrompe o loop em caso de erro
+      }
+    }
+
+    // Converte os valores únicos do Map para um array final
+    const dadosUnicos = Array.from(todosOsDados.values());
+
+    this.setState({ loadingCsv: false, disabledCsv: false });
+
+    return dadosUnicos;
+  };
+
+  extrato_csv = async () => {
+    const { dataDe, dataAte, pessoa, soma } = this.state;
+
+    try {
+      // Chama a função para carregar todos os dados paginados
+      const todosOsDados = await this.carregarExtratoCsv();
+
+      // Define valores padrão caso estejam indefinidos
+      const saldoTotal = soma ? soma.toFixed(2).replace(".", ",") : "0,00";
+      const saldoDisponivel = saldoTotal;
+
+      // Cabeçalhos e informações principais
+      const headers = [
+        `Extrato de Movimentação da Conta:`,
+        `${dataDe.toLocaleDateString()} até ${dataAte.toLocaleDateString()}`,
+        `Cliente:`,
+        `${pessoa?.nome || "N/A"}`,
+        `Agência/Conta:`,
+        `0001 / ${pessoa?.conta_id || "N/A"}`,
+        `Saldo Total:`,
+        saldoTotal,
+        `Saldo Disponível:`,
+        saldoDisponivel,
+        `Saldo Bloqueado:`,
+        "",
+      ];
+
+      // Cabeçalho das colunas
+      const columns = [
+        "Custom ID",
+        "Id",
+        "Data/Hora",
+        "Descrição",
+        "Valor",
+        "Conta",
+        "Saldo",
+        "Order",
+        "Bloqueado",
+      ];
+
+      // Dados das transações no formato CSV
+      const rows = todosOsDados.map((item) => [
+        item.custom_id || "N/A",
+        item.id || "",
+        new Date(item.dataHora).toLocaleDateString(),
+        item.descricao || "",
+        item.valor ? item.valor.toFixed(2).replace(".", ",") : "0,00",
+        item.conta_id || "",
+        item.saldo ? item.saldo.toFixed(2).replace(".", ",") : "0,00",
+        "",
+        "Desbloqueado",
+      ]);
+
+      // Convertendo para CSV
+      const csvContent = [
+        headers.join(","), // Cabeçalhos principais
+        columns.join(","), // Cabeçalho das colunas
+        ...rows.map((row) => row.join(",")), // Dados das linhas
+      ].join("\n");
+
+      // Criando o arquivo para download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "extrato_movimentacao.csv";
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Erro ao gerar o CSV:", error);
+      this.props.alerts(
+        "Erro ao gerar CSV",
+        "Ocorreu um problema ao carregar todos os dados.",
+        "error"
+      );
+    }
   };
 
   extrato_pdf = () => {
@@ -393,9 +480,28 @@ export default class ExtratoConta extends Component {
                   <Button className="mr-1" onClick={this.extrato_pdf}>
                     {i18n.t("extrato.downloadPdf")}
                   </Button>
-                  <Button className="mr-1" onClick={this.extrato_csv}>
-                    {i18n.t("extrato.downloadCsv")}
-                  </Button>
+
+                  <div>
+                    {/* Indicador de loading */}
+                    {this.state.loadingCsv && (
+                      <div className="loading-overlay">
+                        <div className="spinner"></div>
+                        <p>Gerando arquivo CSV, por favor, aguarde...</p>
+                      </div>
+                    )}
+
+                    {/* Botão para gerar o CSV */}
+
+                    <Button
+                      className="mr-1"
+                      onClick={this.extrato_csv}
+                      disabled={this.state.loadingCsv || this.state.disabledCsv}
+                    >
+                      {this.state.loading
+                        ? "Gerando..."
+                        : "Download Extrato CSV"}
+                    </Button>
+                  </div>
                 </ButtonGroup>
                 {soma !== 0 && (
                   <div className="d-flex flex-grow-1">
