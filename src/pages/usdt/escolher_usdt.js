@@ -326,9 +326,31 @@ export default class Cambio extends Component {
         alert("Saque em processamento! Verificar relatorio de Saque");
         window.location.href = "/relatorio_crypo";
       } else {
-        alert("Erro em solicitar o saque, tente novamente");
-        this.setState({ travarSaque: false });
-        location.reload();
+        if (responseJson.cod == 101) {
+          alert("Senha errada, tente novamente");
+          this.setState({ travarSaque: false });
+        } else if (responseJson.cod == 105) {
+          alert(
+            "Parametros insuficientes, verifique os campos e tente novamente"
+          );
+          this.setState({ travarSaque: false });
+        } else if (responseJson.cod == 203) {
+          alert("Erro em solicitar o saque, tente novamente");
+          Funcoes.logout();
+        } else if (responseJson.cod == 2) {
+          alert(
+            "Saldo para saque insuficiente, realize uma compra para poder sacar mais que o saldo"
+          );
+          this.setState({ travarSaque: false });
+        } else if (responseJson.cod == 104) {
+          alert(
+            "Erro ao completar o Saque, tente novamente mais tarde ou comunique o gerente"
+          );
+          this.setState({ travarSaque: false });
+        } else {
+          alert("Erro em solicitar o saque, tente novamente");
+          this.setState({ travarSaque: false });
+        }
       }
     });
   };
