@@ -165,10 +165,10 @@ export default class Cambio extends Component {
     ) {
       alert("Por favor, preencha os campos para prosseguir");
     } else if (this.state.valueCompra < 10000) {
-      alert("Compra minima de 1.000");
+      alert("Compra minima de 10.000");
     } else {
       if (this.state.valueCompra < 10000) {
-        alert("Valor Minimo de Compra é de 1.000,00");
+        alert("Valor Minimo de Compra é de 10.000,00");
       } else {
         this.setState({ viewValidar: false, disabled: true });
         const data = {
