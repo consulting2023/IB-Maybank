@@ -59,7 +59,9 @@ export default class Cambio extends Component {
       idMoeda: 0,
       valorMoedaTravar: 0,
       disabledConfirm: false,
-      senhaSaqueMasked: ""
+      senhaSaqueMasked: "",
+      senhaMasked: "",
+      senhaConfirmMasked: "",
     };
   }
 
@@ -400,12 +402,38 @@ export default class Cambio extends Component {
     this.setState((prevState) => {
       const realValue = value; // Valor real digitado
       const maskedValue = realValue.replace(/./g, "*"); // Mascarar com '*'
-  
+
       return {
         senhaSaque: realValue,
-        senha: realValue,
-        senhaConfirm: realValue,
+
         senhaSaqueMasked: maskedValue,
+      };
+    });
+  };
+
+  handleSenhaChangeCompra = (value) => {
+    // Atualiza o estado com o valor real e a máscara
+    this.setState((prevState) => {
+      const realValue = value; // Valor real digitado
+      const maskedValue = realValue.replace(/./g, "*"); // Mascarar com '*'
+
+      return {
+        senha: realValue,
+
+        senhaMasked: maskedValue,
+      };
+    });
+  };
+  handleSenhaChangeConfirm = (value) => {
+    // Atualiza o estado com o valor real e a máscara
+    this.setState((prevState) => {
+      const realValue = value; // Valor real digitado
+      const maskedValue = realValue.replace(/./g, "*"); // Mascarar com '*'
+
+      return {
+        senhaConfirm: realValue,
+
+        senhaConfirmMasked: maskedValue,
       };
     });
   };
@@ -661,16 +689,14 @@ export default class Cambio extends Component {
                 <Col>
                   <h3>Senha de Transição</h3>
                   <OtpInput
-                  focusInput={1}
-                  isInputNum={true}
-                  value={this.state.senha} // Valor mascarado
-                  onChange={(value) => this.handleSenhaChange(value)}
-                  numInputs={6}
-                  className="tokenValidacao"
-                  inputType="password"
-                />
-
-                 
+                    focusInput={1}
+                    isInputNum={true}
+                    value={this.state.senhaMasked} // Valor mascarado
+                    onChange={(value) => this.handleSenhaChangeCompra(value)}
+                    numInputs={6}
+                    className="tokenValidacao"
+                    inputType="password"
+                  />
                 </Col>
               </Row>
             </Container>
@@ -767,17 +793,15 @@ export default class Cambio extends Component {
                 <h6>Senha de Transação</h6>
               </Row>
               <Row>
-
-              <OtpInput
+                <OtpInput
                   focusInput={1}
                   isInputNum={true}
-                  value={this.state.senhaConfirm} // Valor mascarado
-                  onChange={(value) => this.handleSenhaChange(value)}
+                  value={this.state.senhaConfirmMasked} // Valor mascarado
+                  onChange={(value) => this.handleSenhaChangeConfirm(value)}
                   numInputs={6}
                   className="tokenValidacao"
                   inputType="password"
                 />
-                
               </Row>
             </Container>
           </Modal.Body>
