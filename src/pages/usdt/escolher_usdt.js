@@ -257,7 +257,7 @@ export default class Cambio extends Component {
         if (res.success == 0) {
           if (res.cod == 0) {
             alert(res.message);
-            this.setState({ disabled: false });
+            this.setState({ disabledConfirm: false });
           } else if (res.cod == 1) {
             alert(
               "Tempo minino para travar cotação de 1 minuto, tente novamente"
@@ -265,21 +265,21 @@ export default class Cambio extends Component {
             location.reload();
           } else if (res.cod == 2) {
             alert(res.mensagem);
-            this.setState({ disabled: false });
+            this.setState({ disabledConfirm: false });
           } else if (res.cod == 101) {
             alert(res.message);
-            this.setState({ disabled: false });
+            this.setState({ disabledConfirm: false });
           } else if (res.cod == 104) {
             alert(res.mensagem);
             location.location();
           } else if (res.cod == 105) {
             alert("Verifique os parametros e tente novamente");
-            this.setState({ disabled: false });
+            this.setState({ disabledConfirm: false });
           } else if (res.cod == 203) {
             alert("Erro interno, aguarde");
           } else if (res.cod == 204) {
             alert(res.mensagem);
-            this.setState({ disabled: false });
+            this.setState({ disabledConfirm: false });
           } else {
             alert("Erro Desconhecido");
           }
