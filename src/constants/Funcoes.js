@@ -263,8 +263,67 @@ export function comprovante_pdf(id) {
 
         cursorY += 10; // Espaço entre as seções
 
+        if (transferencia.tipo == "saida") {
+          
+          // Dados do pagador
+          doc.setFontSize(12);
+          doc.text("Dados do Pagador", 10, cursorY);
+          cursorY += 10;
+          drawTableRow("Nome", dados_pagador.nome || "N/A");
+          drawTableRow("Documento", dados_pagador.documento || "N/A");
+          drawTableRow("Conta Origem", dados_pagador.conta_origem || "N/A");
+          drawTableRow("Banco", dados_pagador.banco || "N/A");
+          drawTableRow("Tipo", dados_pagador.tipo || "N/A");
+
+          cursorY += 10; // Espaço entre as seções
+
+          // Dados do recebedor
+          doc.text("Dados do Recebedor", 10, cursorY);
+          cursorY += 10;
+          drawTableRow("Nome", dados_recebedor.nome || "N/A");
+          drawTableRow(
+            "Conta Destino",
+            res.pix
+              ? `${dados_recebedor.agencia || "N/A"} | ${
+                  dados_recebedor.conta || "N/A"
+                }`
+              : dados_recebedor.conta_destino || "N/A"
+          );
+          drawTableRow("Documento", dados_recebedor.documento || "N/A");
+          drawTableRow("Banco", dados_recebedor.banco || "N/A");
+          if (!res.pix) {
+            drawTableRow("Tipo de Conta", dados_recebedor.tipo_conta || "N/A");
+          }
+        } else {
+          doc.setFontSize(12);
+          doc.text("Dados do Pagador", 10, cursorY);
+          cursorY += 10;
+          drawTableRow("Nome", dados_recebedor.nome || "N/A");
+          drawTableRow(
+            "Conta Destino",
+            res.pix
+              ? `${dados_recebedor.agencia || "N/A"} | ${
+                  dados_recebedor.conta || "N/A"
+                }`
+              : dados_recebedor.conta_destino || "N/A"
+          );
+          drawTableRow("Documento", dados_recebedor.documento || "N/A");
+          drawTableRow("Banco", dados_recebedor.banco || "N/A");
+          if (!res.pix) {
+            drawTableRow("Tipo de Conta", dados_recebedor.tipo_conta || "N/A");
+          }
+          cursorY += 10; // Espaço entre as seções
+          doc.text("Dados do Recebedor", 10, cursorY);
+          cursorY += 10;
+          drawTableRow("Nome", dados_pagador.nome || "N/A");
+          drawTableRow("Documento", dados_pagador.documento || "N/A");
+          drawTableRow("Conta Origem", dados_pagador.conta_origem || "N/A");
+          drawTableRow("Banco", dados_pagador.banco || "N/A");
+          drawTableRow("Tipo", dados_pagador.tipo || "N/A");
+        }
+
         // Dados do pagador
-        doc.setFontSize(12);
+        /* doc.setFontSize(12);
         doc.text("Dados do Pagador", 10, cursorY);
         cursorY += 10;
         drawTableRow("Nome", dados_pagador.nome || "N/A");
@@ -291,7 +350,7 @@ export function comprovante_pdf(id) {
         drawTableRow("Banco", dados_recebedor.banco || "N/A");
         if (!res.pix) {
           drawTableRow("Tipo de Conta", dados_recebedor.tipo_conta || "N/A");
-        }
+        } */
 
         doc.save("comprovante.pdf");
       };
@@ -384,7 +443,6 @@ export async function comprovante_ver(id) {
         });
 
         cursorY += 8; // Espaço entre seções
-      
       };
 
       // Dados do Pagador
@@ -409,7 +467,10 @@ export async function comprovante_ver(id) {
       addSection("Dados da Transação", [
         { label: "Valor", value: `R$ ${dados_transacao.valor_pago}` },
         { label: "Chave PIX", value: dados_transacao.chave_pix },
-        { label: "Data/Hora da Transação", value: dados_transacao.data_transacao },
+        {
+          label: "Data/Hora da Transação",
+          value: dados_transacao.data_transacao,
+        },
         {
           label: "Identificador da Transação",
           value: dados_transacao.identificador_transacao,
