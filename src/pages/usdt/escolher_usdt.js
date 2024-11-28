@@ -161,11 +161,11 @@ export default class Cambio extends Component {
       this.state.valueMoeda == []
     ) {
       alert("Por favor, preencha os campos para prosseguir");
-    } else if (this.state.valueCompra < 1000) {
-      alert("Compra minima de 1.000");
+    } else if (this.state.valueCompra < 10000) {
+      alert("Compra minima de 10.000");
     } else {
-      if (this.state.valueCompra < 0) {
-        alert("Valor Minimo de Compra é de 1.000,00");
+      if (this.state.valueCompra < 10000) {
+        alert("Valor Minimo de Compra é de 10.000,00");
       } else {
         this.setState({ viewValidar: false, disabled: true });
         const data = {
