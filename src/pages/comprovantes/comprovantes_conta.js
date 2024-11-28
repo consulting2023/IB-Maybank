@@ -388,7 +388,7 @@ export default class ComprovanteConta extends Component {
                     <button
                       style={{ marginLeft: "15px" }}
                       className="btn btn-sm baixarComprovante btn-success"
-                      onClick={() => this.comprovante_pdf(comprovante.mov.id)}
+                      onClick={() => Funcoes.comprovante_pdf(comprovante.mov.id)}
                     >
                       Ver PDF
                     </button>

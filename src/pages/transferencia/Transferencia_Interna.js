@@ -249,7 +249,7 @@ export default class TransferenciaInterna extends Component {
             window.location.href = "/transferencia_interna";
           } else if (res.dados.mov_id) {
             //*pagamento realizado
-            this.comprovante_ver(res.dados.mov_id);
+            Funcoes.comprovante_pdf(res.dados.mov_id);
           } else {
             //*algum erro não previsto
             alert("Processamento Invalido, Contate seu Gerente!");
