@@ -184,13 +184,37 @@ export default class Cambio extends Component {
         Funcoes.Geral_API(data, true).then((res) => {
           console.log(res);
 
-          if (res.error == 1) {
-            alert(res.message);
-            this.setState({ disabled: false });
-          } else if (res.message == "success") {
-            // Atualiza o valor da moeda antes de calcular
+          if (res.success == 0) {
+            if (res.cod == 0) {
+              alert(res.message);
+              this.setState({ disabled: false });
+            } else if (res.cod == 1) {
+              alert(
+                "Tempo minino para travar cotação de 1 minuto, tente novamente"
+              );
+              location.reload();
+            } else if (res.cod == 2) {
+              alert(res.mensagem);
+              this.setState({ disabled: false });
+            } else if (res.cod == 101) {
+              alert(res.message);
+              this.setState({ disabled: false });
+            } else if (res.cod == 104) {
+              alert(res.mensagem);
+              location.location();
+            } else if (res.cod == 105) {
+              alert("Verifique os parametros e tente novamente");
+              this.setState({ disabled: false });
+            } else if (res.cod == 203) {
+              alert("Erro interno, aguarde");
+            } else if (res.cod == 204) {
+              alert(res.mensagem);
+              this.setState({ disabled: false });
+            } else {
+              alert("Erro Desconhecido");
+            }
+          } else if (res.success == 1) {
             this.setState({ valorMoedaTravar: res.data.result.price }, () => {
-              // Chama a função de cálculo após atualizar o estado
               this.calcularTotalPagarConfirmar();
             });
             this.startTimerCancel();
@@ -199,36 +223,9 @@ export default class Cambio extends Component {
               modalConfirmComprar: true,
               modalComprar: false,
             });
-          }
-
-          /* this.setState({ modalConfirmComprar: true, modalComprar: false });
-          const responseJson = JSON.parse(jsonstring);
-
-          if (responseJson.message !== "success") {
-            console.error("Erro na resposta:", responseJson);
-
-            alert(
-              responseJson?.message ||
-                "Erro inesperado ao processar a solicitação."
-            );
-
-            this.setState({ disabled: false });
-          } else if (responseJson.data?.result?.id) {
-            this.setState({
-              idCotacao: responseJson.data.result.id,
-              modalConfirmComprar: true,
-              modalComprar: false,
-            });
           } else {
-            console.warn(
-              "Resposta recebida, mas faltam informações necessárias:",
-              responseJson
-            );
-
-            alert("Resposta recebida, mas faltam informações necessárias.");
-
-            this.setState({ disabled: false });
-          } */
+            alert("Erro interno");
+          }
         });
       }
     }
@@ -254,17 +251,38 @@ export default class Cambio extends Component {
           amount_total: this.state.totalPagarConfirmar,
         }),
         method: "POST",
-        console: false,
-        funcao: "trazer moeda crypto",
-        tela: "comprar_moeda",
       };
 
       Funcoes.Geral_API(data).then((responseJson) => {
-        // Cancela o temporizador caso a resposta chegue antes de 15 segundos
-
-        if (responseJson.data.success == false) {
-          alert(responseJson.data.mensagem);
-          location.reload();
+        if (res.success == 0) {
+          if (res.cod == 0) {
+            alert(res.message);
+            this.setState({ disabled: false });
+          } else if (res.cod == 1) {
+            alert(
+              "Tempo minino para travar cotação de 1 minuto, tente novamente"
+            );
+            location.reload();
+          } else if (res.cod == 2) {
+            alert(res.mensagem);
+            this.setState({ disabled: false });
+          } else if (res.cod == 101) {
+            alert(res.message);
+            this.setState({ disabled: false });
+          } else if (res.cod == 104) {
+            alert(res.mensagem);
+            location.location();
+          } else if (res.cod == 105) {
+            alert("Verifique os parametros e tente novamente");
+            this.setState({ disabled: false });
+          } else if (res.cod == 203) {
+            alert("Erro interno, aguarde");
+          } else if (res.cod == 204) {
+            alert(res.mensagem);
+            this.setState({ disabled: false });
+          } else {
+            alert("Erro Desconhecido");
+          }
         } else {
           alert("Compra realizada com sucesso");
           window.location.href = "/relatorio_crypo";
@@ -667,7 +685,7 @@ export default class Cambio extends Component {
                 <Col>
                   <h3>Senha de Transição</h3>
                   <OtpInput
-                  isInputSecure={true}
+                    isInputSecure={true}
                     focusInput={1}
                     isInputNum={true}
                     value={this.state.senha}
@@ -773,7 +791,7 @@ export default class Cambio extends Component {
               </Row>
               <Row>
                 <OtpInput
-                isInputSecure={true}
+                  isInputSecure={true}
                   focusInput={1}
                   isInputNum={true}
                   value={this.state.senhaConfirm}
