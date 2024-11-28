@@ -384,10 +384,7 @@ export async function comprovante_ver(id) {
         });
 
         cursorY += 8; // Espaço entre seções
-        doc.setDrawColor(0); // Cor preta
-        doc.setLineWidth(0.1); // Espessura fina
-        doc.line(10, cursorY, pageWidth - 10, cursorY); // Desenha a linha
-        cursorY += 8;
+      
       };
 
       // Dados do Pagador
