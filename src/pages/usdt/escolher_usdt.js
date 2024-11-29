@@ -194,13 +194,13 @@ export default class Cambio extends Component {
               );
               location.reload();
             } else if (res.cod == 2) {
-              alert(res.mensagem);
+              alert(res.messagem);
               this.setState({ disabled: false });
             } else if (res.cod == 101) {
               alert(res.message);
               this.setState({ disabled: false });
             } else if (res.cod == 104) {
-              alert(res.mensagem);
+              alert(res.messagem);
               location.location();
             } else if (res.cod == 105) {
               alert("Verifique os parametros e tente novamente");
@@ -208,10 +208,14 @@ export default class Cambio extends Component {
             } else if (res.cod == 203) {
               alert("Erro interno, aguarde");
             } else if (res.cod == 204) {
-              alert(res.mensagem);
+              alert(res.messagem);
+              this.setState({ disabled: false });
+            } else if (res.cod == 102) {
+              alert(res.messagem);
               this.setState({ disabled: false });
             } else {
-              alert("Erro Desconhecido");
+              alert(res.messagem);
+              this.setState({ disabled: false });
             }
           } else if (res.success == 1) {
             this.setState({ valorMoedaTravar: res.data.result.price }, () => {
@@ -264,13 +268,13 @@ export default class Cambio extends Component {
             );
             location.reload();
           } else if (res.cod == 2) {
-            alert(res.mensagem);
+            alert(res.messagem);
             this.setState({ disabledConfirm: false });
           } else if (res.cod == 101) {
             alert(res.message);
             this.setState({ disabledConfirm: false });
           } else if (res.cod == 104) {
-            alert(res.mensagem);
+            alert(res.messagem);
             location.location();
           } else if (res.cod == 105) {
             alert("Verifique os parametros e tente novamente");
@@ -278,7 +282,7 @@ export default class Cambio extends Component {
           } else if (res.cod == 203) {
             alert("Erro interno, aguarde");
           } else if (res.cod == 204) {
-            alert(res.mensagem);
+            alert(res.messagem);
             this.setState({ disabledConfirm: false });
           } else {
             alert("Erro Desconhecido");
