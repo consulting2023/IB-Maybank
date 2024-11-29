@@ -54,6 +54,9 @@ import Relatorio from "../pages/relatorio/relatorio";
 import RelatorioSaida from "../pages/relatorio/relatorio_saida";
 import RelatorioEntrada from "../pages/relatorio/relatorio_entrada";
 import RelatorioCrypo from "../pages/relatorio/relatorio_crypo";
+import CadastroPj from "../pages/cadastro/cadastro_pj";
+
+
 
 
 
@@ -75,6 +78,7 @@ function Router(props) {
     return (
       <Routes>
         <Route exact path="/" element={<Login langProp={traduzir} alerts={props.alerts}/>}/>
+        <Route exact path="/cadastropj" element={<CadastroPj langProp={traduzir} alerts={props.alerts}/>}/>
         
         <Route path="*" element={<NoMatch langProp={traduzir} alerts={props.alerts}/>}/>
         {/* <Route exact path="/siso" component={Siso} /> */}

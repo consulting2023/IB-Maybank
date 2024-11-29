@@ -52,6 +52,7 @@ export default class Login extends Component {
       OTP: "",
       loading: false,
       lang: "",
+      cadastro: false,
     };
   }
 
@@ -456,6 +457,17 @@ export default class Login extends Component {
                         </Button>
                       )}
                     </Col>
+                    {Produtos.cadastro.cadastroLiberado ? (
+                      <Col className="text-center">
+                        <Button
+                          type="button"
+                          className="botaologin btn-primary"
+                          onClick={() => this.setState({ cadastro: true })}
+                        >
+                          Cadastrar
+                        </Button>
+                      </Col>
+                    ) : null}
                   </Row>
 
                   {/* {Produtos.siso ? (<Row> */}
@@ -626,6 +638,48 @@ export default class Login extends Component {
                   Confirmar
                 </Button>
               </Modal.Footer>
+            </Modal>
+
+            <Modal
+              // dialogClassName="modalDialog"
+              contentClassName="modalContent"
+              show={this.state.cadastro}
+              // show={true}
+              centered
+              onHide={() => this.setState({ cadastro: false })}
+            >
+              <Modal.Body>
+                <div className="container text-center">
+                  <h1 style={{ color: "white" }}>
+                    Selecione o tipo de conta para cadastro
+                  </h1>
+                  <ButtonGroup className="mt-4 d-flex flex-row justify-content-between">
+                    {Produtos.cadastro.cadastroPF ? (
+                      <Button
+                        type="button"
+                        className={
+                          "btn-primary col-12 mx-1 text-center modalBtn"
+                        }
+                        onClick={() => this.loginConta(conta)}
+                      >
+                        <h5 className="py-2">Conta PF</h5>
+                      </Button>
+                    ) : null}
+
+                    {Produtos.cadastro.cadastroPj ? (
+                      <Button
+                        type="button"
+                        className={
+                          "btn-primary col-12 mx-1 text-center modalBtn"
+                        }
+                        onClick={() => (window.location.href = "/cadastropj")}
+                      >
+                        <h5 className="py-2">Conta PJ</h5>
+                      </Button>
+                    ) : null}
+                  </ButtonGroup>
+                </div>
+              </Modal.Body>
             </Modal>
           </div>
         </div>

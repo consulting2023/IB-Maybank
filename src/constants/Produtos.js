@@ -306,5 +306,11 @@ export default {
 
   pix: {
     chavePix: false
+  },
+
+  cadastro: {
+    cadastroLiberado: false,
+    cadastroPF: false,
+    cadastroPj: true
   }
 };
