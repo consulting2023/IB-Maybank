@@ -197,7 +197,7 @@ export default class Cambio extends Component {
               alert(res.messagem);
               this.setState({ disabled: false });
             } else if (res.cod == 101) {
-              alert(res.message);
+              alert(res.messagem);
               this.setState({ disabled: false });
             } else if (res.cod == 104) {
               alert(res.messagem);
