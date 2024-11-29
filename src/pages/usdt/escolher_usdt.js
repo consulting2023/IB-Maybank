@@ -186,7 +186,7 @@ export default class Cambio extends Component {
 
           if (res.success == 0) {
             if (res.cod == 0) {
-              alert(res.message);
+              alert(res.messagem);
               this.setState({ disabled: false });
             } else if (res.cod == 1) {
               alert(
