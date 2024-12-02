@@ -52,10 +52,13 @@ export default class CadastroPj extends Component {
       liberaFaturamento: false,
       liberarContribuicao: false,
       contribuicao: "",
+      termo: "",
+      termoModal: false,
     };
   }
   componentDidMount = () => {
     this.agCadastro();
+    this.buscarTermoUso();
   };
 
   agCadastro = () => {
@@ -102,6 +105,21 @@ export default class CadastroPj extends Component {
     if (rawValue.length === 15) {
       this.setState({ liberarEmail: true });
     }
+  };
+
+  buscarTermoUso = () => {
+    const data = {
+      url: "termos/texto",
+      data: {
+        chave: "termo_uso",
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data).then((res) => {
+      console.log(res.texto);
+      this.setState({ termo: res.texto });
+    });
   };
 
   render() {
@@ -227,8 +245,7 @@ export default class CadastroPj extends Component {
                                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                                 if (emailRegex.test(email)) {
                                   this.setState({
-                                    cadastroPt1: false,
-                                    cadastroPt2: true,
+                                    termoModal: true,
                                   });
                                 } else {
                                   alert("Por favor, insira um e-mail válido.");
@@ -426,7 +443,7 @@ export default class CadastroPj extends Component {
                             }}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") {
-                                const contribuicao =  
+                                const contribuicao =
                                   this.state.contribuicao.trim();
 
                                 // Validação: verifica se há um valor válido
@@ -455,7 +472,47 @@ export default class CadastroPj extends Component {
             </div>
           </div>
 
-          {/* Campo Slide */}
+          <Modal
+            size="lg"
+            show={this.state.termoModal}
+            onHide={() => this.setState({ termoModal: false })}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Aceite o termo para continuar</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Container
+                style={{
+                  maxHeight: "400px", // Limita a altura do conteúdo para permitir o scroll
+                  overflowY: "auto", // Adiciona barra de rolagem vertical
+                }}
+              >
+                <div
+                  style={{
+                    color: "black",
+                    WebkitTextFillColor: "black", // Para navegadores com preenchimento de texto
+                    textAlign: "justify", // Alinha o texto de forma justificada (opcional)
+                    fontSize: "16px", // Define a cor do texto como preto
+                  }}
+                  dangerouslySetInnerHTML={{ __html: this.state.termo }}
+                ></div>
+              </Container>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  this.setState({
+                    cadastroPt1: false,
+                    cadastroPt2: true,
+                    termoModal: false,
+                  });
+                }}
+              >
+                Declaro que li e aceito os termos de uso e de privacidade {process.env.NOME_BANCO}
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </div>
       );
     } else {

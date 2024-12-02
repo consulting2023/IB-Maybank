@@ -200,7 +200,9 @@ export default class Cambio extends Component {
               alert(res.messagem);
               this.setState({ disabled: false });
             } else if (res.cod == 104) {
-              alert(res.messagem);
+              alert(
+                "Erro ao travar cotação, tente novamente mais tarde ou comunique o gerente"
+              );
               location.location();
             } else if (res.cod == 105) {
               alert("Verifique os parametros e tente novamente");
@@ -274,7 +276,9 @@ export default class Cambio extends Component {
             alert(res.message);
             this.setState({ disabledConfirm: false });
           } else if (res.cod == 104) {
-            alert(res.messagem);
+            alert(
+              "Erro ao realizar a compra, tente novamente mais tarde ou comunique o gerente"
+            );
             location.location();
           } else if (res.cod == 105) {
             alert("Verifique os parametros e tente novamente");

@@ -249,7 +249,6 @@ export default class ExtratoConta extends Component {
         "Descrição",
         "Valor",
         "Conta",
-        "Saldo",
         "Status",
       ];
 
@@ -264,9 +263,8 @@ export default class ExtratoConta extends Component {
             item.id || "",
             new Date(item.dataHora).toLocaleString(),
             item.descricao || "",
-            item.valor ? item.valor.toFixed(2).replace(".", ",") : "0,00",
+            item.valor || 0, // Retorna o valor como float diretamente
             item.conta_id || "",
-            item.saldo ? item.saldo.toFixed(2).replace(".", ",") : "0,00",
             item.bloqueado ? "Bloqueado" : "Desbloqueado",
           ]);
         });
