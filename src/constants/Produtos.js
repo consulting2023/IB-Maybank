@@ -309,7 +309,7 @@ export default {
   },
 
   cadastro: {
-    cadastroLiberado: false,
+    cadastroLiberado: true,
     cadastroPF: false,
     cadastroPj: true
   }
