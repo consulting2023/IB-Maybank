@@ -381,7 +381,9 @@ export default class Pix extends Component {
       console.log(responseJson);
       if (responseJson.cod == 0) {
         this.closeModalTransferencia();
-        alert("Pix temporariamente fora do ar, tente novamente mais tarde.");
+        alert(
+          "PIX INDISPONÍVEL! Aguarde alguns minutos e tente novamente. Caso o problema continue, entre em contato com o suporte ao cliente para assistência."
+        );
       } else if (responseJson.cod == 1) {
         setTimeout(() => {
           alert("Pix realizado com Sucesso!");
@@ -405,14 +407,14 @@ export default class Pix extends Component {
         alert(responseJson.mensagem);
         this.closeModalTransferencia();
       } else if (responseJson.cod == 7) {
-        alert(responseJson.mensagem);
+        alert("Houve um problema ao gerar o pix, tente novamente mais tarde");
         this.closeModalTransferencia();
       } else if (responseJson.cod == 9) {
         alert("Transação não efetuada, tente novamente mais tarde.");
         this.closeModalTransferencia();
       } else if (responseJson.cod == 10) {
         alert(
-          "Não é permitido a realização de múltiplas transferências Pix em menos de um minuto"
+          "O sistema detectou múltiplas tentativas de transferência em um curto intervalo de tempo. Aguarde alguns minutos e tente novamente."
         );
         this.closeModalTransferencia();
       } else if (responseJson.cod == 11) {
@@ -424,7 +426,9 @@ export default class Pix extends Component {
         this.closeModalTransferencia();
       } else {
         this.setState({ loading: false });
-        alert("Pix temporariamente fora do ar, tente novamente mais tarde.");
+        alert(
+          "PIX INDISPONÍVEL! Aguarde alguns minutos e tente novamente. Caso o problema continue, entre em contato com o suporte ao cliente para assistência."
+        );
         location.href();
       }
     });
