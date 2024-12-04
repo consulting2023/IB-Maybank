@@ -77,8 +77,6 @@ export default class RelatorioCrypo extends Component {
         method: "POST",
       };
 
-      console.log(data);
-
       Funcoes.Geral_API(data, true).then((res) => {
         if (res.status && res.data.length > 0) {
           this.setState({
@@ -305,13 +303,13 @@ export default class RelatorioCrypo extends Component {
                     </tbody>
                   </Table>
                 </Row>
-
-                {this.state.hasMore && (
+                {/* Desabilitar o scroll infinito enquanto está chamada do back não usar ultimo_id */}
+                {/* {this.state.hasMore && (
                   <div
                     id="end-of-list"
                     style={{ height: "1px", background: "transparent" }}
                   />
-                )}
+                )} */}
               </Col>
             )
           )}
