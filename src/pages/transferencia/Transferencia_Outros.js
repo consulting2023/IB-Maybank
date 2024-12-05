@@ -326,6 +326,7 @@ export default class TransferenciaOutros extends Component {
     if (valorTotal > saldo) {
       // alert('Saldo insuficiente');
       alert(i18n.t("transferencia.erroSaldo"));
+      window.location.href = "/transferencia_outros";
     } else {
       // if (this.state.valida_senha_ok == false) {
       //     alert('Erro senha ou token invalido');
@@ -338,26 +339,39 @@ export default class TransferenciaOutros extends Component {
       // } else {
 
       Funcoes.Geral_API(data, true).then((res) => {
-        if (res == 0) {
-          // Código inválido
-          alert("Erro na transferencia");
-          // window.location.href = '/transferencia_outros'
-          // } else if (res == 203) {
-          // Alerta pânico
-          // alert('Código de barras inválido');
-          // window.location.href = '/transferencia_outros'
-        } else if (res == 2) {
-          alert("Saldo insuficiente");
-          // window.location.href = '/transferencia_outros'
-          //*Sem saldo na conta
-        } else if (res.mov_id) {
-          //*pagamento realizado
-          this.comprovante_ver(res.mov_id);
-        } else {
-          //*algum erro não previsto
-          alert("Processamento Invalido, Contate seu Gerente!");
-          window.location.href = "/transferencia_outros";
-        }
+          if (res.error) {
+            alert("Erro: " + res.message);
+            window.location.href = "/transferencia_interna";
+          } else {
+            if (res.dados.mov_id) {
+              Funcoes.comprovante_pdf(res.dados.mov_id);
+            }
+          }
+
+          this.setState({ loading: false, token_app: false, contaSelecionada: false });
+          this.props.alerts("Transação efetuada", "Comprovante instalado automaticamente.", "success");
+
+
+        // if (res == 0) {
+        //   // Código inválido
+        //   alert("Erro na transferencia");
+        //   // window.location.href = '/transferencia_outros'
+        //   // } else if (res == 203) {
+        //   // Alerta pânico
+        //   // alert('Código de barras inválido');
+        //   // window.location.href = '/transferencia_outros'
+        // } else if (res == 2) {
+        //   alert("Saldo insuficiente");
+        //   // window.location.href = '/transferencia_outros'
+        //   //*Sem saldo na conta
+        // } else if (res.mov_id) {
+        //   //*pagamento realizado
+        //   this.comprovante_ver(res.mov_id);
+        // } else {
+        //   //*algum erro não previsto
+        //   alert("Processamento Invalido, Contate seu Gerente!");
+        //   window.location.href = "/transferencia_outros";
+        // }
       });
 
       // }

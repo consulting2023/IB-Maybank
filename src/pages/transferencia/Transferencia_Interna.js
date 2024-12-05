@@ -208,8 +208,8 @@ export default class TransferenciaInterna extends Component {
     const saldo = this.state.saldoDigital;
 
     if (valor > saldo) {
-      window.location.href = "/transferencia_interna";
       alert(i18n.t("transferencia.erroSaldo"));
+      window.location.href = "/transferencia_interna";
     } else {
       setTimeout(() => {
         const dados = {
