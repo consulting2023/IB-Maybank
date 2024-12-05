@@ -348,7 +348,7 @@ export default class TransferenciaOutros extends Component {
             }
           }
 
-          this.setState({ loading: false, token_app: false, contaSelecionada: false });
+          this.setState({ loading: false, token_app: false, contaSelecionada: false, modal_confirmacao: false });
           this.props.alerts("Transação efetuada", "Comprovante instalado automaticamente.", "success");
 
 

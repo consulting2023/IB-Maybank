@@ -380,6 +380,7 @@ export default class TransferenciaInterna extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data, true).then((res) => {
+      console.log(res);
       if (Object.keys(res).length > 0) {
         try {
           this.setState({
