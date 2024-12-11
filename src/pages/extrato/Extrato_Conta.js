@@ -19,6 +19,7 @@ import ReactLoading from "react-loading";
 import i18n from "../../tradutor/tradutor";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import Produtos from "../../constants/Produtos";
 
 export default class ExtratoConta extends Component {
   constructor() {
@@ -36,6 +37,7 @@ export default class ExtratoConta extends Component {
       custom_id: "",
       loadingCsv: false,
       disabledCsv: false,
+      saldos: {},
     };
     this.handleScroll = this.handleScroll.bind(this);
   }
@@ -44,6 +46,7 @@ export default class ExtratoConta extends Component {
     const pessoa = Funcoes.pessoa;
     this.setState({ pessoa: pessoa });
     window.addEventListener("scroll", this.handleScroll);
+    this.SaldoConta();
   }
 
   componentWillUnmount() {
@@ -185,7 +188,6 @@ export default class ExtratoConta extends Component {
       });
     });
   };
-
 
   carregarExtratoCsv = async () => {
     const { dataDe, dataAte, pessoa } = this.state;
@@ -329,6 +331,7 @@ export default class ExtratoConta extends Component {
   };
 
   extrato_pdf = async () => {
+    console.log(this.state.saldos);
     const { extrato, dataDe, dataAte, pessoa, soma } = this.state;
 
     // Verificação de dados antes de gerar o PDF
@@ -360,8 +363,8 @@ export default class ExtratoConta extends Component {
     );
     doc.text(`Cliente: ${pessoa?.nome || "N/A"}`, 10, 30);
     doc.text(`Agência/Conta: 0001 / ${pessoa?.conta_id || "N/A"}`, 10, 40);
-    doc.text(`Saldo Total: R$ ${saldoTotal}`, 10, 50);
-    doc.text(`Saldo Disponível: R$ ${saldoDisponivel}`, 10, 60);
+    doc.text(`Saldo Total: R$ ${this.state.saldos.digital.saldo}`, 10, 50);
+    doc.text(`Saldo Do Dia: R$ ${saldoDisponivel}`, 10, 60);
     doc.text("Saldo Bloqueado: R$ 0,00", 10, 70);
 
     // Cabeçalho da tabela
@@ -395,6 +398,32 @@ export default class ExtratoConta extends Component {
 
     // Gerar e fazer download do PDF
     doc.save("extrato_movimentacao.pdf");
+  };
+
+  SaldoConta = () => {
+    const data = {
+      url: "conta/saldo",
+      data: { conta_id: Funcoes.pessoa.conta_id },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      console.log(res);
+      let tmpSaldos = this.state.saldos;
+
+      if (Produtos.saldoDigital)
+        tmpSaldos.digital = {
+          saldo: Formatar.formatarMoeda(res.digital),
+        };
+
+      // if (Produtos.saldoCartao) tmpSaldos.push({ show: false, icone: Icones.saldo2, titulo: i18n.t('home.saldoCartao'), saldo: Formatar.formatarMoeda(res.cartao), saldoTrue: res.cartao });
+
+      // if (Produtos.saldoCredito) tmpSaldos.push({ show: false, icone: Icones.saldo3, titulo: i18n.t('home.saldoConvenio'), saldo: Formatar.formatarMoeda(res.credito), saldoTrue: res.credito });
+
+      // if (Produtos.saldoInvestimento) tmpSaldos.push({ show: false, icone: Icones.saldo4, titulo: i18n.t('home.saldoConvenio'), saldo: Formatar.formatarMoeda(res.investimento), saldoTrue: res.investimento });
+
+      this.setState({ saldos: tmpSaldos });
+    });
   };
 
   render() {
@@ -544,21 +573,20 @@ export default class ExtratoConta extends Component {
                     <th>Custom ID</th>
                   </tr>
                 </thead>
-                
-                  <tbody>
-                    {extrato.map((row, index) => (
-                      <tr key={`${row.id}-${index}`}>
-                        <td>{row.id}</td>
-                        <td>{Formatar.formatarDate(row.dataHora)}</td>
-                        <td>{row.descricao}</td>
-                        <td>{Formatar.formatReal(row.valor)}</td>
-                        <td>{row.conta_id}</td>
-                        <td>{Formatar.formatReal(row.saldo)}</td>
-                        <td>{row.custom_id}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                
+
+                <tbody>
+                  {extrato.map((row, index) => (
+                    <tr key={`${row.id}-${index}`}>
+                      <td>{row.id}</td>
+                      <td>{Formatar.formatarDate(row.dataHora)}</td>
+                      <td>{row.descricao}</td>
+                      <td>{Formatar.formatReal(row.valor)}</td>
+                      <td>{row.conta_id}</td>
+                      <td>{Formatar.formatReal(row.saldo)}</td>
+                      <td>{row.custom_id}</td>
+                    </tr>
+                  ))}
+                </tbody>
               </Table>
               {loading && (
                 <div className="text-center mt-3">
