@@ -77,7 +77,7 @@ export default class ExtratoConta extends Component {
         conta_id: pessoa.conta_id,
         data_de: Formatar.formatarDateAno(dataDe),
         data_ate: Formatar.formatarDateAno(dataAte),
-        ulti_id: ultimoId,
+        ult_id: ultimoId,
       },
       method: "POST",
     };
