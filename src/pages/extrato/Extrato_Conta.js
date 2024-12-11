@@ -113,10 +113,24 @@ export default class ExtratoConta extends Component {
     const dataInicio = new Date(dataDe);
     const dataFim = new Date(dataAte);
 
+    // Verificar se as datas são válidas
     if (dataInicio > hoje || dataFim > hoje) {
       this.props.alerts(
         "Data inválida",
         "Informe no máximo a data do dia atual.",
+        "warning"
+      );
+      return;
+    }
+
+    // Verificar diferença de dois dias entre as datas
+    const diffInMilliseconds = Math.abs(dataFim - dataInicio);
+    const diffInDays = diffInMilliseconds / (1000 * 60 * 60 * 24);
+
+    if (diffInDays > 2) {
+      this.props.alerts(
+        "Intervalo inválido",
+        "Selecione no máximo um intervalo de dois dias.",
         "warning"
       );
       return;
@@ -171,6 +185,7 @@ export default class ExtratoConta extends Component {
       });
     });
   };
+
 
   carregarExtratoCsv = async () => {
     const { dataDe, dataAte, pessoa } = this.state;
