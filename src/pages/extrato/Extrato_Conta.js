@@ -529,19 +529,21 @@ export default class ExtratoConta extends Component {
                     <th>Custom ID</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {extrato.map((row) => (
-                    <tr key={row.id}>
-                      <td>{row.id}</td>
-                      <td>{Formatar.formatarDate(row.dataHora)}</td>
-                      <td>{row.descricao}</td>
-                      <td>{Formatar.formatReal(row.valor)}</td>
-                      <td>{row.conta_id}</td>
-                      <td>{Formatar.formatReal(row.saldo)}</td>
-                      <td>{row.custom_id}</td>
-                    </tr>
-                  ))}
-                </tbody>
+                
+                  <tbody>
+                    {extrato.map((row, index) => (
+                      <tr key={`${row.id}-${index}`}>
+                        <td>{row.id}</td>
+                        <td>{Formatar.formatarDate(row.dataHora)}</td>
+                        <td>{row.descricao}</td>
+                        <td>{Formatar.formatReal(row.valor)}</td>
+                        <td>{row.conta_id}</td>
+                        <td>{Formatar.formatReal(row.saldo)}</td>
+                        <td>{row.custom_id}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                
               </Table>
               {loading && (
                 <div className="text-center mt-3">
