@@ -38,6 +38,8 @@ export default class ExtratoConta extends Component {
       loadingCsv: false,
       disabledCsv: false,
       saldos: {},
+
+      continue: true,
     };
     this.handleScroll = this.handleScroll.bind(this);
   }
@@ -69,6 +71,7 @@ export default class ExtratoConta extends Component {
       this.loadMoreExtrato();
     }
   };
+
   loadMoreExtrato = () => {
     const { pessoa, dataDe, dataAte, ultimoId, extrato } = this.state;
 
@@ -127,17 +130,17 @@ export default class ExtratoConta extends Component {
     }
 
     // Verificar diferença de dois dias entre as datas
-    const diffInMilliseconds = Math.abs(dataFim - dataInicio);
-    const diffInDays = diffInMilliseconds / (1000 * 60 * 60 * 24);
+    // const diffInMilliseconds = Math.abs(dataFim - dataInicio);
+    // const diffInDays = diffInMilliseconds / (1000 * 60 * 60 * 24);
 
-    if (diffInDays > 2) {
-      this.props.alerts(
-        "Intervalo inválido",
-        "Selecione no máximo um intervalo de dois dias.",
-        "warning"
-      );
-      return;
-    }
+    // if (diffInDays > 2) {
+    //   this.props.alerts(
+    //     "Intervalo inválido",
+    //     "Selecione no máximo um intervalo de dois dias.",
+    //     "warning"
+    //   );
+    //   return;
+    // }
 
     this.setState({
       loading: true,
@@ -189,19 +192,86 @@ export default class ExtratoConta extends Component {
     });
   };
 
+  fetchExtrato = async () => {
+    this.setState({
+      loading: true,
+      disabled: true,
+    });
+
+    const { dataDe, dataAte, pessoa } = this.state;
+
+    const hoje = new Date() + 1;
+
+    const dataInicio = new Date(dataDe);
+    const dataFim = new Date(dataAte);
+
+    if (dataInicio > hoje || dataFim > hoje) {
+      this.props.alerts(
+        "Data inválida",
+        "Informe no máximo a data do dia atual.",
+        "warning"
+      );
+    } else {
+
+      const data = {
+        url: "conta/extrato",
+        data: {
+          conta_id: pessoa.conta_id,
+          data_de: Formatar.formatarDateAno(dataDe),
+          data_ate: Formatar.formatarDateAno(dataAte),
+          custom_id: this.state.custom_id || "",
+          // ult_id: '48694416'
+          // ult_id: '48683525'
+          ult_id: '63742347'
+        },
+        method: "POST",
+      };
+
+      Funcoes.Geral_API(data, true).then((res) => {
+        const keys = Object.keys(res);
+        if (keys.length === 0) {
+          this.props.alerts(
+            "Nenhuma movimentação encontrada",
+            "Selecione outro período ou tente novamente mais tarde",
+            "warning"
+          );
+
+        } else {
+          const arr = keys.flatMap((key) => res[key]);
+          const soma = arr.reduce((acc, e) => acc + e.valor, 0);
+
+          console.log(arr);
+
+          // this.setState({
+          //   extrato: arr,
+          //   ultimoId: arr[arr.length - 1].id,
+          //   soma,
+          //   mostrarExtrato: true,
+          //   // hasMore: arr.length === 50, // Verifica se ainda há mais resultados
+          // });
+        }
+      });
+    }
+
+    this.setState({
+      loading: false,
+      disabled: false,
+    });
+  }
+
   carregarExtratoCsv = async () => {
     const { dataDe, dataAte, pessoa } = this.state;
 
-    console.log("Data de início:", dataDe);
-    console.log("Data de término:", dataAte);
+    // console.log("Data de início:", dataDe);
+    // console.log("Data de término:", dataAte);
 
     const hoje = new Date();
     const dataInicio = new Date(dataDe);
     const dataFim = new Date(dataAte);
 
-    console.log("Data atual:", hoje);
-    console.log("Data de início convertida:", dataInicio);
-    console.log("Data de término convertida:", dataFim);
+    // console.log("Data atual:", hoje);
+    // console.log("Data de início convertida:", dataInicio);
+    // console.log("Data de término convertida:", dataFim);
 
     const data = {
       url: "conta/extrato",
@@ -216,11 +286,11 @@ export default class ExtratoConta extends Component {
 
     try {
       const res = await Funcoes.Geral_API(data, true);
-      console.log("Resposta da API:", res); // Verifique se a resposta está correta
+      // console.log("Resposta da API:", res); // Verifique se a resposta está correta
       if (res && Object.keys(res).length > 0) {
         return res;
       }
-      console.log("Nenhum dado retornado pela API");
+      // console.log("Nenhum dado retornado pela API");
       return []; // Caso contrário, retorna um array vazio
     } catch (error) {
       console.error("Erro ao carregar extrato:", error);
@@ -242,7 +312,7 @@ export default class ExtratoConta extends Component {
     try {
       // Chama o endpoint uma única vez
       const dadosExtrato = await this.carregarExtratoCsv();
-      console.log("Dados do extrato:", dadosExtrato); // Verifique se os dados foram carregados corretamente
+      // console.log("Dados do extrato:", dadosExtrato); // Verifique se os dados foram carregados corretamente
 
       if (!dadosExtrato || Object.keys(dadosExtrato).length === 0) {
         this.props.alerts(
@@ -331,7 +401,7 @@ export default class ExtratoConta extends Component {
   };
 
   extrato_pdf = async () => {
-    console.log(this.state.saldos);
+    // console.log(this.state.saldos);
     const { extrato, dataDe, dataAte, pessoa, soma } = this.state;
 
     // Verificação de dados antes de gerar o PDF
@@ -408,7 +478,7 @@ export default class ExtratoConta extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((res) => {
-      console.log(res);
+      // console.log(res);
       let tmpSaldos = this.state.saldos;
 
       if (Produtos.saldoDigital)
