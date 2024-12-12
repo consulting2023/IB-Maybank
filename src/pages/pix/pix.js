@@ -399,10 +399,10 @@ export default class Pix extends Component {
         alert("Transação não efetuada, por favor consulte seu gerente.");
       } else if (responseJson.cod == 4) {
         this.closeModalTransferencia();
-        alert(responseJson.msg);
+        alert(responseJson.mensagem);
       } else if (responseJson.cod == 5) {
         this.closeModalTransferencia();
-        alert(responseJson.msg);
+        alert(responseJson.mensagem);
       } else if (responseJson.cod == 6) {
         alert(responseJson.mensagem);
         this.closeModalTransferencia();
