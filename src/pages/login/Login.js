@@ -143,6 +143,15 @@ export default class Login extends Component {
   };
 
   loginConta = (dados) => {
+    console.log(dados.conta.ativo);
+    if (dados.conta.ativo == 0) {
+      this.props.alerts(
+        "Conta Não Aprovada",
+        "Conta não aprovada, contate o gerente para saber mais",
+        "warning"
+      );
+      return;
+    }
     localStorage.setItem("nivel", dados.usuario.nivel);
     this.enviarToken();
     this.setState({
