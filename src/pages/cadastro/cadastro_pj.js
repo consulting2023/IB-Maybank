@@ -37,6 +37,7 @@ export default class CadastroPj extends Component {
       agencias: [],
       valueAgencia: "",
       agenciaNome: "",
+      agenciaNumero: "",
       liberarCNPJ: false,
       cnpj: "",
       liberarTelefone: false,
@@ -69,7 +70,22 @@ export default class CadastroPj extends Component {
     };
     Funcoes.Geral_API(data).then((res) => {
       this.setState({ agencias: res });
-      console.log(res);
+      // console.log(res);
+    });
+  };
+
+  buscarTermoUso = () => {
+    const data = {
+      url: "termos/texto",
+      data: {
+        chave: "termo_uso",
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data).then((res) => {
+      // console.log(res.texto);
+      this.setState({ termo: res.texto });
     });
   };
 
@@ -85,6 +101,7 @@ export default class CadastroPj extends Component {
     };
     Funcoes.Geral_API(data).then((res) => {
       if (res) {
+        this.salvarDormente('agencia', this.state.agenciaNumero);
         this.setState({ liberarTelefone: true });
       } else {
         alert("CNPJ invalido, tente novamente");
@@ -92,35 +109,26 @@ export default class CadastroPj extends Component {
     });
   };
 
-  handleTelefoneChange = (e) => {
-    const rawValue = e.target.value;
-    const numericValue = rawValue.replace(/\D/g, ""); // Remove a máscara
-    const formattedValue = Formatar.formatarTelefone(numericValue); // Reaplica a máscara
-
-    // Permite apagar normalmente
-    this.setState({
-      celEmpresa: numericValue.length > 0 ? formattedValue : "",
-    });
-
-    if (rawValue.length === 15) {
-      this.setState({ liberarEmail: true });
-    }
-  };
-
-  buscarTermoUso = () => {
+  salvarDormente = (campo, valor) => {
     const data = {
-      url: "termos/texto",
+      url: "dormente-pj/previa",
       data: {
-        chave: "termo_uso",
+        "documento": this.state.cnpj,
+        "campo": campo,
+        "valor": valor,
+        "representante": 1
       },
       method: "POST",
     };
-
     Funcoes.Geral_API(data).then((res) => {
-      console.log(res.texto);
-      this.setState({ termo: res.texto });
+      if (!res) {
+        alert("Falha ao cadastrar informações, tente novamente.");
+        window.location.reload();
+      } else {
+        console.log(campo + ' ok');
+      }
     });
-  };
+  }
 
   render() {
     if (deviceType == "browser") {
@@ -153,6 +161,8 @@ export default class CadastroPj extends Component {
                     <div>
                       <h1 className="mb-2">
                         Iremos começar o cadastro da sua conta PJ
+                        <br></br>
+                        (Aperte Enter para continuar)
                       </h1>
                       <hr className="divisoria" />
                       <span className="ttAgencia">Escolha a Agencia</span>
@@ -160,6 +170,7 @@ export default class CadastroPj extends Component {
                         options={this.state.agencias.map((agencia) => ({
                           value: agencia.id,
                           label: agencia.nome, // Exibe o nome da agência no dropdown
+                          number: agencia.numero
                         }))}
                         placeholder="Agência"
                         value={this.state.valueAgencia} // Passa o objeto selecionado ou `null`
@@ -167,6 +178,7 @@ export default class CadastroPj extends Component {
                           this.setState({
                             valueAgencia: selectedOption, // Atualiza o estado com o objeto selecionado
                             agenciaNome: selectedOption.label,
+                            agenciaNumero: selectedOption.number,
                             liberarCNPJ: true, // Guarda o nome da agência selecionada
                           });
                         }}
@@ -197,12 +209,17 @@ export default class CadastroPj extends Component {
                             onChange={(e) => {
                               // Remove a máscara e atualiza o estado com apenas os números
                               const cnpj = e.target.value.replace(/\D/g, "");
-                              this.setState({ cnpj }, () => {
-                                // Chama validarCNPJ após o estado ser atualizado
-                                if (cnpj.length === 14) {
+                              this.setState({ cnpj });
+                            }}
+                            onKeyDown={(e) => {
+                              const cnpj = this.state.cnpj; 
+                              if (cnpj.length > 0 && e.key === "Enter") {
+                                if(cnpj.length === 14) {
                                   this.validarCNPJ();
+                                } else {
+                                  alert("Por favor, termine de digitar o CNPJ.");
                                 }
-                              });
+                              }
                             }}
                           />
                         </>
@@ -216,10 +233,30 @@ export default class CadastroPj extends Component {
                           <br />
                           <input
                             value={this.state.celEmpresa}
-                            placeholder="(00) 00000-0000"
+                            // placeholder="(00) 00000-0000"
                             style={{ height: 40, width: "100%" }}
                             maxLength={15} // Limite do formato com máscara
-                            onChange={this.handleTelefoneChange}
+                            onChange={(e) => {
+                              const rawValue = e.target.value;
+                              const numericValue = rawValue.replace(/\D/g, ""); // Remove a máscara
+                              const formattedValue = Formatar.formatarTelefone(numericValue); // Reaplica a máscara
+
+                              // Permite apagar normalmente
+                              this.setState({
+                                celEmpresa: numericValue.length > 0 ? formattedValue : "",
+                              });
+                            }}
+                            onKeyDown={(e) => {
+                              const cel = this.state.celEmpresa;
+                              if (cel.length > 0 && e.key === "Enter") {
+                                if(cel.length === 15) {
+                                  this.salvarDormente('telefone', cel.replace(/\s+/g, ""))
+                                  this.setState({ liberarEmail: true });
+                                } else {
+                                  alert("Por favor, termine de digitar o telefone.");
+                                }
+                              }
+                            }}
                           />
                         </>
                       ) : null}
@@ -227,8 +264,7 @@ export default class CadastroPj extends Component {
                       {this.state.liberarEmail ? (
                         <>
                           <span className="ttAgencia">
-                            Informe o Email da empresa (Aperte Enter para
-                            continuar)
+                            Informe o Email da empresa
                           </span>
                           <br />
                           <input
@@ -239,14 +275,13 @@ export default class CadastroPj extends Component {
                               this.setState({ emailEmpresa: e.target.value })
                             }
                             onKeyDown={(e) => {
-                              if (e.key === "Enter") {
+                              const email = e.target.value;
+                              if (email.length > 0 && e.key === "Enter") {
                                 const email = this.state.emailEmpresa;
-
                                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                                 if (emailRegex.test(email)) {
-                                  this.setState({
-                                    termoModal: true,
-                                  });
+                                  this.salvarDormente('email', email);
+                                  this.setState({ termoModal: true });
                                 } else {
                                   alert("Por favor, insira um e-mail válido.");
                                 }
@@ -260,9 +295,12 @@ export default class CadastroPj extends Component {
 
                   {this.state.cadastroPt2 ? (
                     <div>
+                      <h1 className="mb-2">
+                        (Aperte Enter para continuar)
+                      </h1>
+                      <hr className="divisoria" />
                       <span className="ttAgencia">
-                        Informe a Razão Social da empresa (Aperte Enter para
-                        continuar)
+                        Informe a Razão Social da empresa
                       </span>
                       <br />
                       <input
@@ -273,51 +311,31 @@ export default class CadastroPj extends Component {
                           this.setState({ razaoSocial: e.target.value })
                         }
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            const razaoSocial = this.state.razaoSocial.trim();
-
-                            if (razaoSocial.length > 0) {
-                              // Prossegue para o próximo passo se a razão social for preenchida
-                              this.setState({
-                                liberarFantasia: true,
-                              });
-                            } else {
-                              alert(
-                                "Por favor, insira a Razão Social da empresa."
-                              );
-                            }
+                          const razaoSocial = this.state.razaoSocial.trim();
+                          if (razaoSocial.length > 0 && e.key === "Enter") {
+                            this.salvarDormente('razao_social', razaoSocial);
+                            this.setState({ liberarFantasia: true });
                           }
                         }}
                       />
                       {this.state.liberarFantasia ? (
                         <div>
                           <span className="ttAgencia">
-                            Informe o Nome Fantasia da empresa (Aperte Enter
-                            para continuar)
+                            Informe o Nome Fantasia da empresa
                           </span>
                           <br />
                           <input
                             value={this.state.razanomeFantasiaoSocial}
-                            placeholder="Digite a Razão Social"
+                            placeholder="Digite a Nome Fantasia"
                             style={{ height: 40, width: "100%" }}
                             onChange={(e) =>
                               this.setState({ nomeFantasia: e.target.value })
                             }
                             onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                const nomeFantasia =
-                                  this.state.nomeFantasia.trim();
-
-                                if (nomeFantasia.length > 0) {
-                                  // Prossegue para o próximo passo se a razão social for preenchida
-                                  this.setState({
-                                    liberarInscricao: true,
-                                  });
-                                } else {
-                                  alert(
-                                    "Por favor, insira a Razão Social da empresa."
-                                  );
-                                }
+                              const nomeFantasia = this.state.nomeFantasia.trim();
+                              if (nomeFantasia.length > 0 && e.key === "Enter") {
+                                this.salvarDormente('nome_fantasia', nomeFantasia);
+                                this.setState({ liberarInscricao: true });
                               }
                             }}
                           />
@@ -326,8 +344,7 @@ export default class CadastroPj extends Component {
                       {this.state.liberarInscricao ? (
                         <>
                           <span className="ttAgencia">
-                            Informe a Inscrição Estadual da empresa (Aperte
-                            Enter para continuar)
+                            Informe a Inscrição Estadual da empresa
                           </span>
                           <br />
                           <input
@@ -340,21 +357,10 @@ export default class CadastroPj extends Component {
                               })
                             }
                             onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                const inscricaoEstadual =
-                                  this.state.inscricaoEstadual.trim();
-
-                                // Validação: verifica se há um valor válido
-                                if (inscricaoEstadual.length > 0) {
-                                  // Prossegue para o próximo passo se a inscrição estadual for preenchida
-                                  this.setState({
-                                    liberaFaturamento: true,
-                                  });
-                                } else {
-                                  alert(
-                                    "Por favor, insira a Inscrição Estadual da empresa."
-                                  );
-                                }
+                              const inscricaoEstadual = this.state.inscricaoEstadual.trim();
+                              if (inscricaoEstadual.length > 0 && e.key === "Enter") {
+                                this.salvarDormente('inscricao_estadual', inscricaoEstadual);
+                                this.setState({ liberaFaturamento: true });
                               }
                             }}
                           />
@@ -364,8 +370,7 @@ export default class CadastroPj extends Component {
                       {this.state.liberaFaturamento ? (
                         <>
                           <span className="ttAgencia">
-                            Informe o Faturamento da empresa (Aperte Enter para
-                            continuar)
+                            Informe o Faturamento da empresa
                           </span>
                           <br />
                           <input
@@ -391,21 +396,11 @@ export default class CadastroPj extends Component {
                               this.setState({ faturamento: formattedValue });
                             }}
                             onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                const faturamento =
-                                  this.state.faturamento.trim();
-
+                              const faturamento = this.state.faturamento.trim();
+                              if (faturamento.length > 0 && e.key === "Enter") {
                                 // Validação: verifica se há um valor válido
-                                if (faturamento.length > 0) {
-                                  // Prossegue para o próximo passo se o faturamento for preenchido
-                                  this.setState({
-                                    liberarContribuicao: true,
-                                  });
-                                } else {
-                                  alert(
-                                    "Por favor, insira o Faturamento da empresa."
-                                  );
-                                }
+                                this.salvarDormente('faturamento', faturamento);
+                                this.setState({ liberarContribuicao: true });
                               }
                             }}
                           />
@@ -415,48 +410,21 @@ export default class CadastroPj extends Component {
                       {this.state.liberarContribuicao ? (
                         <>
                           <span className="ttAgencia">
-                            Informe a Contribuição da empresa (Aperte Enter para
-                            continuar)
+                            Informe a Contribuição da empresa
                           </span>
                           <br />
                           <input
                             value={this.state.contribuicao}
                             placeholder="Digite a Contribuição"
                             style={{ height: 40, width: "100%" }}
-                            onChange={(e) => {
-                              const value = e.target.value;
-
-                              // Remove tudo que não for número ou ponto
-                              const numericValue = value.replace(/[^0-9]/g, ""); // Permite apenas números
-
-                              // Aplica a máscara de R$ (usando Intl.NumberFormat)
-                              const formattedValue = new Intl.NumberFormat(
-                                "pt-BR",
-                                {
-                                  style: "currency",
-                                  currency: "BRL",
-                                }
-                              ).format(numericValue / 100); // Divide por 100 apenas quando formatando para exibir centavos
-
-                              // Atualiza o estado com o valor formatado
-                              this.setState({ contribuicao: formattedValue });
-                            }}
+                            onChange={(e) =>
+                              this.setState({ contribuicao: e.target.value })
+                            }
                             onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                const contribuicao =
-                                  this.state.contribuicao.trim();
-
-                                // Validação: verifica se há um valor válido
-                                if (contribuicao.length > 0) {
-                                  // Prossegue para o próximo passo se a contribuição for preenchida
-                                  this.setState({
-                                    liberarProximoPasso: true, // Altere conforme necessário
-                                  });
-                                } else {
-                                  alert(
-                                    "Por favor, insira a Contribuição da empresa."
-                                  );
-                                }
+                              const contribuicao = this.state.contribuicao.trim();
+                              if (contribuicao.length > 0 && e.key === "Enter") {
+                                this.salvarDormente('contribuicao', contribuicao);
+                                this.setState({ liberarProximoPasso: true });
                               }
                             }}
                           />
@@ -464,7 +432,7 @@ export default class CadastroPj extends Component {
                       ) : null}
                     </div>
                   ) : null}
-                  <Button onClick={() => this.validarCNPJ()}>Teste</Button>
+                  {/* <Button onClick={() => this.validarCNPJ()}>Teste</Button> */}
                 </div>
 
                 <br />
