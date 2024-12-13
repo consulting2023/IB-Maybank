@@ -34,6 +34,7 @@ export default class CadastroPj extends Component {
     this.state = {
       cadastroPt1: true,
       cadastroPt2: false,
+      cadastroPt3: false,
       agencias: [],
       valueAgencia: "",
       agenciaNome: "",
@@ -55,6 +56,8 @@ export default class CadastroPj extends Component {
       contribuicao: "",
       termo: "",
       termoModal: false,
+      dataAbertura: "",
+      liberarCnae: false,
     };
   }
   componentDidMount = () => {
@@ -325,7 +328,7 @@ export default class CadastroPj extends Component {
                           </span>
                           <br />
                           <input
-                            value={this.state.razanomeFantasiaoSocial}
+                            value={this.state.nomeFantasia}
                             placeholder="Digite a Nome Fantasia"
                             style={{ height: 40, width: "100%" }}
                             onChange={(e) =>
@@ -424,11 +427,58 @@ export default class CadastroPj extends Component {
                               const contribuicao = this.state.contribuicao.trim();
                               if (contribuicao.length > 0 && e.key === "Enter") {
                                 this.salvarDormente('contribuicao', contribuicao);
-                                this.setState({ liberarProximoPasso: true });
+                                this.setState({ cadastroPt2: false, cadastroPt3: true });
                               }
                             }}
                           />
                         </>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  {this.state.cadastroPt3 ? (
+                    <div>
+                      <h1 className="mb-2">
+                        (Aperte Enter para continuar)
+                      </h1>
+                      <hr className="divisoria" />
+                      <span className="ttAgencia">
+                        Informe a data de abertura da empresa
+                      </span>
+                      <br />
+                      <input
+                        type="date"
+                        value={this.state.dataAbertura}
+                        placeholder="Digite a Razão Social"
+                        style={{ height: 40 }}
+                        onChange={(e) => {
+                          this.salvarDormente('dataabertura', e.target.value + ' 00:00:00')
+                          this.setState({ dataAbertura: e.target.value })
+                        }
+                        }
+                      />
+                      {this.state.liberarCnae ? (
+                        <div>
+                          <span className="ttAgencia">
+                            Informe a CNAE da empresa
+                          </span>
+                          <br />
+                          <input
+                            value={this.state.Cnae}
+                            placeholder="Digite a Nome Fantasia"
+                            style={{ height: 40, width: "100%" }}
+                            onChange={(e) =>
+                              this.setState({ nomeFantasia: e.target.value })
+                            }
+                            onKeyDown={(e) => {
+                              const nomeFantasia = this.state.nomeFantasia.trim();
+                              if (nomeFantasia.length > 0 && e.key === "Enter") {
+                                this.salvarDormente('nome_fantasia', nomeFantasia);
+                                this.setState({ liberarInscricao: true });
+                              }
+                            }}
+                          />
+                        </div>
                       ) : null}
                     </div>
                   ) : null}
