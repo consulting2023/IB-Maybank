@@ -202,7 +202,7 @@ export function comprovante_pdf(id) {
       }
 
       if (res.pix) {
-        this.comprovante_ver(id);
+        comprovante_ver(id);
         return;
       }
 
