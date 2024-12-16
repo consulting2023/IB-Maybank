@@ -572,7 +572,7 @@ export default class ExtratoConta extends Component {
                     <th>Descrição</th>
                     <th>Valor</th>
                     <th>Conta</th>
-                    <th>Saldo</th>
+                    
                     <th>Custom ID</th>
                   </tr>
                 </thead>
@@ -585,7 +585,7 @@ export default class ExtratoConta extends Component {
                       <td>{row.descricao}</td>
                       <td>{Formatar.formatReal(row.valor)}</td>
                       <td>{row.conta_id}</td>
-                      <td>{Formatar.formatReal(row.saldo)}</td>
+                      
                       <td>{row.custom_id}</td>
                     </tr>
                   ))}
