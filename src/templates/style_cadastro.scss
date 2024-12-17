@@ -75,14 +75,14 @@
   // BODY
 
   $titleFont: 22pt;
-  $windowHeight: 450px;
+  // $windowHeight: 450px;
 
   h1 {
     font-family: GantariLight;
     color: $cor_1;
     font-size: $titleFont !important;
     line-height: 1em;
-    white-space: pre-wrap;
+    // white-space: pre-wrap;
   }
 
   h2 {
@@ -96,12 +96,12 @@
   }
 
   .cadastropj {
-    height: $windowHeight;
-    width: $windowHeight * 2;
+    // height: $windowHeight;
+    // width: $windowHeight * 2;
+    max-width: 800px;
     border-radius: 10px;
 
-    padding-left: $sideMargin;
-    padding-right: $sideMargin;
+    padding: $sideMargin;
     background-color: $cor_3;
 
     .divisoria {
