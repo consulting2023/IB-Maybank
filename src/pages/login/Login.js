@@ -58,6 +58,9 @@ export default class Login extends Component {
 
   componentDidMount() {
     Funcoes.logout();
+
+    const token = Funcoes.getUniqueToken();
+    console.log("Token: " + token);
   }
 
   componentWillUnmount() {

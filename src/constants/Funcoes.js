@@ -3,6 +3,7 @@ import CryptoJS from "crypto-js";
 import { decode, encode } from "base-64";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { v4 as uuidv4 } from "uuid";
 
 const tokenKey = "super_chave_secreta";
 const this_version = "1.0";
@@ -515,6 +516,21 @@ export async function comprovante_ver(id) {
     setLoading(false);
     setShowModalComprovante({ visible: false });
   }
+}
+
+export function getUniqueToken() {
+  const localStorageKey = "uniqueInstallationToken";
+
+  // Verifica se o token já existe no localStorage
+  let token = localStorage.getItem(localStorageKey);
+
+  if (!token) {
+    // Gera um novo token se não existir
+    token = uuidv4();
+    localStorage.setItem(localStorageKey, token);
+  }
+
+  return token;
 }
 
 // FUNÇÕES QUE AINDA SERÃO EXCLUÍDAS
