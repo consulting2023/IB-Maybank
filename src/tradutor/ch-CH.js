@@ -646,5 +646,7 @@ export default {
     btnGerarQrCode: "生成二维码",
     qrCodeSucces: "二维码生成成功",
     coyCod: "复制代码",
+    tokenInvalido: "无效的令牌",
+    erro: "错误",
   },
 };

@@ -746,6 +746,7 @@ export default {
     btnGerarQrCode: "Gerar QR Code",
     qrCodeSucces: "QR Code Gerado com Sucesso",
     coyCod: "Copiar Código",
-    
+    tokenInvalido: "Token inválido",
+    erro: "erro",
   },
 };

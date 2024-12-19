@@ -259,7 +259,11 @@ export default class Pix extends Component {
           this.valor_tarifa(valor_enviar);
         } else {
           this.setState({ loading: false });
-          this.props.alerts("Erro", "Token inválido", "warning");
+          this.props.alerts(
+            i18n.t("pix.erro"),
+            i18n.t("pix.tokenInvalido"),
+            "warning"
+          );
         }
       });
     }, 300);
@@ -1066,7 +1070,7 @@ export default class Pix extends Component {
                     }
                   }}
                 >
-                  {i18n.t("pix.btnTransferir")}
+                  {i18n.t("pix.btnTransfer")}
                 </Button>
               </Modal.Footer>
             )}
