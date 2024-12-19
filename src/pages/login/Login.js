@@ -70,7 +70,11 @@ export default class Login extends Component {
     let { password, email } = this.state;
 
     if (password.some((e) => e == "") || email == "") {
-      this.props.alerts("Erro", i18n.t("login.preencha"), "warning");
+      this.props.alerts(
+        i18n.t("login.alertaCombinacoes"),
+        i18n.t("login.preencha"),
+        "warning"
+      );
       this.setState({ loading: false });
     } else {
       this.setState({ loading: true });
@@ -113,7 +117,11 @@ export default class Login extends Component {
         console.log(res);
 
         if (res == 0) {
-          this.props.alerts("Erro", i18n.t("login.senhaIncorreta"), "warning");
+          this.props.alerts(
+            i18n.t("login.alertaCombinacoes"),
+            i18n.t("login.senhaIncorreta"),
+            "warning"
+          );
         } else if (texto == "") {
           this.props.alerts("Erro interno", "", "danger");
         } else {
@@ -146,8 +154,8 @@ export default class Login extends Component {
     console.log(dados.conta.ativo);
     if (dados.conta.ativo == 0) {
       this.props.alerts(
-        "Conta Não Aprovada",
-        "Conta não aprovada, contate o gerente para saber mais",
+        i18n.t("login.tituloContaNãoAprovada"),
+        i18n.t("login.contaNãoAprovada"),
         "warning"
       );
       return;
@@ -303,7 +311,7 @@ export default class Login extends Component {
 
   modalSenhaLogin = () => {
     if (this.state.email == "") {
-      alert("Preencha o email para recuperar a senha");
+      alert(i18n.t("login.alertEsqueciSenha"));
     } else {
       this.setState({ modalShowLogin: true });
 
@@ -323,7 +331,7 @@ export default class Login extends Component {
     setTimeout(() => {
       Funcoes.Geral_API(data, true).then((res) => {
         if (res === 1) {
-          alert("Token enviado para o email");
+          alert(i18n.t("login.tokenEnviado"));
         }
       });
     }, 300);
@@ -331,9 +339,9 @@ export default class Login extends Component {
 
   trocarSenha = () => {
     if (this.state.senha == "") {
-      alert("É Obrigatorio preencher a senha para seguir adiante");
+      alert(i18n.t("login.alertSemSenha"));
     } else if (this.state.OTP == "") {
-      alert("É Obrigatorio preencher a o token para seguir adiante");
+      alert(i18n.t("login.alertSemToken"));
     } else {
       const data = {
         url: "usuario/troca-senha",
@@ -351,10 +359,10 @@ export default class Login extends Component {
 
       Funcoes.Geral_API(data, true).then((res) => {
         if (res === 1) {
-          alert("Senha alterada com sucesso! ");
+          alert(i18n.t("login.alertSenhaAlteradaComSucesso"));
           location.reload();
         } else {
-          alert("Erro em alterar a senha, tente novamente mais tarde");
+          alert(i18n.t("login.alertErroAlterarSenha"));
           location.reload();
         }
       });
@@ -423,7 +431,7 @@ export default class Login extends Component {
                   onClick={() => this.modalSenhaLogin()}
                 >
                   {" "}
-                  Esqueci a senha
+                  {i18n.t("login.esqueciSenha")}
                 </Button>
 
                 <div className="loginPassWrapper">
@@ -609,12 +617,12 @@ export default class Login extends Component {
               onHide={() => this.setState({ modalShowLogin: false })}
             >
               <Modal.Header closeButton>
-                <Modal.Title>Senha Login</Modal.Title>
+                <Modal.Title>{i18n.t("login.senha")}</Modal.Title>
               </Modal.Header>
               <Modal.Body>
                 <Container>
                   <Row>
-                    <h3>Token enviado para seu email</h3>
+                    <h3>{i18n.t("login.tokenModalSenha")}</h3>
                   </Row>
                   <Row>
                     <OtpInput
@@ -627,7 +635,7 @@ export default class Login extends Component {
                     />
                   </Row>
                   <Row>
-                    <h6>Senha Nova</h6>
+                    <h6>{i18n.t("login.senhaModalSenha")}</h6>
                   </Row>
                   <Row>
                     <OtpInput

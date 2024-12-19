@@ -13,7 +13,7 @@ import ReactLoading from "react-loading";
 import i18n from "../../tradutor/tradutor";
 import * as Formatar from "../../constants/Formatar";
 
-export default class RelatorioEntrada extends Component {
+export default class RelatorioSaida extends Component {
   constructor() {
     super();
     this.state = {
@@ -217,7 +217,7 @@ export default class RelatorioEntrada extends Component {
           <Row className="baseWindow px-5 py-4">
             <Col md={3}>
               <Form.Group>
-                <Form.Label>Data De</Form.Label>
+                <Form.Label>{i18n.t("relatorio.dataDe")}</Form.Label>
                 <Form.Control
                   type="date"
                   name="dataDe"
@@ -229,7 +229,7 @@ export default class RelatorioEntrada extends Component {
 
             <Col md={3}>
               <Form.Group>
-                <Form.Label>Data Até</Form.Label>
+                <Form.Label>{i18n.t("relatorio.dataAte")}</Form.Label>
                 <Form.Control
                   type="date"
                   name="dataAte"
@@ -241,26 +241,26 @@ export default class RelatorioEntrada extends Component {
 
             <Col md={3}>
               <Form.Group>
-                <Form.Label>Custom ID</Form.Label>
+                <Form.Label>{i18n.t("relatorio.customId")}</Form.Label>
                 <Form.Control
                   type="text"
                   name="id"
                   value={this.state.id}
-                  onChange={(e) => this.setState({id: e.target.value})}
-                  placeholder="Informe o ID"
+                  onChange={this.handleInputChange}
+                  
                 />
               </Form.Group>
             </Col>
 
             <Col md={3}>
               <Form.Group>
-                <Form.Label>End to End</Form.Label>
+                <Form.Label>{i18n.t("relatorio.endtoend")}</Form.Label>
                 <Form.Control
                   type="text"
                   name="endToEnd"
                   value={this.state.endToEnd}
                   onChange={this.handleInputChange}
-                  placeholder="Informe o ID"
+                  
                 />
               </Form.Group>
             </Col>
@@ -296,16 +296,16 @@ export default class RelatorioEntrada extends Component {
                     <thead>
                       <tr>
                         <th>ID</th>
-                        <th scope="col">Nome</th>
+                        <th scope="col">{i18n.t("relatorio.nome")}</th>
                         <th className="text-right" scope="col">
                           {i18n.t("extrato.descrValor")}
                         </th>
                         <th className="text-right" scope="col">
                           {i18n.t("extrato.descrData")}
                         </th>
-                        <th>Status</th>
-                        <th>Custom ID</th>
-                        <th>End To End ID</th>
+                        <th>{i18n.t("relatorio.status")}</th>
+                        <th>{i18n.t("relatorio.customId")}</th>
+                        <th>{i18n.t("relatorio.endtoend")}</th>
                       </tr>
                     </thead>
 
@@ -327,10 +327,10 @@ export default class RelatorioEntrada extends Component {
                           </td>
                           <td className="text-right">
                             {dado.cod_retorno == 1
-                              ? "Concluido"
+                              ? i18n.t("relatorio.concluido")
                               : dado.cod_retorno == 2
-                              ? "Estornado"
-                              : "em analise"}
+                              ? i18n.t("relatorio.estornado")
+                              :  i18n.t("relatorio.analise")}
                           </td>
                           <td className="text-right">{dado.mensagem}</td>
                           <td className="text-right">{dado.end_to_end_id}</td>

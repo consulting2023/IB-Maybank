@@ -201,7 +201,7 @@ export default class RelatorioCrypo extends Component {
           <Row className="baseWindow px-5 py-4">
             <Col md={3}>
               <Form.Group>
-                <Form.Label>Data De</Form.Label>
+                <Form.Label>{i18n.t("relatorio.dataDe")}</Form.Label>
                 <Form.Control
                   type="date"
                   name="dataDe"
@@ -213,7 +213,7 @@ export default class RelatorioCrypo extends Component {
 
             <Col md={3}>
               <Form.Group>
-                <Form.Label>Data Até</Form.Label>
+                <Form.Label>{i18n.t("relatorio.dataDe")}</Form.Label>
                 <Form.Control
                   type="date"
                   name="dataAte"
@@ -254,12 +254,11 @@ export default class RelatorioCrypo extends Component {
                   <Table striped bordered id="tabela-extrato">
                     <thead>
                       <tr>
-                        <th>Movimentação</th>
-                        <th>Data e Hora</th>
-                        <th>Valor Cotação Dólar</th>
-                        <th>Valor Real</th>
-
-                        <th>Moeda</th>
+                        <th>{i18n.t("relatorio.movimentacao")}</th>
+                        <th>{i18n.t("relatorio.datahora")}</th>
+                        <th>{i18n.t("relatorio.valCotacao")}</th>
+                        <th>{i18n.t("relatorio.valReal")}</th>
+                        <th>{i18n.t("relatorio.moeda")}</th>
                       </tr>
                     </thead>
 

@@ -141,31 +141,18 @@ export default class Cambio extends Component {
     }
   };
 
-  enviar_token2f = () => {
-    const data = {
-      url: "token2f/novo",
-      data: {
-        conta_id: Funcoes.pessoa.conta_id,
-      },
-      method: "POST",
-    };
-    Funcoes.Geral_API(data, true).then((responseJson) => {
-      alert("Enviamos um Token para o seu email");
-    });
-  };
-
   travarCotacao = () => {
     if (
       this.state.senha == "" ||
       this.state.valueCompra == 0 ||
       this.state.valueMoeda == []
     ) {
-      alert("Por favor, preencha os campos para prosseguir");
+      alert(i18n.t("cambio.campos"));
     } else if (this.state.valueCompra < 10000) {
       alert("Compra minima de 10.000");
     } else {
       if (this.state.valueCompra < 10000) {
-        alert("Valor Minimo de Compra é de 10.000,00");
+        alert(i18n.t("cambio.limit"));
       } else {
         this.setState({ viewValidar: false, disabled: true });
         const data = {
@@ -189,9 +176,7 @@ export default class Cambio extends Component {
               alert(res.messagem);
               this.setState({ disabled: false });
             } else if (res.cod == 1) {
-              alert(
-                "Tempo minino para travar cotação de 1 minuto, tente novamente"
-              );
+              alert(i18n.t("cambio.timeLimite"));
               location.reload();
             } else if (res.cod == 2) {
               alert(res.messagem);
@@ -200,12 +185,10 @@ export default class Cambio extends Component {
               alert(res.messagem);
               this.setState({ disabled: false });
             } else if (res.cod == 104) {
-              alert(
-                "Erro ao travar cotação, tente novamente mais tarde ou comunique o gerente"
-              );
+              alert(i18n.t("cambio.erroTravar"));
               location.location();
             } else if (res.cod == 105) {
-              alert("Verifique os parametros e tente novamente");
+              alert(i18n.t("cambio.verifiqueParam"));
               this.setState({ disabled: false });
             } else if (res.cod == 203) {
               alert("Erro interno, aguarde");
@@ -239,10 +222,10 @@ export default class Cambio extends Component {
 
   buyMoeda = () => {
     if (this.state.senhaConfirm == "") {
-      alert("É necessário informar a senha de transação para comprar");
+      alert(i18n.t("cambio.senhaInform"));
       return;
     } else if (this.state.senhaConfirm != this.state.senha) {
-      alert("Senha incorreta");
+      alert(i18n.t("cambio.senhaIncorreta"));
     } else {
       this.setState({ disabledConfirm: true });
       // Define um temporizador para exibir alerta após 15 segundos
@@ -259,15 +242,13 @@ export default class Cambio extends Component {
         method: "POST",
       };
 
-      Funcoes.Geral_API(data).then((responseJson) => {
+      Funcoes.Geral_API(data).then((res) => {
         if (res.success == 0) {
           if (res.cod == 0) {
             alert(res.message);
             this.setState({ disabledConfirm: false });
           } else if (res.cod == 1) {
-            alert(
-              "Tempo minino para travar cotação de 1 minuto, tente novamente"
-            );
+            alert(i18n.t("cambio.timeLimite"));
             location.reload();
           } else if (res.cod == 2) {
             alert(res.messagem);
@@ -276,12 +257,10 @@ export default class Cambio extends Component {
             alert(res.message);
             this.setState({ disabledConfirm: false });
           } else if (res.cod == 104) {
-            alert(
-              "Erro ao realizar a compra, tente novamente mais tarde ou comunique o gerente"
-            );
+            alert(i18n.t("cambio.erroCompra"));
             location.location();
           } else if (res.cod == 105) {
-            alert("Verifique os parametros e tente novamente");
+            alert(i18n.t("cambio.verifiqueParam"));
             this.setState({ disabledConfirm: false });
           } else if (res.cod == 203) {
             alert("Erro interno, aguarde");
@@ -292,7 +271,7 @@ export default class Cambio extends Component {
             alert("Erro Desconhecido");
           }
         } else {
-          alert("Compra realizada com sucesso");
+          alert(i18n.t("cambio.compraSuccess"));
           window.location.href = "/relatorio_crypo";
         }
       });
@@ -305,25 +284,25 @@ export default class Cambio extends Component {
 
     // Verifica se todos os campos necessários estão preenchidos
     if (!carteiraSaque) {
-      alert("Informe a carteira para saque.");
+      alert(i18n.t("cambio.informeCarteira"));
       this.setState({ travarSaque: false });
       return;
     }
 
     if (!valorSaque || isNaN(valorSaque) || valorSaque <= 0) {
-      alert("Informe um valor de saque válido.");
+      alert(i18n.t("cambio.informeValorSaque"));
       this.setState({ travarSaque: false });
       return;
     }
 
     if (!moedaSaque) {
-      alert("Escolha uma moeda para o saque.");
+      alert(i18n.t("cambio.informeMoedaSaque"));
       this.setState({ travarSaque: false });
       return;
     }
 
     if (!senhaSaque) {
-      alert("Informe a senha para realizar o saque.");
+      alert(i18n.t("cambio.informeSenhaSaque"));
       this.setState({ travarSaque: false });
       return;
     }
@@ -346,29 +325,23 @@ export default class Cambio extends Component {
     Funcoes.Geral_API(data, true).then((responseJson) => {
       console.log(responseJson);
       if (responseJson.success) {
-        alert("Saque em processamento! Verificar relatorio de Saque");
+        alert(i18n.t("cambio.saqueSuccess"));
         window.location.href = "/relatorio_crypo";
       } else {
         if (responseJson.cod == 101) {
-          alert("Senha errada, tente novamente");
+          alert(i18n.t("cambio.saqueCod101"));
           this.setState({ travarSaque: false });
         } else if (responseJson.cod == 105) {
-          alert(
-            "Parametros insuficientes, verifique os campos e tente novamente"
-          );
+          alert(i18n.t("cambio.saqueCod105"));
           this.setState({ travarSaque: false });
         } else if (responseJson.cod == 203) {
           alert("Erro em solicitar o saque, tente novamente");
           Funcoes.logout();
         } else if (responseJson.cod == 2) {
-          alert(
-            "Saldo para saque insuficiente, realize uma compra para poder sacar mais que o saldo"
-          );
+          alert(i18n.t("cambio.saqueCod2"));
           this.setState({ travarSaque: false });
         } else if (responseJson.cod == 104) {
-          alert(
-            "Erro ao completar o Saque, tente novamente mais tarde ou comunique o gerente"
-          );
+          alert(i18n.t("cambio.saqueCod104"));
           this.setState({ travarSaque: false });
         } else {
           alert("Erro em solicitar o saque, tente novamente");
@@ -457,7 +430,7 @@ export default class Cambio extends Component {
                 className="mb-2 w-100 text-center"
                 style={{ fontSize: "1.30em" }}
               >
-                <strong>Cambio</strong>
+                <strong>{i18n.t("cambio.cambiotitle")}</strong>
               </p>
             </Row>
             {this.state.liberarSaque == false && this.state.saque.length > 0 ? (
@@ -465,9 +438,12 @@ export default class Cambio extends Component {
                 {this.state.saque.map((data, index) => {
                   return (
                     <Col key={data.key || index}>
-                      <h5>Moeda: {data.symbol || "N/A"}</h5>
                       <h5>
-                        Saldo: {data.saldo !== undefined ? data.saldo : "N/A"}
+                        {i18n.t("cambio.moeda")} {data.symbol || "N/A"}
+                      </h5>
+                      <h5>
+                        {i18n.t("cambio.saldo")}{" "}
+                        {data.saldo !== undefined ? data.saldo : "N/A"}
                       </h5>
                     </Col>
                   );
@@ -482,7 +458,6 @@ export default class Cambio extends Component {
                   className="baseButtonPrimary"
                   onClick={() => {
                     this.setState({ modalComprar: true });
-                    Produtos.cambioTela.token ? this.enviar_token2f() : null;
                   }}
                 >
                   <Row className="w-80 m-auto">
@@ -490,7 +465,9 @@ export default class Cambio extends Component {
                       {Icones.cambio}
                     </Col>
                     <Col xs={7} className="px-0 my-auto">
-                      <p className="buttonTitle m-auto">Comprar Moeda</p>
+                      <p className="buttonTitle m-auto">
+                        {i18n.t("cambio.comprarMoeda")}
+                      </p>
                     </Col>
                   </Row>
                 </Button>
@@ -503,9 +480,6 @@ export default class Cambio extends Component {
                   className="baseButtonPrimary"
                   onClick={() => {
                     this.setState({ modalSaque: true });
-                    Produtos.cambioTela.tokenSaque
-                      ? this.enviar_token2f()
-                      : null;
                   }}
                 >
                   <Row className="w-80 m-auto">
@@ -513,7 +487,9 @@ export default class Cambio extends Component {
                       {Icones.cambio}
                     </Col>
                     <Col xs={7} className="px-0 my-auto">
-                      <p className="buttonTitle m-auto">Saque Moeda</p>
+                      <p className="buttonTitle m-auto">
+                        {i18n.t("cambio.saqueMoeda")}
+                      </p>
                     </Col>
                   </Row>
                 </Button>
@@ -529,19 +505,19 @@ export default class Cambio extends Component {
           onHide={() => this.setState({ modalComprar: false })}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Compra de Moeda</Modal.Title>
+            <Modal.Title>{i18n.t("cambio.comprarMoeda")}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>
               <Row>
                 <Col>
-                  <h3>Moeda</h3>
+                  <h3>{i18n.t("cambio.moeda")}</h3>
                   <Select
                     options={this.state.saque.map((moeda) => ({
                       value: moeda.id,
                       label: moeda.symbol,
                     }))}
-                    placeholder="Escolher Moeda"
+                    placeholder={i18n.t("cambio.escolherMoeda")}
                     value={this.state.valueMoeda} // Passa o objeto selecionado ou `null`
                     onChange={(selectedOption) => {
                       this.setState({
@@ -569,7 +545,7 @@ export default class Cambio extends Component {
               <br />
               <Row className="mb-3">
                 <Col>
-                  <h3>Valor Desejado</h3>
+                  <h3>{i18n.t("cambio.valDsj")}</h3>
                   <input
                     value={this.state.valueCompra.toLocaleString("pt-BR", {
                       minimumFractionDigits: 2, // Garante que exiba sempre duas casas decimais
@@ -587,7 +563,7 @@ export default class Cambio extends Component {
                   />
                 </Col>
                 <Col>
-                  <h3>Valor Moeda</h3>
+                  <h3>{i18n.t("cambio.valMoeda")}</h3>
                   <span style={{ marginLeft: 10 }}>
                     <input
                       value={
@@ -605,7 +581,7 @@ export default class Cambio extends Component {
                   </span>
                 </Col>
                 <Col>
-                  <h3>Valor Liquido</h3>
+                  <h3>{i18n.t("cambio.valLqd")}</h3>
                   <input
                     value={
                       this.state.valorCotacao.price_buy
@@ -633,7 +609,7 @@ export default class Cambio extends Component {
               <hr />
               <Row className="mb-3">
                 <Col>
-                  <h3>Taxa</h3>
+                  <h3>{i18n.t("cambio.taxa")}</h3>
                   <input
                     value={this.state.taxa + "%"}
                     placeholder=" 00,00"
@@ -641,21 +617,17 @@ export default class Cambio extends Component {
                   />
                 </Col>
                 <Col>
-                  <h3>Tarifa</h3>
+                  <h3>{i18n.t("cambio.tarifa")}</h3>
                   <span style={{ marginLeft: 10 }}>
                     <input
                       value={" " + this.state.tarifa}
                       placeholder=" 00,00"
                       disabled
                     />
-
-                    {/* {this.state.valorCotacao.price_buy
-                      ? this.state.valorCotacao.price_buy
-                      : " 00,00"} */}
                   </span>
                 </Col>
                 <Col>
-                  <h3>Total a Pagar</h3>
+                  <h3>{i18n.t("cambio.totalPagar")}</h3>
                   <input
                     value={
                       this.state.totalPagar
@@ -670,28 +642,9 @@ export default class Cambio extends Component {
                   />
                 </Col>
               </Row>
-
-              {Produtos.cambioTela.token ? (
-                <div>
-                  <Row>
-                    <h3>Token enviado para seu email</h3>
-                  </Row>
-                  <Row>
-                    <OtpInput
-                      focusInput={1}
-                      isInputNum={true}
-                      value={this.state.token}
-                      onChange={(value) => this.setState({ token: value })}
-                      numInputs={6}
-                      className="tokenValidacao"
-                    />
-                  </Row>
-                </div>
-              ) : null}
-
               <Row>
                 <Col>
-                  <h3>Senha de Transição</h3>
+                  <h3>{i18n.t("cambio.senhaTransfer")}</h3>
                   <OtpInput
                     isInputSecure={true}
                     focusInput={1}
@@ -712,12 +665,10 @@ export default class Cambio extends Component {
               variant="primary"
               disabled={this.state.disabled}
               onClick={() => {
-                Produtos.cambioTela.token
-                  ? this.valida_token2f
-                  : this.travarCotacao();
+                this.travarCotacao();
               }}
             >
-              Confirmar Compra
+              {i18n.t("cambio.confirmCompra")}
             </Button>
           </Modal.Footer>
         </Modal>
@@ -728,14 +679,14 @@ export default class Cambio extends Component {
           onHide={() => this.setState({ modalConfirmComprar: false })}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Confirmar Compra</Modal.Title>
+            <Modal.Title>{i18n.t("cambio.confirmCompra")}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>
               <Alert style={{ fontSize: "13px" }} variant="secondary">
                 <Row>
                   <Col>
-                    <h4>Moeda</h4>
+                    <h4>{i18n.t("cambio.moeda")}</h4>
                     <input
                       type="text"
                       value={this.state.moedaNome}
@@ -744,7 +695,7 @@ export default class Cambio extends Component {
                     />
                   </Col>
                   <Col>
-                    <h4>Valor da Moeda</h4>
+                    <h4>{i18n.t("cambio.valMoeda")}</h4>
                     <input
                       type="text"
                       value={this.state.valorMoedaTravar || "00,00"}
@@ -753,7 +704,7 @@ export default class Cambio extends Component {
                     />
                   </Col>
                   <Col>
-                    <h4>Taxa</h4>
+                    <h4>{i18n.t("cambio.taxa")}</h4>
                     <input
                       type="text"
                       value={this.state.taxa + "%" || "00.00%"}
@@ -765,7 +716,7 @@ export default class Cambio extends Component {
                 <br />
                 <Row>
                   <Col>
-                    <h4>Quantidade que quer</h4>
+                    <h4>{i18n.t("cambio.valDsj")}</h4>
                     <input
                       type="text"
                       value={this.state.valueCompra.toLocaleString("pt-BR", {
@@ -777,7 +728,7 @@ export default class Cambio extends Component {
                     />
                   </Col>
                   <Col>
-                    <h4>Valor Total a Pagar</h4>
+                    <h4>{i18n.t("cambio.totalPagar")}</h4>
                     <input
                       type="text"
                       value={this.state.totalPagarConfirmar.toLocaleString(
@@ -795,7 +746,7 @@ export default class Cambio extends Component {
               </Alert>
               <br />
               <Row>
-                <h6>Senha de Transação</h6>
+                <h6>{i18n.t("cambio.senhaTransfer")}</h6>
               </Row>
               <Row>
                 <OtpInput
@@ -817,7 +768,7 @@ export default class Cambio extends Component {
               disabled={this.state.disabledConfirm}
               onClick={this.buyMoeda}
             >
-              Confirmar Compra
+              {i18n.t("cambio.confirmCompra")}
             </Button>
           </Modal.Footer>
         </Modal>
@@ -829,13 +780,13 @@ export default class Cambio extends Component {
           onHide={() => this.setState({ modalSaque: false })}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Saque Compra</Modal.Title>
+            <Modal.Title>{i18n.t("cambio.saqueMoeda")}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>
               <Row className="mb-3">
                 <Col>
-                  <h3>Moeda</h3>
+                  <h3>{i18n.t("cambio.moeda")}</h3>
                   <Select
                     options={this.state.saque.map((moeda) => ({
                       value: moeda.id,
@@ -868,7 +819,7 @@ export default class Cambio extends Component {
                   />
                 </Col>
                 <Col>
-                  <h3>Saldo Moeda</h3>
+                  <h3>{i18n.t("cambio.saldo")}</h3>
                   <h4>
                     {this.state.saldoForSaque != 0
                       ? " " + this.state.saldoForSaque
@@ -876,7 +827,7 @@ export default class Cambio extends Component {
                   </h4>
                 </Col>
                 <Col>
-                  <h3>Valor de Saque</h3>
+                  <h3>{i18n.t("cambio.valSaque")}</h3>
                   <div>
                     <input
                       value={
@@ -901,37 +852,21 @@ export default class Cambio extends Component {
               </Row>
               <Row>
                 <Col>
-                  <h3>Carteira de Crypto</h3>
+                  <h3>{i18n.t("cambio.carteiraSaque")}</h3>
                   <input
                     type="text"
                     style={{ width: "90%", height: 40 }}
-                    placeholder="Preencha a carteira para saque"
+                    placeholder={i18n.t("cambio.placeholderSaque")}
                     onChange={(e) =>
                       this.setState({ carteiraSaque: e.target.value })
                     }
                   />
                 </Col>
               </Row>
-              {Produtos.cambioTela.tokenSaque ? (
-                <div>
-                  <Row>
-                    <h3>Token enviado para seu email</h3>
-                  </Row>
-                  <Row>
-                    <OtpInput
-                      focusInput={1}
-                      isInputNum={true}
-                      value={this.state.tokenSaque}
-                      onChange={(value) => this.setState({ tokenSaque: value })}
-                      numInputs={6}
-                      className="tokenValidacao"
-                    />
-                  </Row>
-                </div>
-              ) : null}
+
               <br />
               <Row>
-                <h6>Senha de Transação</h6>
+                <h6>{i18n.t("cambio.senhaTransfer")}</h6>
               </Row>
               <Row>
                 <OtpInput
@@ -956,7 +891,7 @@ export default class Cambio extends Component {
                   variant="primary"
                   style={{ width: "2rem", height: "2rem" }}
                 >
-                  <span className="sr-only">Carregando...</span>
+                  <span className="sr-only">{i18n.t("cambio.carregando")}</span>
                 </Spinner>
               </div>
             ) : (
@@ -969,7 +904,7 @@ export default class Cambio extends Component {
                   this.saqueCrypto(); // Chama a função
                 }}
               >
-                Sacar
+                {i18n.t("cambio.sacar")}
               </Button>
             )}
           </Modal.Footer>
