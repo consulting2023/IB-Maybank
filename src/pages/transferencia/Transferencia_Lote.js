@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "../../templates/style_cobrar.scss";
-import { Container, Col, Row, Modal } from "react-bootstrap";
+import { Container, Col, Row, Modal, Table } from "react-bootstrap";
 import { registerLocale } from "react-datepicker";
 import br from "date-fns/locale/pt-BR";
 import Icones from "../../constants/Icon";
@@ -11,7 +11,7 @@ import ReactLoading from "react-loading";
 import OtpInput from "react-otp-input";
 import i18n from "../../tradutor/tradutor";
 import Password from "../../components/password/Password";
-
+import Papa from "papaparse";
 // registerLocale('pt-BR', br)
 
 export default class Transferencia_Lote extends Component {
@@ -28,7 +28,7 @@ export default class Transferencia_Lote extends Component {
       inputToken: true,
       valida_senha_ok: false,
       valida_token_ok: false,
-
+      dadosCsv: [], // Armazena os dados processados do CSV
       password: ["", "", "", "", "", ""],
     };
   }
@@ -93,7 +93,8 @@ export default class Transferencia_Lote extends Component {
     let i = 0;
     let slice_name = event.target.files[0]["name"].split(".");
     if (slice_name[1] === "csv") {
-      
+      this.verRetorno(event);
+
       this.setState({
         csv: event.target.files[0],
         nome_do_arquivo: event.target.files[0]["name"],
@@ -250,6 +251,89 @@ export default class Transferencia_Lote extends Component {
     }, 300);
   };
 
+  verRetorno = (event) => {
+    const arquivo = event.target.files[0]; // Obtém o arquivo selecionado
+    if (arquivo && arquivo.type === "text/csv") {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const conteudo = e.target.result; // Lê o conteúdo do arquivo como texto
+        // Usa o PapaParse para fazer o parsing do CSV
+        Papa.parse(conteudo, {
+          header: true, // Define que o CSV tem cabeçalhos
+          skipEmptyLines: true, // Ignora linhas vazias
+          complete: (result) => {
+            console.log("Dados processados:", result.data);
+
+            // Mapeia as finalidades para suas descrições
+            const finalidades = {
+              1: "Crédito em Conta",
+              2: "Pagamento de Aluguel/Condomínio",
+              3: "Pagamento de Duplicata/Títulos",
+              4: "Pagamento de Dividendos",
+              5: "Pagamento de Mensalidade Escolar",
+              6: "Pagamento de Salários",
+              7: "Pagamento de Fornecedores/Honorários",
+              8: "Operações de Câmbios/Fundos/Bolsa de Valores",
+              9: "Repasse de Arrecadação/Pagamento de Tributos",
+              10: "Transferência Internacional em Real",
+              11: "DOC para Poupança",
+              12: "DOC para Depósito Judicial",
+              13: "Outros",
+              16: "Pagamento de bolsa auxílio",
+              17: "Remuneração à cooperado",
+            };
+
+            // Função para formatar os valores como moeda
+            const formatarMoeda = (valor) => {
+              return new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(valor);
+            };
+
+            // Manipula os dados para remover o digitoAgencia, validar a finalidade e formatar valores
+            const dadosProcessados = result.data.map((item) => {
+              // Remove o campo digitoAgencia
+              const { digitoAgencia, ...resto } = item;
+
+              // Valida e substitui a finalidade pelo nome correspondente
+              const finalidade =
+                finalidades[item.finalidade] || "Finalidade desconhecida";
+
+              // Formata o valor como moeda (exemplo de campo 'valor', substitua conforme necessário)
+              const valorFormatado = item.valor
+                ? formatarMoeda(parseFloat(item.valor))
+                : item.valor;
+
+              return {
+                ...resto,
+                finalidade, // Substitui o valor de finalidade pela descrição
+                valor: valorFormatado, // Substitui o valor pelo formato de moeda
+              };
+            });
+
+            this.setState({
+              dadosCsv: dadosProcessados, // Atualiza o estado com os dados processados
+              nome_do_arquivo: arquivo.name, // Atualiza o nome do arquivo
+            });
+          },
+          error: (err) => {
+            console.error("Erro ao processar o CSV:", err);
+          },
+        });
+      };
+
+      reader.onerror = (err) => {
+        console.error("Erro ao ler o arquivo:", err);
+      };
+
+      reader.readAsText(arquivo); // Lê o arquivo como texto
+    } else {
+      alert("Por favor, selecione um arquivo CSV válido.");
+    }
+  };
+
   render() {
     return (
       <>
@@ -258,7 +342,6 @@ export default class Transferencia_Lote extends Component {
           img={Objetos.transferenciaImg}
         />
 
-       
         <Container className="mt-1 col-md-10 text-center">
           <p className="text-center" style={{ fontSize: "1.65em" }}>
             {i18n.t("transferencia.titleLote")}
@@ -315,6 +398,34 @@ export default class Transferencia_Lote extends Component {
               {i18n.t("transferencia.btnDownLote")}
             </button>
           </Col>
+        </Container>
+
+        <br />
+
+        <Container>
+          {this.state.dadosCsv.length > 0 && (
+            <div>
+              <h4>Dados Processados:</h4>
+              <Table striped bordered id="tabela-extrato">
+                <thead>
+                  <tr>
+                    {Object.keys(this.state.dadosCsv[0]).map((key) => (
+                      <th key={key}>{key}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.dadosCsv.map((linha, index) => (
+                    <tr key={index}>
+                      {Object.values(linha).map((valor, i) => (
+                        <td key={i}>{valor}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          )}
         </Container>
 
         <Modal
