@@ -306,10 +306,15 @@ export default class Transferencia_Lote extends Component {
                 ? formatarMoeda(parseFloat(item.valor))
                 : item.valor;
 
+              // Valida o campo id_banco
+              const id_banco =
+                item.id_banco === "000" ? process.env.NOME_BANCO : "Banco não identificado";
+
               return {
                 ...resto,
                 finalidade, // Substitui o valor de finalidade pela descrição
                 valor: valorFormatado, // Substitui o valor pelo formato de moeda
+                id_banco, // Define o nome correspondente ao id_banco
               };
             });
 
