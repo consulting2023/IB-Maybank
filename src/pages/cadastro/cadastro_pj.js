@@ -35,6 +35,9 @@ export default class CadastroPj extends Component {
       cadastroPt2: false,
       cadastroPt3: false,
       cadastroPt4: false,
+      cadastroPt5: false,
+      cadastroPt6: false,
+      cadastroPt7: true,
 
       agencias: [],
       valueAgencia: "",
@@ -89,7 +92,41 @@ export default class CadastroPj extends Component {
       cartao: "",
 
       liberarContrato: false,
-      contrato: ""
+      contrato: "",
+
+      rep_nome:"",
+
+      liberarRepCpf: false,
+      rep_cpf: "",
+
+      liberarRepCelular: false,
+      rep_celular: "",
+
+      smsModal: false,
+      sms: "",
+
+      rep_email: "",
+
+      tokenModal: false,
+      token: "",
+
+      liberarSenha1: false,
+      senha1: "",
+
+      liberarSenha2: false,
+      senha2: "",
+
+      liberarRepNomeMae: false,
+      rep_nomeMae: "",
+
+      liberarRepData: false,
+      rep_data: "",
+
+      liberarRepGenero: false,
+      rep_genero: "",
+
+
+
     };
 
     this.inputTelefone = React.createRef();
@@ -101,6 +138,13 @@ export default class CadastroPj extends Component {
     this.inputAbertura = React.createRef();
     this.inputCnae = React.createRef();
     this.inputCep = React.createRef();
+    this.inputRepCpf = React.createRef();
+    this.inputRepCelular = React.createRef();
+    this.inputSenha1 = React.createRef();
+    this.inputSenha2 = React.createRef();
+    this.inputRepNomeMae = React.createRef();
+    this.inputRepData = React.createRef();
+    this.inputRepGenero = React.createRef();
   }
 
   handleFocus = (nextInputRef) => {
@@ -128,9 +172,8 @@ export default class CadastroPj extends Component {
           const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
           this.setState({
             comprovante: base64String,
-            // cadastroPt3: false,
-            // cadastroPt4: true
           });
+          this.salvarDormente('imagecomprovante', base64String)
         };
 
         // Ler o arquivo como uma URL de dados (base64)
@@ -156,12 +199,62 @@ export default class CadastroPj extends Component {
         reader.onloadend = () => {
           const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
           this.setState({
-            comprovante: base64String,
+            cartao: base64String,
+            liberarContrato: true
           });
+          this.salvarDormente('imagecnpj', base64String)
         };
 
         // Ler o arquivo como uma URL de dados (base64)
         reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  uploadContrato = (e) => {
+    const file = e.target.files[0]; // Pega o arquivo selecionado
+    if (file) {
+      // Tipos válidos para imagem
+      const validImageTypes = ['image/png', 'image/jpeg'];
+      // Tipo válido para PDF
+      const validPdfType = 'application/pdf';
+
+      if (validImageTypes.includes(file.type)) {
+        // Se for imagem PNG ou JPEG
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+          const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
+          this.setState({
+            contrato: base64String,
+          });
+          this.salvarDormente('imagecontrato', base64String)
+        };
+
+        // Ler o arquivo como uma URL de dados (base64)
+        reader.readAsDataURL(file);
+
+      } else if (file.type === validPdfType) {
+        // Se for PDF
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+          const base64String = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
+          this.setState({
+            contrato: base64String,
+          });
+          this.salvarDormente('imagecontrato', base64String)
+        };
+
+        // Ler o arquivo como ArrayBuffer (PDFs não podem ser lidos diretamente como Data URL)
+        reader.readAsArrayBuffer(file);
+
+      } else {
+        // Caso o arquivo seja inválido
+        alert("Arquivo inválido");
+        this.setState({
+          contrato: '', // Limpa a imagem ou PDF em caso de erro
+        });
       }
     }
   };
@@ -280,6 +373,105 @@ export default class CadastroPj extends Component {
     };
 
     return estados[estado] || "Estado não encontrado";
+  };
+
+  salvarEndereco = () => {
+    this.salvarDormente('cep', this.state.cep);
+    this.salvarDormente('endereco', this.state.endereço);
+    this.salvarDormente('numero', this.state.numero);
+    this.salvarDormente('bairro', this.state.bairro);
+    this.salvarDormente('cidade', this.state.cidade);
+    this.salvarDormente('estado', this.state.estado);
+    if (this.state.complemento != '') {
+      this.salvarDormente('complemento', this.state.complemento);
+    }
+  };
+
+  sms_envia = () => {
+    const data = {
+      url: "utilitarios/validacao-sms-envio",
+      data: {
+        telefone: this.state.rep_celular
+      },
+      method: "POST",
+    };
+    Funcoes.Geral_API(data).then((res) => {
+      if (res){
+        this.setState({ smsModal: true });
+      } else {
+        alert("Erro ao enviar SMS.");
+      }
+    });
+  };
+
+  sms_valida = () => {
+    const data = {
+      url: "utilitarios/validacao-sms-confere",
+      data: {
+        telefone: this.state.rep_celular,
+        token: this.state.sms
+      },
+      method: "POST",
+    };
+    Funcoes.Geral_API(data).then((res) => {
+      if (res){
+        this.setState({ smsModal: false, cadastroPt5: false, cadastroPt6: true });
+      } else {
+        alert("SMS inválido.");
+      }
+    });
+  }
+
+  email_envia = () => {
+    const data = {
+      url: "utilitarios/validacao-email-envio",
+      data: {
+        email: this.state.rep_email
+      },
+      method: "POST",
+    };
+    Funcoes.Geral_API(data).then((res) => {
+      if (res){
+        this.setState({ tokenModal: true });
+      } else {
+        alert("Erro ao enviar SMS.");
+      }
+    });
+  };
+
+  email_valida = () => {
+    console.log('email_valida');
+    const data = {
+      url: "utilitarios/validacao-email-confere",
+      data: {
+        email: this.state.rep_email,
+        token: this.state.token
+      },
+      method: "POST",
+    };
+    Funcoes.Geral_API(data).then((res) => {
+      if (res){
+        this.setState({ tokenModal: false, liberarSenha1: true }, () => {
+          this.handleFocus(this.inputSenha1)
+        });
+      } else {
+        alert("SMS inválido.");
+      }
+    });
+  }
+
+  setSenha = () => {
+    const { senha1, senha2 }  = this.state;
+    if (senha1 === senha2) {
+      this.salvarDormente('senha', senha1);
+      this.setState({
+        liberarRepNomeMae: true,
+      }, () => {
+        this.handleFocus(this.inputRepNomeMae);
+      })
+    } else {
+      alert("As senhas não são iguais. Tente novamente.");
+    }
   }
 
   salvarDormente = (campo, valor) => {
@@ -295,7 +487,8 @@ export default class CadastroPj extends Component {
     };
     Funcoes.Geral_API(data).then((res) => {
       if (!res) {
-        alert("Falha ao cadastrar informações, tente novamente.");
+        // alert("Falha ao cadastrar informações, tente novamente.");
+        alert("Falha ao cadastrar informações, tente novamente." + campo );
         window.location.reload();
       } else {
         console.log(campo + ' ok');
@@ -332,7 +525,7 @@ export default class CadastroPj extends Component {
                 (Aperte Enter para continuar para o próximo campo)
 
                 { 
-                  this.state.cadastroPt1 ? ( <>
+                  this.state.cadastroPt1 && ( <>
 
                     <h1 className="mb-2">
                       Iremos começar o cadastro da sua conta PJ
@@ -372,7 +565,7 @@ export default class CadastroPj extends Component {
                     />
 
                     {
-                      this.state.liberarCNPJ ? ( 
+                      this.state.liberarCNPJ && ( 
                       
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -402,11 +595,11 @@ export default class CadastroPj extends Component {
                           />
                         </div> 
 
-                      ) : null
+                      )
                     }
 
                     {
-                      this.state.liberarTelefone ? ( 
+                      this.state.liberarTelefone && ( 
                       
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -445,11 +638,11 @@ export default class CadastroPj extends Component {
                           />
                         </div> 
 
-                      ) : null
+                      )
                     }
 
                     {
-                      this.state.liberarEmail ? ( 
+                      this.state.liberarEmail && ( 
 
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -480,14 +673,14 @@ export default class CadastroPj extends Component {
                           />
                         </div> 
 
-                      ) : null
+                      )
                     }
 
-                  </> ) : null 
+                  </> )
                 }
 
                 {
-                  this.state.cadastroPt2 ? ( <>
+                  this.state.cadastroPt2 && ( <>
 
                     <hr className="divisoria" />
 
@@ -514,7 +707,7 @@ export default class CadastroPj extends Component {
                     />
 
                     {
-                      this.state.liberarFantasia ? ( 
+                      this.state.liberarFantasia && ( 
 
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -541,11 +734,11 @@ export default class CadastroPj extends Component {
                           />
                         </div> 
 
-                      ) : null
+                      )
                     }
 
                     {
-                      this.state.liberarInscricao ? (
+                      this.state.liberarInscricao && (
 
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -574,11 +767,11 @@ export default class CadastroPj extends Component {
                           />
                         </div>
 
-                      ) : null
+                      )
                     }
 
                     {
-                      this.state.liberaFaturamento ? ( 
+                      this.state.liberaFaturamento && ( 
 
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -610,7 +803,6 @@ export default class CadastroPj extends Component {
                             }}
                             onKeyDown={(e) => {
                               const faturamento = this.state.faturamento.trim();
-                              console.log('faturamento', faturamento);
                               if (faturamento.length > 0 && e.key === "Enter") {
                                 if (faturamento != "R$ 0,00") {
                                   this.salvarDormente('faturamento', faturamento);
@@ -625,11 +817,11 @@ export default class CadastroPj extends Component {
                           />
                         </div> 
 
-                      ) : null
+                      )
                     }
 
                     {
-                      this.state.liberarContribuicao ? ( 
+                      this.state.liberarContribuicao && ( 
 
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -654,14 +846,14 @@ export default class CadastroPj extends Component {
                           />
                         </div>
 
-                      ) : null
+                      )
                     }
 
-                  </> ) : null
+                  </> )
                 }
 
                 {
-                  this.state.cadastroPt3 ? ( <>
+                  this.state.cadastroPt3 && ( <>
 
                     <hr className="divisoria" />
 
@@ -682,7 +874,7 @@ export default class CadastroPj extends Component {
                     />
 
                     {
-                      this.state.liberarCnae ? ( 
+                      this.state.liberarCnae && ( 
 
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -714,11 +906,11 @@ export default class CadastroPj extends Component {
                           />
                         </div>
 
-                      ) : null
+                      )
                     }
 
                     {
-                      this.state.liberarCep ? ( 
+                      this.state.liberarCep && ( 
 
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -735,7 +927,7 @@ export default class CadastroPj extends Component {
                               this.setState({ cep: e.target.value })
                             }}
                             onKeyDown={(e) => {
-                              const cep = this.state.cnae;
+                              const cep = this.state.cep;
                               if (cep.length > 0 && e.key === "Enter") {
                                 if (cep.length === 9){
                                   this.consultarCEP();
@@ -747,11 +939,11 @@ export default class CadastroPj extends Component {
                           />
                         </div>
 
-                      ) : null
+                      )
                     }
 
                     {
-                      this.state.liberarEnderecoCompleto ? ( 
+                      this.state.liberarEnderecoCompleto && ( 
 
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -770,27 +962,14 @@ export default class CadastroPj extends Component {
                             }
                             disabled
                             style={{ height: 40, width: "100%" }}
-                            onChange={(e) => {
-                              this.setState({ cep: e.target.value })
-                            }}
-                            onKeyDown={(e) => {
-                              const cep = this.state.cnae;
-                              if (cep.length > 0 && e.key === "Enter") {
-                                if (cep.length === 9){
-                                  this.consultarCEP();
-                                } else {
-                                  alert("Por favor, termine de digitar o CEP.");
-                                }
-                              }
-                            }}
                           />
                         </div>
 
-                      ) : null
+                      )
                     }
 
                     {
-                      this.state.liberarComprovante ? ( 
+                      this.state.liberarComprovante && ( 
                       
                         <div className="mt-3">
                           <span className="ttAgencia">
@@ -804,33 +983,37 @@ export default class CadastroPj extends Component {
                             onChange={(event) => this.uploadComprovante(event)} 
                           />
                           <br/>
-                          <div className="w-100">
-                            {this.state.comprovante && <img src={`data:image/jpeg;base64,${this.state.comprovante}`} alt="Imagem em base64" style={{ maxWidth: '200px' }} />}
-
                             {
-                              (this.state.comprovante != "") ? (
-                                <button 
-                                  className="float-right mt-auto" 
-                                  type="button"
-                                  onClick={ () => this.setState({ cadastroPt3: false, cadastroPt4: true }) }
-                                >
-                                  Continuar
-                                </button>
-                              ) : null
+                              (this.state.comprovante.length > 0) && (
+                                <div className="w-100 d-flex">
+                                  <img 
+                                    src={`data:image/jpeg;base64,${this.state.comprovante}`}
+                                    alt="Comprovante de endereço"
+                                    style={{ maxWidth: '200px' }} 
+                                  />
+                                  <Button
+                                    variant="primary"
+                                    className="mt-auto ml-auto" 
+                                    onClick={ () => this.setState({ 
+                                      cadastroPt3: false, 
+                                      cadastroPt4: true
+                                    })}
+                                  >
+                                    Continuar
+                                  </Button>
+                                </div>
+                              )
                             }
-                          </div>
-
-                        
                         </div>
 
-                      ) : null
+                      )
                     }
 
-                  </> ) : null
+                  </> )
                 }
 
                 {
-                  this.state.cadastroPt4 ? ( <>
+                  this.state.cadastroPt4 && ( <>
 
                     <hr className="divisoria" />
 
@@ -842,26 +1025,373 @@ export default class CadastroPj extends Component {
                       style={{ "display": "block" }}
                       type="file" 
                       accept="image/png, image/jpeg" 
-                      onChange={(event) => this.uploadComprovante(event)} 
+                      onChange={(event) => this.uploadCartao(event)} 
                     />
                     <br/>
-                    <div className="w-100">
-                      {this.state.cartao && <img src={`data:image/jpeg;base64,${this.state.cartao}`} alt="Imagem em base64" style={{ maxWidth: '200px' }} />}
+                    {
+                      (this.state.cartao.length > 0) && (
+                        <div className="w-100 d-flex">
+                          <img 
+                            src={`data:image/jpeg;base64,${this.state.cartao}`}
+                            alt="Cartão CNPJ"
+                            style={{ maxWidth: '200px' }} 
+                          />
+                        </div>
+                      )
+                    }
 
-                      {
-                        (this.state.cartao != "") ? (
-                          <button 
-                            className="float-right mt-auto" 
-                            type="button"
-                            onClick={ () => this.setState({ cadastroPt3: false, cadastroPt4: true }) }
-                          >
-                            Continuar
-                          </button>
-                        ) : null
+                    {
+                      this.state.liberarContrato && ( 
+
+                        <div className="mt-3">
+                          <span className="ttAgencia">
+                            Agora, precisamos de seu contrato social ou sua ultima alteração. Por favor, faça o upload do arquivo, em PDF ou tire foto de todas as páginas.
+                          </span>
+
+                          <input 
+                            style={{ "display": "block" }}
+                            type="file" 
+                            accept="image/png, image/jpeg, application/pdf" 
+                            onChange={(event) => this.uploadContrato(event)} 
+                          />
+                          <br/>
+                          {
+                            (this.state.contrato.length > 0) && (
+                              <div className="w-100 d-flex">
+                                <h1>CONTRATO CARREGADO COM SUCESSO</h1>
+                                <Button
+                                  variant="primary"
+                                  className="mt-auto ml-auto" 
+                                  onClick={ () => this.setState({ 
+                                    cadastroPt4: false, 
+                                    cadastroPt5: true
+                                  })}
+                                >
+                                  Continuar para cadastro do representante
+                                </Button>
+                              </div>
+                            )
+                          }
+                        </div>
+
+                      )
+                    }
+
+                  </> )
+                }
+
+                {
+                  this.state.cadastroPt5 && ( <>
+
+                    <hr className="divisoria" />
+
+                    <span className="ttAgencia">
+                      Por favor, informe o nome completo do Representante.
+                    </span>
+
+                    <input
+                      value={this.state.rep_nome}
+                      style={{ height: 40, width: "100%" }}
+                      onChange={(e) => {
+                        this.setState({ rep_nome: e.target.value });
+                      }}
+                      onKeyDown={(e) => {
+                        const rep_nome = this.state.rep_nome.trim(); 
+                        if (rep_nome.length > 0 && e.key === "Enter") {
+                          this.salvarDormente('representante_nome', rep_nome)
+                          this.setState({ liberarRepCpf: true }, () => {
+                            this.handleFocus(this.inputRepCpf);
+                          });
+                        }
+                      }}
+                    />
+
+                    {
+                      this.state.liberarRepCpf && (
+                        <div className="mt-3">
+                          <span className="ttAgencia">
+                            Por favor, informe o CPF do Representante.
+                          </span>
+
+                          <input
+                            ref={this.inputRepCpf}
+                            value={Formatar.cpf_mask(this.state.rep_cpf)}
+                            placeholder="000.000.000-00"
+                            style={{ height: 40, width: "100%" }}
+                            maxLength={14}
+                            onChange={(e) => {
+                              const rep_cpf = e.target.value.replace(/\D/g, "");
+                              this.setState({ rep_cpf });
+                            }}
+                            onKeyDown={(e) => {
+                              const rep_cpf = this.state.rep_cpf; 
+                              if (rep_cpf.length > 0 && e.key === "Enter") {
+                                if(rep_cpf.length === 11) {
+                                  this.salvarDormente('representante_cpf', rep_cpf);
+                                  this.setState({ liberarRepCelular: true }, () => {
+                                    this.handleFocus(this.inputRepCelular);
+                                  });
+                                } else {
+                                  alert("Por favor, termine de digitar o CPF.");
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+                      )
+                    }
+
+                    {
+                      this.state.liberarRepCelular && (
+
+                        <div className="mt-3">
+                          <span className="ttAgencia">
+                            Por favor, informe o número de celular do Representante.
+                          </span>
+
+                          <input
+                            ref={this.inputRepCelular}
+                            value={this.state.rep_celular}
+                            // placeholder="(00) 00000-0000"
+                            style={{ height: 40, width: "100%" }}
+                            maxLength={15} // Limite do formato com máscara
+                            onChange={(e) => {
+                              const rawValue = e.target.value;
+                              const numericValue = rawValue.replace(/\D/g, "");
+                              const formattedValue = Formatar.formatarTelefone(numericValue); // Reaplica a máscara
+
+                              this.setState({
+                                rep_celular: numericValue.length > 0 ? formattedValue : "",
+                              });
+                            }}
+                            onKeyDown={(e) => {
+                              const cel = this.state.rep_celular;
+                              if (cel.length > 0 && e.key === "Enter") {
+                                if(cel.length > 13){
+                                  this.salvarDormente('representante_celular', cel.replace(/\s+/g, ""));
+                                  this.sms_envia(); 
+                                } else {
+                                  alert("Por favor, termine de digitar o telefone.");
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+
+                      )
+                    }
+
+                  </> )
+                }
+
+                {
+                  this.state.cadastroPt6 && ( <>
+
+                    <hr className="divisoria" />
+
+                    <span className="ttAgencia">
+                      Informe o email do Representante
+                    </span>
+
+                    <input
+                      ref={this.inputRepEmail}
+                      value={this.state.rep_email}
+                      placeholder="Digite o e-mail do representante"
+                      style={{ height: 40, width: "100%" }}
+                      onChange={(e) =>
+                        this.setState({ rep_email: e.target.value })
                       }
-                    </div>
+                      onKeyDown={(e) => {
+                        const email = e.target.value;
+                        if (email.length > 0 && e.key === "Enter") {
+                          const email = this.state.rep_email;
+                          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                          if (emailRegex.test(email)) {
+                            this.salvarDormente('representante_email', email);
+                            this.email_envia(); 
+                          } else {
+                            alert("Por favor, insira um e-mail válido.");
+                          }
+                        }
+                      }}
+                    />
 
-                  </> ) : null
+                    {
+                      this.state.liberarSenha1 && (
+
+                        <div className="mt-3">
+                          <span className="ttAgencia">
+                            Ótimo! Agora, vamos criar sua senha de acesso.
+                          </span>
+
+                          <div>
+                            <span>
+                              Dicas:
+                            </span>
+
+                            <ul className="ml-2">
+                              <li>-a senha deve conter 6 números</li>
+                              <li>-não use números sequenciais</li>
+                              <li>-utilize, no máximo, 3 números repetidos</li>
+                              <li>-evite usar seus dados pessoas</li>
+                            </ul>
+                          </div>
+
+                          <input
+                            ref={this.inputSenha1}
+                            maxLength={6}
+                            type="password"
+                            value={this.state.senha1}
+                            placeholder="Digite sua senha"
+                            style={{ height: 40, width: "100%" }}
+                            onChange={(e) =>
+                              this.setState({ senha1: e.target.value })
+                            }
+                            onKeyDown={(e) => {
+                              const senha = this.state.senha1;
+                              if (senha.length > 0 && e.key === "Enter") {
+                                this.setState({ liberarSenha2: true }, () => {
+                                  this.handleFocus(this.inputSenha2);
+                                });
+                              }
+                            }}
+                          />
+                        </div>
+
+                      )
+                    }
+
+                    {
+                      this.state.liberarSenha2 && (
+
+                         <div className="mt-3">
+                          <span className="ttAgencia">
+                            Repita a senha
+                          </span>
+
+                          <input
+                            ref={this.inputSenha2}
+                            maxLength={6}
+                            type="password"
+                            value={this.state.senha2}
+                            placeholder="Repita sua senha"
+                            style={{ height: 40, width: "100%" }}
+                            onChange={(e) =>
+                              this.setState({ senha2: e.target.value })
+                            }
+                            onKeyDown={(e) => {
+                              const senha = this.state.senha2;
+                              if (senha.length > 0 && e.key === "Enter") {
+                                this.setSenha();
+                              }
+                            }}
+                          />
+                        </div>                       
+
+                      )
+                    }
+
+                    {
+                      this.state.liberarRepNomeMae && (
+
+                        <div className="mt-3">
+                          <span className="ttAgencia">
+                            Por favor, insira o nome completo da sua mãe.
+                          </span>
+
+                          <input
+                            ref={this.inputRepNomeMae}
+                            value={this.state.rep_nomeMae}
+                            style={{ height: 40, width: "100%" }}
+                            onChange={(e) =>
+                              this.setState({ rep_nomeMae: e.target.value })
+                            }
+                            onKeyDown={(e) => {
+                              const nomeMae = this.state.rep_nomeMae.trim();
+                              if (nomeMae.length > 0 && e.key === "Enter") {
+                                this.salvarDormente('representante_nomemae', nomeMae);
+                                this.setState({ liberarRepData: true }, () => {
+                                  this.handleFocus(this.inputRepData);
+                                });
+                              }
+
+                            }}
+                          />
+                        </div>
+
+                      )
+                    }
+
+                    {
+                      this.state.liberarRepData && (
+
+                        <div className="mt-3">
+                          <span className="ttAgencia">
+                            Por favor, informe a data de nascimento do Representante.
+                          </span>
+
+                          <input
+                            ref={this.inputRepData}
+                            type="date"
+                            value={this.state.rep_data}
+                            style={{ height: 40, width: "100%" }}
+                            onChange={(e) => {
+                              this.salvarDormente('representante_data_nascimento', e.target.value + ' 00:00:00')
+                              this.setState({ 
+                                rep_data: e.target.value, 
+                                liberarRepGenero: true 
+                              }, () => {
+                                this.handleFocus(this.inputRepGenero);
+                              })
+                            }}
+                          />
+                        </div>
+
+                      )
+                    }
+
+                    {
+                      this.state.liberarRepGenero && (
+
+                         <div className="mt-3">
+                          <span className="ttAgencia">
+                            Escolha o gênero
+                          </span>
+
+                          <Select
+                            options={
+                              [
+                                { label: "Masculino", value: "MASCULINO" },
+                                { label: "Feminino", value: "FEMININO" },
+                                { label: "Outros", value: "Outros" }
+                              ]
+                            }
+                            placeholder="Selecione seu gênero"
+                            value={this.state.rep_genero}
+                            onChange={(selectedOption) => {
+                              this.setState({
+                                rep_genero: selectedOption,
+                                cadastroPt7: true
+                              });
+                            }}
+                            styles={{
+                              control: (base) => ({
+                                ...base,
+                                height: 40,
+                                minHeight: 40,
+                              }),
+                              placeholder: (base) => ({
+                                ...base,
+                                fontSize: 14,
+                              }),
+                            }}
+                          />
+                        </div>                       
+
+                      )
+                    }
+
+                  </> )
                 }
               </div>
             </div>
@@ -1021,6 +1551,7 @@ export default class CadastroPj extends Component {
                   if (this.state.numero == '' || this.state.endereço == '' || this.state.numero == '' || this.state.bairro == '' || this.state.cidade == '' || this.state.estado == '') {
                     alert('Por favor, complete o endereço de sua empresa.');
                   } else {
+                    this.salvarEndereco();
                     this.setState({
                       cepModal: false,
                       liberarEnderecoCompleto: true,
@@ -1033,6 +1564,75 @@ export default class CadastroPj extends Component {
               </Button>
             </Modal.Footer>
           </Modal>
+
+          <Modal
+            size="lg"
+            show={this.state.smsModal}
+            onHide={() => this.setState({ smsModal: false })}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Enviamos um código via sms para seu número. Informe o código.</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Container>
+
+                  <input
+                    value={this.state.sms}
+                    style={{ height: 40, width: "100%" }}
+                    maxLength={6} // Limite do formato com máscara
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/\D/g, "");
+                      this.setState({ sms: numericValue.length > 0 ? numericValue : "" });
+                    }}
+                  />
+
+              </Container>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  this.sms_valida();
+                }}
+              >
+                Validar código
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          <Modal
+            size="lg"
+            show={this.state.tokenModal}
+            onHide={() => this.setState({ tokenModal: false })}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Enviamos um token para seu e-mail. Informe o token.</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Container>
+
+                  <input
+                    value={this.state.token}
+                    style={{ height: 40, width: "100%" }}
+                    maxLength={6}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/\D/g, "");
+                      this.setState({ token: numericValue.length > 0 ? numericValue : "" });
+                    }}
+                  />
+
+              </Container>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="primary"
+                onClick={ () => this.email_valida() }
+              >
+                Validar token
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
         </div>
       );
     } else {
