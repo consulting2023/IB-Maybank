@@ -148,8 +148,8 @@ export default class Cambio extends Component {
       this.state.valueMoeda == []
     ) {
       alert(i18n.t("cambio.campos"));
-    } else if (this.state.valueCompra < 10000) {
-      alert("Compra minima de 10.000");
+    } else if (this.state.valueCompra < 10000 || this.state.valueCompra > 900000) {
+      alert("Compra minima de 10.000 e Compra Maxima é de 900.000");
     } else {
       if (this.state.valueCompra < 10000) {
         alert(i18n.t("cambio.limit"));
