@@ -258,14 +258,7 @@ export default class Transferencia_Lote extends Component {
           img={Objetos.transferenciaImg}
         />
 
-        <Container className="mt-4 col-md-10">
-          {/* <Breadcrumb>
-                                <Breadcrumb.Item href="/home">Home</Breadcrumb.Item>
-                                <Breadcrumb.Item href="/transferencia">Transferência</Breadcrumb.Item>
-                                <Breadcrumb.Item active>Transferência em Lote</Breadcrumb.Item>
-                            </Breadcrumb> */}
-        </Container>
-
+       
         <Container className="mt-1 col-md-10 text-center">
           <p className="text-center" style={{ fontSize: "1.65em" }}>
             {i18n.t("transferencia.titleLote")}
