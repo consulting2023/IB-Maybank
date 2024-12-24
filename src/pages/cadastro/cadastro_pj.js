@@ -31,7 +31,7 @@ export default class CadastroPj extends Component {
   constructor() {
     super();
     this.state = {
-      cadastroPt1: true,
+      cadastroPt1: false,
       cadastroPt2: false,
       cadastroPt3: false,
       cadastroPt4: false,
@@ -45,7 +45,8 @@ export default class CadastroPj extends Component {
       agenciaNumero: "",
 
       liberarCNPJ: false,
-      cnpj: "",
+      cnpj: "92204714000130",
+      // cnpj: "",
 
       liberarTelefone: false,
       celEmpresa: "",
@@ -65,7 +66,6 @@ export default class CadastroPj extends Component {
       liberaFaturamento: false,
 
       liberarContribuicao: false,
-      contribuicao: "",
 
       termo: "",
       termoModal: false,
@@ -123,9 +123,13 @@ export default class CadastroPj extends Component {
       rep_data: "",
 
       liberarRepGenero: false,
-      rep_genero: "",
 
+      liberarRepTipodoc: false,
+      rep_tipodoc: "",
 
+      liberarRepDoc: false,
+
+      liberarRepPass: false,
 
     };
 
@@ -144,7 +148,6 @@ export default class CadastroPj extends Component {
     this.inputSenha2 = React.createRef();
     this.inputRepNomeMae = React.createRef();
     this.inputRepData = React.createRef();
-    this.inputRepGenero = React.createRef();
   }
 
   handleFocus = (nextInputRef) => {
@@ -522,8 +525,9 @@ export default class CadastroPj extends Component {
 
             <div className="cadastropj select-none d-flex align-items-center">
               <div className="w-100">
-                (Aperte Enter para continuar para o próximo campo)
-
+                <span style={{ color: 'white' }}>
+                  (Aperte Enter dentro da caixa de texto para cadastrar a informação pedida.)
+                </span>
                 { 
                   this.state.cadastroPt1 && ( <>
 
@@ -828,7 +832,7 @@ export default class CadastroPj extends Component {
                             Informe a Contribuição da empresa
                           </span>
 
-                          <input
+                          {/* <input
                             ref={this.inputContribuicao}
                             value={this.state.contribuicao}
                             placeholder="Digite a Contribuição"
@@ -843,7 +847,56 @@ export default class CadastroPj extends Component {
                                 this.setState({ cadastroPt2: false, cadastroPt3: true });
                               }
                             }}
+                          /> */}
+
+                          <Select
+                            options={
+                              [
+                                { label: "Sociedade Anônima - SA", value: "SA" },
+                                { label: "Sociedade Limitada - LTDA", value: "LTDA" },
+                                { label: "Sociedade Simples - SS", value: "SS" },
+                                { label: "Microempresa - ME", value: "ME" },
+                                { label: "Empresa de Pequeno Porte - EPP", value: "EPP" },
+                                { label: "Empresário Individual - SOLE_PROPRIETOR", value: "SOLE_PROPRIETOR" },
+                                { label: "Empresa Individual de Responsabilidade - EIRELI", value: "EIRELI" },
+                                { label: "Microempreendedor Individual - MEI", value: "MEI" },
+                                { label: "Sociedade de Conta de Participação - SCP", value: "SCP" },
+                                { label: "Sociedade em Nome Coletivo - S/A", value: "S/A" },
+                                { label: "Sociedade em Comandita Simples", value: "SOCIEDADE EM COMANDITA SIMPLES" },
+                                { label: "Sociedade em Comandita por Ações", value: "SOCIEDADE EM COMANDITA POR ACOES" },
+                                { label: "Sociedade de Propósito Específico - SPE", value: "SPE" },
+                                { label: "Cooperativa", value: "COOPERATIVA" },
+                                { label: "Consórcio de Empresas", value: "CONSORCIO DE EMPRESAS" },
+                                { label: "Associação", value: "ASSOCIACAO" },
+                                { label: "Fundação", value: "FUNDACAO" },
+                                { label: "Organização Não Governamental - ONG", value: "ONG" },
+                                { label: "Entidade Religiosa", value: "ENTIDADE RELIGIOSA" },
+                                { label: "Organização da Sociedade Civil de Interesse Público - OSCIP", value: "OSCIP" },
+                                { label: "Instituto", value: "INSTITUTO" },
+                                { label: "Condomínio", value: "CONDOMÍNIO" },
+                                { label: "Consórcio Público", value: "CONSORCIO PUBLICO" },
+                                { label: "Empreendedor Rural", value: "EMPREENDEDOR RURAL" },
+                                { label: "Entidade Sindical", value: "ENTIDADE SINDICAL" },
+                              ]
+                            }
+                            placeholder="Selecione a Contribuição"
+                            onChange={(selectedOption) => {
+                              this.salvarDormente('contribuicao', selectedOption.value);
+                              this.setState({ cadastroPt2: false, cadastroPt3: true });
+                            }}
+                            styles={{
+                              control: (base) => ({
+                                ...base,
+                                height: 40,
+                                minHeight: 40,
+                              }),
+                              placeholder: (base) => ({
+                                ...base,
+                                fontSize: 14,
+                              }),
+                            }}
                           />
+
                         </div>
 
                       )
@@ -1363,14 +1416,16 @@ export default class CadastroPj extends Component {
                               [
                                 { label: "Masculino", value: "MASCULINO" },
                                 { label: "Feminino", value: "FEMININO" },
-                                { label: "Outros", value: "Outros" }
+                                { label: "Outros", value: "OUTROS" }
                               ]
                             }
                             placeholder="Selecione seu gênero"
                             value={this.state.rep_genero}
                             onChange={(selectedOption) => {
+                              this.salvarDormente('representante_sexo', selectedOption.value);
                               this.setState({
-                                rep_genero: selectedOption,
+                                // rep_genero: selectedOption,
+                                cadastroPt6: false,
                                 cadastroPt7: true
                               });
                             }}
@@ -1386,13 +1441,104 @@ export default class CadastroPj extends Component {
                               }),
                             }}
                           />
-                        </div>                       
+                        </div>
 
                       )
                     }
 
                   </> )
                 }
+
+                {
+                  this.state.cadastroPt7 && ( <>
+                  
+                    <hr className="divisoria" />
+
+                    <span className="ttAgencia">
+                      Informe seu estado civil
+                    </span>
+
+                    <Select
+                      options={
+                        [
+                          { label: "Solteiro" },
+                          { label: "Casado" },
+                          { label: "Separado" },
+                          { label: "Divorciado" },
+                          { label: "Viúvo" },
+                          { label: "União Estável" },
+                        ]
+                      }
+                      placeholder="Selecione seu estado civil"
+                      value={this.state.rep_genero}
+                      onChange={(selectedOption) => {
+                        this.salvarDormente('representante_estado_civil', selectedOption.label);
+                        this.setState({
+                          liberarRepTipodoc: true
+                        });
+                      }}
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          height: 40,
+                          minHeight: 40,
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          fontSize: 14,
+                        }),
+                      }}
+                    />
+
+                    {
+                      this.state.liberarRepTipodoc && (
+
+                         <div className="mt-3">
+                          <span className="ttAgencia">
+                            Precisamos da foto de um documento.
+                            Qual documento você usará para abrir sua conta?
+                          </span>
+
+                          <div className="d-flex">
+                            <Button
+                              className="mr-3"
+                              onClick={ () => {
+                                this.salvarDormente('idoc', '1');
+                                this.setState({ rep_tipodoc: '1' });
+                              }}
+                            >
+                              RG
+                            </Button>
+
+                            <Button
+                              className="mr-3"
+                              onClick={ () => {
+                                this.salvarDormente('idoc', '2');
+                                this.setState({ rep_tipodoc: '2' });
+                              }}
+                            >
+                              CNH
+                            </Button>
+
+                            <Button
+                              className="mr-3"
+                              onClick={ () => {
+                                this.salvarDormente('idoc', '3');
+                                this.setState({ rep_tipodoc: '3' });
+                              }}
+                            >
+                              Passaporte
+                            </Button>
+                          </div>
+                          
+                        </div>
+
+                      )
+                    }
+                  
+                  </> )
+                }
+
               </div>
             </div>
 
@@ -1422,9 +1568,6 @@ export default class CadastroPj extends Component {
                   }}
                   dangerouslySetInnerHTML={{ __html: this.state.termo }}
                 ></div>
-              </Container>
-            </Modal.Body>
-            <Modal.Footer>
               <Button
                 variant="primary"
                 onClick={() => {
@@ -1437,6 +1580,10 @@ export default class CadastroPj extends Component {
               >
                 Declaro que li e aceito os termos de uso e de privacidade {process.env.NOME_BANCO}
               </Button>
+              </Container>
+            </Modal.Body>
+            <Modal.Footer>
+              (O botão de aceitar está no final dos termos.)
             </Modal.Footer>
           </Modal>
 
@@ -1571,7 +1718,7 @@ export default class CadastroPj extends Component {
             onHide={() => this.setState({ smsModal: false })}
           >
             <Modal.Header closeButton>
-              <Modal.Title>Enviamos um código via sms para seu número. Informe o código.</Modal.Title>
+              <Modal.Title>Enviamos um código via SMS para seu número. Informe o código.</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Container>
