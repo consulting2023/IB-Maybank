@@ -205,7 +205,7 @@ export default class Home extends Component {
             </div> */}
 
             <Row>
-              <p className="mb-3 w-100 text-center" style={{ fontSize: "1.30em" }}><strong>Últimas movimentações</strong></p>
+              <p className="mb-3 w-100 text-center" style={{ fontSize: "1.30em" }}><strong>{i18n.t("home.ultiMov")}</strong></p>
               <Col xs={8}>
                 {
                   ((this.state.saldo) && (this.state.extrato.length > 0)) ? (

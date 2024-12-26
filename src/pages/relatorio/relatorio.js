@@ -22,7 +22,7 @@ export default class Relatorio extends Component {
   render() {
     return (
       <div className="extrato">
-        <BannerTitle title={"Relatorio"} img={Objetos.extratoImg} />
+        <BannerTitle title={i18n.t("sidebar.relatorio")} img={Objetos.extratoImg} />
 
         <Container className="p-3 d-flex justify-content-center">
           <Col md={8} className="baseWindow px-5 py-4">
@@ -31,7 +31,7 @@ export default class Relatorio extends Component {
                 className="mb-2 w-100 text-center"
                 style={{ fontSize: "1.30em" }}
               >
-                <strong>Escolha o extrato que deseja sacar:</strong>
+                <strong></strong>
               </p> */}
             </Row>
             <Row className="text-center px-3">
@@ -47,7 +47,7 @@ export default class Relatorio extends Component {
                       </Col>
                       <Col xs={7} className="px-0 my-auto">
                         <p className="buttonTitle m-auto">
-                          Relatorio Saida Pix
+                          {i18n.t("relatorio.relatorioPixOut")}
                         </p>
                       </Col>
                     </Row>
@@ -67,7 +67,7 @@ export default class Relatorio extends Component {
                       </Col>
                       <Col xs={7} className="px-0 my-auto">
                         <p className="buttonTitle m-auto">
-                          Relatorio Entrada Pix
+                          {i18n.t("relatorio.relatorioPixIn")}
                         </p>
                       </Col>
                     </Row>
@@ -87,7 +87,7 @@ export default class Relatorio extends Component {
                           {Icones.cambio}
                         </Col>
                         <Col xs={7} className="px-0 my-auto">
-                          <p className="buttonTitle m-auto">Relatorio Crypto</p>
+                          <p className="buttonTitle m-auto">{i18n.t("relatorio.relatorioCrypto")}</p>
                         </Col>
                       </Row>
                     </Button>

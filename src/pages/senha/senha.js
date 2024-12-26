@@ -48,9 +48,9 @@ export default class Senha extends Component {
 
     setTimeout(() => {
       Funcoes.Geral_API(data, true).then((res) => {
-        if (res === 1) {
+        /*  if (res === 1) {
           alert("Token enviado para o email");
-        }
+        } */
       });
     }, 300);
   };
@@ -90,9 +90,9 @@ export default class Senha extends Component {
 
   trocarSenhaTransfer = () => {
     if (this.state.senhaTransfer == "") {
-      alert("É Obrigatorio preencher a senha para seguir adiante");
+      alert(i18n.t("senha.alertSemSenha"));
     } else if (this.state.OTP == "") {
-      alert("É Obrigatorio preencher a o token para seguir adiante");
+      alert(i18n.t("senha.alertSemToken"));
     } else {
       const data = {
         url: "usuario/troca-senha-transferencia",
@@ -110,10 +110,11 @@ export default class Senha extends Component {
 
       Funcoes.Geral_API(data, true).then((res) => {
         if (res === 1) {
-          alert("Senha alterada com sucesso!");
+          alert(i18n.t("senha.alertSenhaAlteradaComSucesso"));
           location.reload();
         } else {
-          alert("Erro em alterar a senha, tente novamente mais tarde");
+          alert(i18n.t("senha.alertErroAlterarSenha"));
+
           location.reload();
         }
       });
@@ -135,7 +136,7 @@ export default class Senha extends Component {
                 className="mb-2 w-100 text-center"
                 style={{ fontSize: "1.30em" }}
               >
-                <strong>Escolha a senha que deseja alterar:</strong>
+                <strong></strong>
               </p>
             </Row>
             <Row className="text-center px-3">
@@ -150,7 +151,7 @@ export default class Senha extends Component {
                       {Icones.senhaLogin}
                     </Col>
                     <Col xs={7} className="px-0 my-auto">
-                      <p className="buttonTitle m-auto">Senha de Login</p>
+                      <p className="buttonTitle m-auto">{i18n.t("senha.senhaLogin")}</p>
                     </Col>
                   </Row>
                 </Button>
@@ -168,7 +169,7 @@ export default class Senha extends Component {
                       </Col>
                       <Col xs={7} className="px-0 my-auto">
                         <p className="buttonTitle m-auto">
-                          Senha de Transferência
+                        {i18n.t("senha.senhaTransfer")}
                         </p>
                       </Col>
                     </Row>
@@ -186,12 +187,12 @@ export default class Senha extends Component {
           onHide={() => this.setState({ modalShowLogin: false })}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Senha Login</Modal.Title>
+            <Modal.Title>{i18n.t("senha.senhaLogin")}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>
               <Row>
-                <h3>Token enviado para seu email</h3>
+                <h3>{i18n.t("senha.token")}</h3>
               </Row>
               <Row>
                 <OtpInput
@@ -204,7 +205,7 @@ export default class Senha extends Component {
                 />
               </Row>
               <Row>
-                <h6>Senha Nova</h6>
+                <h6>{i18n.t("senha.senhaNova")}</h6>
               </Row>
               <Row>
                 <OtpInput
@@ -235,12 +236,12 @@ export default class Senha extends Component {
           onHide={() => this.setState({ modalShowTransfer: false })}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Senha Transação</Modal.Title>
+            <Modal.Title>{i18n.t("senha.senhaTransfer")}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Container>
               <Row>
-                <h3>Token enviado para seu email</h3>
+                <h3>{i18n.t("senha.token")}</h3>
               </Row>
               <Row>
                 <OtpInput
@@ -254,7 +255,7 @@ export default class Senha extends Component {
                 />
               </Row>
               <Row>
-                <h6>Senha Transação Nova</h6>
+                <h6>{i18n.t("senha.senhaTransferNova")}</h6>
               </Row>
               <Row>
                 <OtpInput

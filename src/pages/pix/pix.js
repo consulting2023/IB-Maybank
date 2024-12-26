@@ -24,6 +24,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import Produtos from "../../constants/Produtos";
 import logo from "../../assets/images/logos/icon_logo.png"; // Importa a imagem
+import i18n from "../../tradutor/tradutor";
 
 export default class Pix extends Component {
   constructor() {
@@ -110,7 +111,7 @@ export default class Pix extends Component {
           var verifica = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
           if (verifica.test(chave) === false) {
             this.setState({ loading: false });
-            alert("Email inválido");
+            alert(i18n.t("pix.emailFail"));
             return false;
           } else {
             var chave_final = chave.toLowerCase();
@@ -134,7 +135,7 @@ export default class Pix extends Component {
       }
     } else {
       this.setState({ loading: false });
-      alert("Digite a chave pix");
+      alert(i18n.t("pix.dgtChave"));
     }
   };
 
@@ -163,7 +164,7 @@ export default class Pix extends Component {
           }, 1000);
         } else {
           this.setState({ loading: false });
-          alert("Chave Pix não encontrada");
+          alert(i18n.t("pix.chaveFail"));
         }
       }
     });
@@ -183,7 +184,7 @@ export default class Pix extends Component {
 
     Funcoes.Geral_API(dados, true).then((responseJson) => {
       if (responseJson == 0) {
-        alert("Chave não encontrada");
+        alert(i18n.t("pix.qrCodeFail"));
       } else {
         if (responseJson.chave) {
           this.setState({ retornoConsulta: responseJson });
@@ -193,7 +194,7 @@ export default class Pix extends Component {
           }, 1000);
         } else {
           this.setState({ loading: false });
-          alert("Chave não encontrada");
+          alert(i18n.t("pix.qrCodeFail"));
         }
       }
     });
@@ -234,41 +235,6 @@ export default class Pix extends Component {
       chave = texto;
       this.setState({ password: chave });
       this.Valida_token(this.state.OTP);
-
-      /* const data = {
-        url: "usuario/login",
-        data: {
-          email: Funcoes.pessoa.email,
-          password: texto,
-          sub_banco_id: "",
-          token_aparelho: "",
-          nome_aparelho: "",
-        },
-        method: "POST",
-      };
-
-      
-      Funcoes.Geral_API(data, false).then((res) => {
-        let chave = "";
-
-        if (res != 0) {
-          chave = texto;
-          i = Object.keys(output);
-        }
-
-        if (chave == "") {
-          this.setState({ loading: false });
-          this.props.alerts("Erro", "Senha Incorreta", "warning");
-        } else {
-          if (this.state.OTP.length == 6) {
-            this.setState({ password: chave });
-            this.Valida_token(this.state.OTP);
-          } else {
-            this.setState({ loading: false });
-            this.props.alerts("Erro", "Preencha o token", "warning");
-          }
-        }
-      }); */
     }
   };
 
@@ -293,7 +259,11 @@ export default class Pix extends Component {
           this.valor_tarifa(valor_enviar);
         } else {
           this.setState({ loading: false });
-          this.props.alerts("Erro", "Token inválido", "warning");
+          this.props.alerts(
+            i18n.t("pix.erro"),
+            i18n.t("pix.tokenInvalido"),
+            "warning"
+          );
         }
       });
     }, 300);
@@ -332,10 +302,10 @@ export default class Pix extends Component {
 
       if (parseFloat(tarifado) > parseFloat(this.state.saldo)) {
         this.setState({ loading: false });
-        alert("Saldo insuficiente");
+        alert(i18n.t("pix.saldoInsuficiente"));
       } else if (parseFloat(valor) > parseFloat(this.state.saldo)) {
         this.setState({ loading: false });
-        alert("Saldo insuficiente");
+        alert(i18n.t("pix.saldoInsuficiente"));
       } else {
         this.gerar_transferencia();
       }
@@ -381,12 +351,10 @@ export default class Pix extends Component {
       console.log(responseJson);
       if (responseJson.cod == 0) {
         this.closeModalTransferencia();
-        alert(
-          "PIX INDISPONÍVEL! Aguarde alguns minutos e tente novamente. Caso o problema continue, entre em contato com o suporte ao cliente para assistência."
-        );
+        alert(i18n.t("pix.pixCod0"));
       } else if (responseJson.cod == 1) {
         setTimeout(() => {
-          alert("Pix realizado com Sucesso!");
+          alert(i18n.t("pix.pixCod1"));
           this.closeModalTransferencia();
           Funcoes.comprovante_ver(responseJson.mov_id);
         }, 1000);
@@ -396,7 +364,7 @@ export default class Pix extends Component {
         this.setState({ loading: false });
 
         this.closeModalTransferencia();
-        alert("Transação não efetuada, por favor consulte seu gerente.");
+        alert(i18n.t("pix.pixCod3"));
       } else if (responseJson.cod == 4) {
         this.closeModalTransferencia();
         alert(responseJson.mensagem);
@@ -407,22 +375,20 @@ export default class Pix extends Component {
         alert(responseJson.mensagem);
         this.closeModalTransferencia();
       } else if (responseJson.cod == 7) {
-        alert("Houve um problema ao gerar o pix, tente novamente mais tarde");
+        alert(i18n.t("pix.pixCod7"));
         this.closeModalTransferencia();
       } else if (responseJson.cod == 9) {
-        alert("Transação não efetuada, tente novamente mais tarde.");
+        alert(i18n.t("pix.pixCod9"));
         this.closeModalTransferencia();
       } else if (responseJson.cod == 10) {
-        alert(
-          "O sistema detectou múltiplas tentativas de transferência em um curto intervalo de tempo. Aguarde alguns minutos e tente novamente."
-        );
+        alert(i18n.t("pix.pixCod10"));
         this.closeModalTransferencia();
       } else if (responseJson.cod == 11) {
         alert(responseJson.mensagem);
         this.closeModalTransferencia();
         location.reload();
       } else if (responseJson.cod == 100) {
-        alert("Senha de Transação Invalida");
+        alert(i18n.t("pix.pixCod100"));
         this.closeModalTransferencia();
       } else {
         this.setState({ loading: false });
@@ -432,153 +398,6 @@ export default class Pix extends Component {
         location.href();
       }
     });
-  };
-
-  // comprovante = () => {
-  //   var newDate = Formatar.formatarDateAno(new Date());
-  //   var newDate2 = Formatar.formatarDateAno(new Date());
-
-  //   const data = {
-  //     url: 'comprovante/lista',
-  //     data: {
-  //         "conta_id": Funcoes.pessoa.conta_id,
-  //         "data_de": newDate,
-  //         "data_ate": newDate2,
-  //     },
-  //     method: 'POST',
-  //     funcao: 'comprovante',
-  //     tela: 'transferencia'
-  //   };
-
-  //   Funcoes.Geral_API(data, true).then((responseJson) => {
-  //     let keys = Object.keys(responseJson);
-  //     keys.sort(function (a, b) { return b - a; });
-  //     this.comprovante_ver(keys[0]);
-  //   });
-  // };
-
-  comprovante_ver = (id) => {
-    this.setState({
-      loading: true,
-      showModalComprovante: true,
-      titleModalComprovante: "Gerando comprovante...",
-    });
-
-    const data = {
-      url: "conta/comprovante-pdf",
-      data: { id: id, app: 1 },
-      method: "POST",
-    };
-
-    Funcoes.Geral_API(data, true)
-      .then((res) => {
-        console.log("Resposta da API:", res);
-
-        if (!res || !res.pix) {
-          console.error("Dados inválidos ou ausentes.");
-          return;
-        }
-
-        const pix = res.pix;
-        const { dados_pagador, dados_recebedor, dados_transacao } = pix;
-
-        const doc = new jsPDF();
-
-        // Configurações iniciais
-
-        const pageWidth = doc.internal.pageSize.width;
-        let cursorY = 20;
-
-        // Adiciona o logotipo
-
-        doc.setFontSize(12);
-        doc.text("MAY BANK INTERMEDIACAO DE NEGOCIOS EIRELI", 60, cursorY + 10);
-        cursorY += 30;
-
-        // Título do comprovante
-        doc.setFontSize(16);
-        doc.text("Comprovante PIX", pageWidth / 2, cursorY, {
-          align: "center",
-        });
-        cursorY += 10;
-
-        doc.setFontSize(10);
-        doc.text(
-          `DATA DE EMISSÃO: ${dados_transacao.data_transacao}`,
-          pageWidth - 60,
-          cursorY,
-          { align: "right" }
-        );
-        cursorY += 10;
-
-        // Função para adicionar seções
-        const addSection = (title, items) => {
-          doc.setFontSize(12);
-          doc.text(title, 10, cursorY);
-          cursorY += 8;
-
-          items.forEach(({ label, value }) => {
-            doc.setFontSize(10);
-            doc.text(`${label}:`, 10, cursorY);
-            doc.text(value ? String(value) : "N/A", 70, cursorY);
-            cursorY += 6;
-          });
-
-          cursorY += 8; // Espaço entre seções
-        };
-
-        // Dados do Pagador
-        addSection("Dados do Pagador", [
-          { label: "Nome", value: dados_pagador.nome },
-          { label: "CPF", value: dados_pagador.documento },
-          { label: "Conta de Origem", value: dados_pagador.conta_origem },
-          { label: "Banco", value: dados_pagador.banco },
-        ]);
-
-        // Dados do Recebedor
-        addSection("Dados do Recebedor", [
-          { label: "Nome", value: dados_recebedor.nome },
-          { label: "Banco", value: dados_recebedor.banco },
-          { label: "Agência", value: dados_recebedor.agencia },
-          { label: "Conta", value: dados_recebedor.conta },
-          { label: "Documento", value: dados_recebedor.documento },
-          { label: "Chave PIX", value: dados_recebedor.chave_pix },
-        ]);
-
-        // Dados da Transação
-        addSection("Dados da Transação", [
-          { label: "Valor", value: `R$ ${dados_transacao.valor_pago}` },
-          { label: "Chave PIX", value: dados_transacao.chave_pix },
-          { label: "Hora da Transação", value: dados_transacao.hora_transacao },
-          {
-            label: "Identificador da Transação",
-            value: dados_transacao.identificador_transacao,
-          },
-        ]);
-
-        // Salva o PDF
-        doc.save("comprovante_pix.pdf");
-
-        this.setState({
-          loading: false,
-          showModalComprovante: false,
-        });
-      })
-      .catch((error) => {
-        console.error("Erro ao converter a imagem para Base64", error);
-        this.setState({
-          loading: false,
-          showModalComprovante: false,
-        });
-      })
-
-      .catch((error) => {
-        console.error("Erro na requisição ou ao gerar o PDF", error);
-        this.setState({
-          loading: false,
-          showModalComprovante: false,
-        });
-      });
   };
 
   abrirComprovante = () => {
@@ -621,7 +440,7 @@ export default class Pix extends Component {
     Funcoes.Geral_API(dados, true).then((responseJson) => {
       if (responseJson == 1) {
         this.setState({ loading: false });
-        alert("O Pix será efetivado em até 1 Hora.");
+        alert(i18n.t("pix.agendarPixSucces"));
         window.location.reload();
       } else {
         this.setState({ loading: false });
@@ -680,12 +499,6 @@ export default class Pix extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
-      /* 300	Não conseguiu criar a conta
-      301	Não conseguiu criar a chave
-      302	Chave já cadastrada em outro banco
-      304	O número limite de chaves é cinco
-      200	Sucesso */
-
       if (responseJson.status == 200) {
         this.closeModalCriar();
         alert("Chave criada com sucesso");
@@ -898,7 +711,7 @@ export default class Pix extends Component {
         key: 1,
         title: "CPF",
         code: "cpf",
-        msg: "Digite o CPF",
+        msg: i18n.t("pix.msgChave") + "CPF",
         icon: Icones.documento,
         mask: Formatar.cpf_mask,
         type: "text",
@@ -907,37 +720,37 @@ export default class Pix extends Component {
         key: 2,
         title: "CNPJ",
         code: "cnpj",
-        msg: "Digite o CNPJ",
+        msg: i18n.t("pix.msgChave") + "CNPJ",
         icon: Icones.documento,
         mask: Formatar.cnpj_mask,
       },
       {
         key: 3,
-        title: "Celular",
+        title: i18n.t("pix.celular"),
         code: "cel",
-        msg: "Digite o Celular",
+        msg: i18n.t("pix.msgCell"),
         icon: Icones.celular,
         mask: Formatar.cel_mask,
       },
       {
         key: 4,
-        title: "E-Mail",
+        title: i18n.t("pix.email"),
         code: "email",
-        msg: "Digite o E-Mail",
+        msg: i18n.t("pix.msgEmail"),
         icon: Icones.email,
       },
       {
         key: 5,
-        title: "Chave Aleatória",
+        title: i18n.t("pix.chaveRandom"),
         code: "random",
-        msg: "Digite ou cole a chave aleatória",
+        msg: i18n.t("pix.msgChaveRandom"),
         icon: Icones.chave,
       },
       {
         key: 6,
-        title: "Copia e Cola",
+        title: i18n.t("pix.copyPaste"),
         code: "copy",
-        msg: "Cole o Pix aqui",
+        msg: i18n.t("pix.msgCopy"),
         icon: Icones.copiacola,
       },
     ];
@@ -1015,7 +828,9 @@ export default class Pix extends Component {
                       {Icones.qrPix}
                     </Col>
                     <Col xs={8}>
-                      <p className="tituloBotoes">Gerar QRCode</p>
+                      <p className="tituloBotoes">
+                        {i18n.t("pix.gerarQrCode")}
+                      </p>
                     </Col>
                   </Row>
                 </Container>
@@ -1032,7 +847,7 @@ export default class Pix extends Component {
         >
           <Modal.Header closeButton>
             <Modal.Title>
-              Método de Pix: {this.state.pixPesquisa.title}
+              {i18n.t("pix.modoPix")}: {this.state.pixPesquisa.title}
             </Modal.Title>
           </Modal.Header>
 
@@ -1074,7 +889,9 @@ export default class Pix extends Component {
 
           {this.state.loading ? null : (
             <Modal.Footer>
-              <Button onClick={() => this.ValidarChave()}>Pesquisar</Button>
+              <Button onClick={() => this.ValidarChave()}>
+                {i18n.t("pix.pesquisar")}
+              </Button>
             </Modal.Footer>
           )}
         </Modal>
@@ -1088,7 +905,7 @@ export default class Pix extends Component {
         >
           <Modal.Body>
             <Modal.Header closeButton>
-              <Modal.Title>Transferência Pix</Modal.Title>
+              <Modal.Title>{i18n.t("pix.transferPix")}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Container className="text-center py-3">
@@ -1104,21 +921,27 @@ export default class Pix extends Component {
                     <Col>
                       <div className="pb-3">
                         <Row>
-                          <Col className="text-right">Favorecido:</Col>
+                          <Col className="text-right">
+                            {i18n.t("pix.favorecido")}
+                          </Col>
                           <Col className="text-left">
                             {this.state.retornoConsulta.dados_bancarios.nome ||
                               "String não populada"}
                           </Col>
                         </Row>
                         <Row>
-                          <Col className="text-right">Banco:</Col>
+                          <Col className="text-right">
+                            {i18n.t("pix.banco")}
+                          </Col>
                           <Col className="text-left">
                             {this.state.retornoConsulta.dados_bancarios
                               .nome_banco || "String não populada"}
                           </Col>
                         </Row>
                         <Row>
-                          <Col className="text-right">Agência e Conta:</Col>
+                          <Col className="text-right">
+                            {i18n.t("pix.agConta")}
+                          </Col>
                           <Col className="text-left">
                             {this.state.retornoConsulta.dados_bancarios
                               .agencia || "String não populada"}{" "}
@@ -1128,14 +951,16 @@ export default class Pix extends Component {
                           </Col>
                         </Row>
                         <Row>
-                          <Col className="text-right">Documento:</Col>
+                          <Col className="text-right">{i18n.t("pix.doc")}</Col>
                           <Col className="text-left">
                             {this.state.retornoConsulta.dados_bancarios
                               .documento || "String não populada"}
                           </Col>
                         </Row>
                         <Row>
-                          <Col className="text-right">Chave Pix:</Col>
+                          <Col className="text-right">
+                            {i18n.t("pix.chavePix")}
+                          </Col>
                           <Col className="text-left">
                             {this.state.retornoConsulta.chave ||
                               "String não populada"}
@@ -1146,7 +971,7 @@ export default class Pix extends Component {
                       <div className="pt-3">
                         <Row className="m-2">
                           <Col className="text-right">
-                            <label>Valor do Pix:</label>
+                            <label>{i18n.t("pix.valPix")}</label>
                           </Col>
                           <Col className="text-left">
                             <CurrencyInput
@@ -1166,7 +991,7 @@ export default class Pix extends Component {
 
                         <Row className="m-2">
                           <Col className="text-right">
-                            <label>Mensagem (opcional):</label>
+                            <label>{i18n.t("pix.msg")}</label>
                           </Col>
                           <Col className="text-left">
                             <textarea
@@ -1184,73 +1009,20 @@ export default class Pix extends Component {
                     <Col>
                       <div className="pb-3">
                         <Row>
-                          <span className="text-left">Digite sua senha</span>
+                          <span className="text-left">
+                            {i18n.t("pix.dgtSenha")}
+                          </span>
                         </Row>
 
                         <Row className="justify-content-center m-2">
                           <Password passProp={this.getPass} />
-                          {/* <div className="d-flex flex-row mb-2" >
-
-                              <div className="mx-2" style={{ width: '55px', height: '40px', borderBottomLeftRadius: '8px 2px', borderBottomRightRadius: '8px 2px', borderBottom: '5px solid #daa521' }}>
-                                {this.state.mostrar_1 ? (<div style={{ width: '15px', height: '15px', backgroundColor: '#daa521', borderRadius: '50px' }} className="d-block mx-auto my-1"></div>) : null}
-                              </div>
-
-                              <div className="mx-2" style={{ width: '55px', height: '40px', borderBottomLeftRadius: '8px 2px', borderBottomRightRadius: '8px 2px', borderBottom: '5px solid #daa521' }}>
-                                {this.state.mostrar_2 ? (<div style={{ width: '15px', height: '15px', backgroundColor: '#daa521', borderRadius: '50px' }} className="d-block mx-auto my-1"></div>) : null}
-                              </div>
-
-                              <div className="mx-2" style={{ width: '55px', height: '40px', borderBottomLeftRadius: '8px 2px', borderBottomRightRadius: '8px 2px', borderBottom: '5px solid #daa521' }}>
-                                {this.state.mostrar_3 ? (<div style={{ width: '15px', height: '15px', backgroundColor: '#daa521', borderRadius: '50px' }} className="d-block mx-auto my-1"></div>) : null}
-                              </div>
-
-                              <div className="mx-2" style={{ width: '55px', height: '40px', borderBottomLeftRadius: '8px 2px', borderBottomRightRadius: '8px 2px', borderBottom: '5px solid #daa521' }}>
-                                {this.state.mostrar_4 ? (<div style={{ width: '15px', height: '15px', backgroundColor: '#daa521', borderRadius: '50px' }} className="d-block mx-auto my-1"></div>) : null}
-                              </div>
-
-                              <div className="mx-2" style={{ width: '55px', height: '40px', borderBottomLeftRadius: '8px 2px', borderBottomRightRadius: '8px 2px', borderBottom: '5px solid #daa521' }}>
-                                {this.state.mostrar_5 ? (<div style={{ width: '15px', height: '15px', backgroundColor: '#daa521', borderRadius: '50px' }} className="d-block mx-auto my-1"></div>) : null}
-                              </div>
-
-                              <div className="mx-2" style={{ width: '55px', height: '40px', borderBottomLeftRadius: '8px 2px', borderBottomRightRadius: '8px 2px', borderBottom: '5px solid #daa521' }}>
-                                {this.state.mostrar_6 ? (<div style={{ width: '15px', height: '15px', backgroundColor: '#daa521', borderRadius: '50px' }} className="d-block mx-auto my-1"></div>) : null}
-                              </div>
-
-                            </div>
-
-                            <div className="caixa_digitos text-nowrap mt-2" >
-                              <ButtonGroup className="d-flex flex-row justify-content-between">
-                                <Button className='mr-1' onClick={() => this.inserir_chave(1)} >
-                                    {this.state.numeros[0] + ' ou ' + this.state.numeros[1]}
-                                </Button>
-
-                                <Button className='mr-1' onClick={() => this.inserir_chave(2)} >
-                                  {this.state.numeros[2] + ' ou ' + this.state.numeros[3]}
-                                </Button>
-
-                                <Button className='mr-1' onClick={() => this.inserir_chave(3)} >
-                                  {this.state.numeros[4] + ' ou ' + this.state.numeros[5]}
-                                </Button>
-
-                                <Button className='mr-1' onClick={() => this.inserir_chave(4)} >
-                                  {this.state.numeros[6] + ' ou ' + this.state.numeros[7]}
-                                </Button>
-
-                                <Button className='mr-1' onClick={() => this.inserir_chave(5)} >
-                                  {this.state.numeros[8] + ' ou ' + this.state.numeros[9]}
-                                </Button>
-
-                                <Button className='backspace' onClick={() => this.deletar_chave(6)}>
-                                  {Icones.apagar}
-                                </Button>
-                              </ButtonGroup>
-                            </div> */}
                         </Row>
                       </div>
 
                       <div>
                         <Row className="pt-3">
                           <span className="text-left">
-                            Insira o Token enviado por email
+                            {i18n.t("pix.tokenPix")}
                           </span>
                         </Row>
                         <Row className="justify-content-center m-2">
@@ -1298,7 +1070,7 @@ export default class Pix extends Component {
                     }
                   }}
                 >
-                  Transferir
+                  {i18n.t("pix.btnTransfer")}
                 </Button>
               </Modal.Footer>
             )}
@@ -1530,7 +1302,7 @@ export default class Pix extends Component {
           onHide={() => this.closeModalQr()}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Receber Pix</Modal.Title>
+            <Modal.Title>{i18n.t("pix.receberPix")}</Modal.Title>
           </Modal.Header>
 
           <Modal.Body>
@@ -1544,14 +1316,13 @@ export default class Pix extends Component {
                 />
               ) : (
                 <div>
-                  Escolha sua chave abaixo:
                   <Col className="mt-3 px-5">
                     <Row className="mb-5">
                       <div className="w-100">
                         <Dropdown>
                           <Dropdown.Toggle className="w-100">
                             {this.state.selectQrChave.chave ||
-                              "Selecionar Chave"}
+                              i18n.t("pix.selectKey")}
                           </Dropdown.Toggle>
                           <Dropdown.Menu>
                             {this.state.minhas_chaves_pix.length > 0 ? (
@@ -1567,9 +1338,7 @@ export default class Pix extends Component {
                               ))
                             ) : (
                               <div className="p-3">
-                                <span>
-                                  Você ainda não possui nenhuma chave cadastrada
-                                </span>
+                                <span>{i18n.t("pix.notKey")}</span>
                               </div>
                             )}
                           </Dropdown.Menu>
@@ -1579,7 +1348,7 @@ export default class Pix extends Component {
 
                     <Row className="mt-5">
                       <Col>
-                        <label>Valor:</label>
+                        <label>{i18n.t("pix.valorQrCode")}</label>
                       </Col>
                       <Col>
                         <CurrencyInput
@@ -1596,7 +1365,7 @@ export default class Pix extends Component {
                     </Row>
                     <Row className="mt-5">
                       <Col>
-                        <label>Nome Pagador:</label>
+                        <label>{i18n.t("pix.nomePagador")}</label>
                       </Col>
                       <Col>
                         <input
@@ -1605,14 +1374,13 @@ export default class Pix extends Component {
                           onChange={(event) => {
                             this.setState({ nomePagador: event.target.value });
                           }}
-                          placeholder="Digite seu nome"
                           className="form-control"
                         />
                       </Col>
                     </Row>
                     <Row className="mt-5">
                       <Col>
-                        <label>Documento Pagador:</label>
+                        <label>{i18n.t("pix.docPagador")}</label>
                       </Col>
                       <Col>
                         <InputMask
@@ -1635,7 +1403,9 @@ export default class Pix extends Component {
 
           {this.state.loading ? null : (
             <Modal.Footer>
-              <Button onClick={this.GerarQrRecebimento}>Gerar QR Code</Button>
+              <Button onClick={this.GerarQrRecebimento}>
+                {i18n.t("pix.btnGerarQrCode")}
+              </Button>
             </Modal.Footer>
           )}
         </Modal>
@@ -1647,7 +1417,7 @@ export default class Pix extends Component {
           onHide={() => this.closeModalQrReceber()}
         >
           <Modal.Header closeButton>
-            <Modal.Title>QR Code gerado com sucesso</Modal.Title>
+            <Modal.Title>{i18n.t("pix.qrCodeSucces")}</Modal.Title>
           </Modal.Header>
 
           <Modal.Body>
@@ -1679,7 +1449,7 @@ export default class Pix extends Component {
                       navigator.clipboard.writeText(this.state.qrCopypaste);
                     }}
                   >
-                    Copiar código
+                    {i18n.t("pix.coyCod")}
                   </Button>
                 </Row>
               </Col>

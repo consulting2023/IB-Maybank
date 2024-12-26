@@ -269,7 +269,7 @@ export default {
   siso: false,
 
   //tradutor
-  mostrar_tradutor: false,
+  mostrar_tradutor: true,
 
   //senha
   senha: true,

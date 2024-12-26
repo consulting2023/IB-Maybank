@@ -37,7 +37,7 @@ export default class Transferencia extends Component {
                   </Button>
                 </Link>
               </Col>
-              <Col className="p-3">
+              {/* <Col className="p-3">
                 <Link
                   to="/transferencia_outros"
                 >
@@ -54,7 +54,7 @@ export default class Transferencia extends Component {
                     </Row>
                   </Button>
                 </Link>
-              </Col>
+              </Col> */}
               <Col className="p-3">
                 <Link
                   to="/transferencia_lote"
