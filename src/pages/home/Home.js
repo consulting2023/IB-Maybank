@@ -186,74 +186,138 @@ export default class Home extends Component {
     }
   };
 
+  SaldoConta = (contaId) => {
+    const data = {
+      url: "conta/saldo",
+      data: { conta_id: contaId },
+      method: "POST",
+    };
+  
+    Funcoes.Geral_API(data, true).then((res) => {
+      let tmpSaldos = this.state.saldos;
+  
+      if (Produtos.saldoDigital) {
+        tmpSaldos[contaId] = {
+          id: contaId,
+          show: false,
+          icone: Icones.saldo1,
+          titulo: i18n.t("home.saldoDigital"),
+          saldo: Formatar.formatarMoeda(res.digital),
+          saldoBloqueado: Formatar.formatarMoeda(res.bloqueados),
+          saldoTrue: res.digital,
+        };
+      }
+  
+      this.setState({ saldos: tmpSaldos });
+    });
+  };
+
   render() {
-    const graph = this.setGraph();
-    return (
-      <div className="w-100">
-        <BannerTitle title="" img={Objetos.homeImg}/>
-
-        <Container className="p-3 d-flex justify-content-center">
-          <Col md={12} className="baseWindow px-2 py-3">
-
-            {/* <div className="acoesTitulo">
-              <p className="titulo select-none">
-                <Icon.Eye onClick={() => this.mostrar_extrato()} className="cursor-pointer" style={{ fontSize: "30px", marginRight: "10px" }} />
-                <strong>
-                  <i>{i18n.t('home.ultLancamentos')}</i>
-                </strong>
-              </p>
-            </div> */}
-
-            <Row>
-              <p className="mb-3 w-100 text-center" style={{ fontSize: "1.30em" }}><strong>{i18n.t("home.ultiMov")}</strong></p>
-              <Col xs={8}>
-                {
-                  ((this.state.saldo) && (this.state.extrato.length > 0)) ? (
+    const contaGrupos = JSON.parse(localStorage.getItem("conta_grupos")) || [];
+    const saldos = this.state.saldos || {}; // Garantir que temos os saldos carregados
+  
+    if (contaGrupos.length > 1) {
+      // Retornar os saldos das contas em um layout semelhante ao da imagem
+      return (
+        <div className="w-100">
+          <Container className="p-3 d-flex justify-content-center">
+            <Col md={12} className="baseWindow px-2 py-3">
+              <h2 className="mb-4 text-center">Dashboard</h2>
+              <p className="text-center">Hello! {this.state.username || "User"}</p>
+  
+              <Row>
+                {contaGrupos.map((conta, index) => (
+                  <Col xs={6} key={index} className="text-center">
+                    <div className="saldo-card">
+                      <h5>
+                        {conta.tipo === "proprietary"
+                          ? "Proprietary Account Balance"
+                          : "Transactional Account Balance"}
+                      </h5>
+                      <p className="saldo-value">
+                        {saldos[conta.id]
+                          ? `${saldos[conta.id]} BRL`
+                          : "Loading..."}
+                      </p>
+                    </div>
+                  </Col>
+                ))}
+              </Row>
+            </Col>
+          </Container>
+        </div>
+      );
+    } else {
+      const graph = this.setGraph();
+      return (
+        <div className="w-100">
+          <BannerTitle title="" img={Objetos.homeImg} />
+  
+          <Container className="p-3 d-flex justify-content-center">
+            <Col md={12} className="baseWindow px-2 py-3">
+              <Row>
+                <p
+                  className="mb-3 w-100 text-center"
+                  style={{ fontSize: "1.30em" }}
+                >
+                  <strong>{i18n.t("home.ultiMov")}</strong>
+                </p>
+                <Col xs={8}>
+                  {this.state.saldo && this.state.extrato.length > 0 ? (
                     <Line
                       options={graph.options}
                       data={graph.data}
-                      style={{ height: '250px' }}
+                      style={{ height: "250px" }}
                     />
-                  ) : null
-                }
-              </Col>
-
-              <Col xs={4} className="text-center">
+                  ) : null}
+                </Col>
+  
+                <Col xs={4} className="text-center">
                   <Table size="sm" striped className="overflow-hidden">
                     <thead>
                       <tr>
-                        <th scope="col">{i18n.t('home.descr')}</th>
-                        <th className="text-right"  scope="col">{i18n.t('home.descrValor')}</th>
-                        <th className="text-right" scope="col">{i18n.t('home.descrData')}</th>
+                        <th scope="col">{i18n.t("home.descr")}</th>
+                        <th className="text-right" scope="col">
+                          {i18n.t("home.descrValor")}
+                        </th>
+                        <th className="text-right" scope="col">
+                          {i18n.t("home.descrData")}
+                        </th>
                       </tr>
                     </thead>
-
+  
                     <tbody>
-                      {this.state.extrato.map(dados => (
+                      {this.state.extrato.map((dados) => (
                         <tr key={dados.id}>
-                          <td>{i18n.t('home.descrNome',{descricao: dados.descricao})}</td>
-                          <td style={{ color: this.colorStatus(dados.valor), textAlign: 'right' }}>{Formatar.formatReal(dados.valor)}</td>
-                          <td style={{ textAlign: 'right' }}>{Formatar.formatarDate(dados.dataHora)}</td>
+                          <td>
+                            {i18n.t("home.descrNome", {
+                              descricao: dados.descricao,
+                            })}
+                          </td>
+                          <td
+                            style={{
+                              color: this.colorStatus(dados.valor),
+                              textAlign: "right",
+                            }}
+                          >
+                            {Formatar.formatReal(dados.valor)}
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            {Formatar.formatarDate(dados.dataHora)}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </Table>
                   <Link to="/extrato">
-                    <h1 className="link">{i18n.t('home.verMais')}</h1>
+                    <h1 className="link">{i18n.t("home.verMais")}</h1>
                   </Link>
-                        
-              </Col>
-            </Row>
-
-                    
-                    
-                    
-              
-
-
-          </Col>
-        </Container>
-      </div>
-    );
-  }
+                </Col>
+              </Row>
+            </Col>
+          </Container>
+        </div>
+      );
+    }
+  }  
 }
