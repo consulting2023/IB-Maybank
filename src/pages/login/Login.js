@@ -161,7 +161,6 @@ export default class Login extends Component {
       return;
     }
     localStorage.setItem("nivel", dados.usuario.nivel);
-    console.log(dados.usuario.conta_grupos);
     localStorage.setItem("conta_grupos", dados.usuario.conta_grupos);
     this.enviarToken();
     this.setState({

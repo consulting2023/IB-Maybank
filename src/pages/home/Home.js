@@ -214,6 +214,7 @@ export default class Home extends Component {
 
   render() {
     const contaGrupos = JSON.parse(localStorage.getItem("conta_grupos")) || [];
+console.log("Parsed contaGrupos:", contaGrupos);
     const saldos = this.state.saldos || {}; // Garantir que temos os saldos carregados
   
     if (contaGrupos.length > 1) {
