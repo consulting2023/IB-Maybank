@@ -983,7 +983,7 @@ export default class Cambio extends Component {
                   </Col>
                   <Col md={4}>
                     <h3>
-                      {i18n.t("home.saldo") + " " + i18n.t("home.conta")}{" "}
+                      {i18n.t("home.saldo") + " USDT" }{" "}
                     </h3>
                     <span style={{ marginLeft: 10 }}>
                       <input
