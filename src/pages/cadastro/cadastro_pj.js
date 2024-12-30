@@ -31,7 +31,7 @@ export default class CadastroPj extends Component {
   constructor() {
     super();
     this.state = {
-      cadastroPt1: false,
+      cadastroPt1: true,
       cadastroPt2: false,
       cadastroPt3: false,
       cadastroPt4: false,
@@ -40,7 +40,7 @@ export default class CadastroPj extends Component {
       cadastroPt7: false,
       cadastroPt8: false,
       cadastroPt9: false,
-      cadastroPt10: true,
+      cadastroPt10: false,
 
       agencias: [],
       valueAgencia: "",
