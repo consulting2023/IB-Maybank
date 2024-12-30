@@ -765,11 +765,7 @@ export default class CadastroPj extends Component {
                   Retornar
                 </Button>
               </li>
-              {Produtos.mostrar_tradutor ? (
-                <li className="loginLangWrapper">
-                  <LangButton langProp={this.traduzir} />
-                </li>
-              ) : null}
+            
             </ul>
           </Container>
 
