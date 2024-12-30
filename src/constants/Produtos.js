@@ -269,7 +269,7 @@ export default {
   siso: false,
 
   //tradutor
-  mostrar_tradutor: false,
+  mostrar_tradutor: true,
 
   //senha
   senha: true,
@@ -309,7 +309,7 @@ export default {
   },
 
   cadastro: {
-    cadastroLiberado: true,
+    cadastroLiberado: false,
     cadastroPF: false,
     cadastroPj: true
   }

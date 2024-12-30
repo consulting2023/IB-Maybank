@@ -201,8 +201,13 @@ export function comprovante_pdf(id) {
         return;
       }
 
+      if (res.pix) {
+        comprovante_ver(id);
+        return;
+      }
+
       // Identifica se o retorno é PIX ou Transferência
-      const transferencia = res.pix || res.transferencia;
+      const transferencia = res.transferencia;
       if (!transferencia) {
         console.error("Nenhum dado de transferência ou PIX encontrado.");
         return;
@@ -264,7 +269,6 @@ export function comprovante_pdf(id) {
         cursorY += 10; // Espaço entre as seções
 
         if (transferencia.tipo == "saida") {
-          
           // Dados do pagador
           doc.setFontSize(12);
           doc.text("Dados do Pagador", 10, cursorY);

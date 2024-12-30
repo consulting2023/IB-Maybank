@@ -208,8 +208,8 @@ export default class TransferenciaInterna extends Component {
     const saldo = this.state.saldoDigital;
 
     if (valor > saldo) {
-      window.location.href = "/transferencia_interna";
       alert(i18n.t("transferencia.erroSaldo"));
+      window.location.href = "/transferencia_interna";
     } else {
       setTimeout(() => {
         const dados = {
@@ -235,26 +235,45 @@ export default class TransferenciaInterna extends Component {
           method: "POST",
         };
         Funcoes.Geral_API(dados, true).then((res) => {
-          if (res == 0) {
-            // Código inválido
-            alert("Erro na transferencia");
+          if (res.error) {
+            alert("Erro: " + res.message);
             window.location.href = "/transferencia_interna";
-            // } else if (res == 203) {
-            // Alerta pânico
-            // alert('Código de barras inválido');
-            // window.location.href = '/transferencia_interna'
-          } else if (res == 2) {
-            //*Sem saldo na conta
-            alert("Saldo insuficiente");
-            window.location.href = "/transferencia_interna";
-          } else if (res.dados.mov_id) {
-            //*pagamento realizado
-            Funcoes.comprovante_pdf(res.dados.mov_id);
           } else {
-            //*algum erro não previsto
-            alert("Processamento Invalido, Contate seu Gerente!");
-            window.location.href = "/transferencia_interna";
+            if (res.dados.mov_id) {
+              Funcoes.comprovante_pdf(res.dados.mov_id);
+            }
           }
+
+          this.setState({ loading: false, token_app: false, contaSelecionada: false });
+          this.props.alerts("Transação efetuada", "Comprovante instalado automaticamente.", "success");
+
+          // if (res == 0) {
+          //   // Código inválido
+          //   alert("Erro na transferencia");
+          //   window.location.href = "/transferencia_interna";
+          //   // } else if (res == 203) {
+          //   // Alerta pânico
+          //   // alert('Código de barras inválido');
+          //   // window.location.href = '/transferencia_interna'
+          // } else if (res.error) {
+          //   if (res.error == 1){
+          //     alert("Erro: " + res.message);
+          //     window.location.href = "/transferencia_interna";
+          //   }
+          // } else if (res == 2) {
+          //   //*Sem saldo na conta
+          //   alert("Saldo insuficiente");
+          //   window.location.href = "/transferencia_interna";
+          // } else if (res.dados) {
+          //   if (res.dados.mov_id) {
+          //   //*pagamento realizado
+          //     Funcoes.comprovante_pdf(res.dados.mov_id);
+          //   }
+          // } else {
+          //   //*algum erro não previsto
+          //   alert("Processamento Invalido, Contate seu Gerente!");
+          //   window.location.href = "/transferencia_interna";
+          // }
         });
       }, 600);
     }
@@ -331,7 +350,7 @@ export default class TransferenciaInterna extends Component {
                   },
                   dados: {
                     nome: res.correntista.dados.razao_social,
-                    documento: res.correntista.dados.CPNJ,
+                    documento: res.correntista.dados.CNPJ,
                     mostrar: false,
                     imagem: null,
                   },
@@ -434,7 +453,6 @@ export default class TransferenciaInterna extends Component {
 
     setTimeout(() => {
       Funcoes.Geral_API(data, true).then((res) => {
-        console.log(res);
         if (res == true) {
           this.gerarTransferencia();
         } else {
@@ -485,8 +503,6 @@ export default class TransferenciaInterna extends Component {
 
     Funcoes.Geral_API(data, true)
       .then((res) => {
-        console.log("Resposta da API:", res);
-
         if (!res || !res.transferencia) {
           console.error("Dados inválidos ou ausentes.");
           return;
@@ -619,7 +635,6 @@ export default class TransferenciaInterna extends Component {
       // Funcoes.Geral_API(data, true).then((res) => {
       Funcoes.Geral_API(data, true).then((res) => {
         if (res == true) {
-          console.log(res);
         }
       });
     }, 300);

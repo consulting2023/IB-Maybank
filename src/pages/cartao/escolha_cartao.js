@@ -903,7 +903,10 @@ export default class EscolhaCartao extends Component {
     return (
       <>
         <section>
-          <BannerTitle title={"Cartões"} img={Objetos.cartaoImg} />
+          <BannerTitle
+            title={i18n.t("sidebar.cartoes")}
+            img={Objetos.cartaoImg}
+          />
 
           {/* Container de escolha */}
           <Container fluid className="mt-4">

@@ -43,7 +43,7 @@ export default class ComprovanteConta extends Component {
     this.setState({ loading: true, disabled: true });
     let data = {};
 
-    if (this.state.custom_id == "") {
+    if (this.state.custom_id === "") {
       data = {
         url: "comprovante/lista",
         data: {
@@ -69,12 +69,17 @@ export default class ComprovanteConta extends Component {
     Funcoes.Geral_API(data, true).then((res) => {
       console.log(res);
       if (res) {
-        var arr = [];
+        let arr = [];
         Object.keys(res).forEach((key) => {
           arr.push(res[key]);
         });
-        var i = 0;
-        arr.map((dados) => i++);
+
+        // Ordena os comprovantes pela data mais recente
+        arr.sort((a, b) => {
+          const dateA = new Date(a.mov.dataHora);
+          const dateB = new Date(b.mov.dataHora);
+          return dateB - dateA; // Mais recente para mais antiga
+        });
 
         let array_cortar_aux = [];
         arr.map((dados) => array_cortar_aux.push(dados));
@@ -89,12 +94,11 @@ export default class ComprovanteConta extends Component {
         this.setState({
           loading: false,
           comprovante: true,
-          numeroRegistro: i,
+          numeroRegistro: arr.length,
           comprovantes: arr,
           disabled: false,
         });
       } else {
-        // alert("Não Foram Encontrados Comprovantes Para o Período Solicitado");
         alert(i18n.t("comprovante.nenhumComprovante"));
         this.setState({ loading: false, disabled: false });
       }
@@ -388,7 +392,9 @@ export default class ComprovanteConta extends Component {
                     <button
                       style={{ marginLeft: "15px" }}
                       className="btn btn-sm baixarComprovante btn-success"
-                      onClick={() => Funcoes.comprovante_pdf(comprovante.mov.id)}
+                      onClick={() =>
+                        Funcoes.comprovante_pdf(comprovante.mov.id)
+                      }
                     >
                       Ver PDF
                     </button>
