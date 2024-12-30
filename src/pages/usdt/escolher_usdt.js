@@ -59,10 +59,19 @@ export default class Cambio extends Component {
       idMoeda: 0,
       valorMoedaTravar: 0,
       disabledConfirm: false,
+      contaGrupos: {},
+      contaId: 0,
+      saldoConta: 0,
+      saldoCrypto: 0,
     };
   }
 
   componentDidMount() {
+    this.setState({
+      contaGrupos: JSON.parse(localStorage.getItem("conta_grupos")),
+    });
+
+    console.log(JSON.parse(localStorage.getItem("conta_grupos")));
     const data = {
       url: "cambio/cambio/get-all-crypto",
       method: "GET",
@@ -95,18 +104,28 @@ export default class Cambio extends Component {
 
   // Função de troca de senha para o modal
   cotacao = (id) => {
+    console.log(this.state.contaId.value);
+    let data = {};
     if (id == undefined) {
-      const data = {
-        url: "cambio/cambio/cotacao",
-        data: JSON.stringify({
-          moeda: this.state.idMoeda,
-          conta_id: Funcoes.pessoa.conta_id,
-        }),
-        method: "POST",
-        console: false,
-        funcao: "trazer moeda crypto",
-        tela: "comprar_moeda",
-      };
+      if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+        data = {
+          url: "cambio/cambio/cotacao",
+          data: JSON.stringify({
+            moeda: this.state.idMoeda,
+            conta_id: this.state.contaId.value,
+          }),
+          method: "POST",
+        };
+      } else {
+        data = {
+          url: "cambio/cambio/cotacao",
+          data: JSON.stringify({
+            moeda: this.state.idMoeda,
+            conta_id: Funcoes.pessoa.conta_id,
+          }),
+          method: "POST",
+        };
+      }
 
       Funcoes.Geral_API(data, true).then((responseJson) => {
         console.log(responseJson);
@@ -118,17 +137,25 @@ export default class Cambio extends Component {
         this.setState({ taxa: responseJson.taxa });
       });
     } else {
-      const data = {
-        url: "cambio/cambio/cotacao",
-        data: JSON.stringify({
-          moeda: id,
-          conta_id: Funcoes.pessoa.conta_id,
-        }),
-        method: "POST",
-        console: false,
-        funcao: "trazer moeda crypto",
-        tela: "comprar_moeda",
-      };
+      if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+        data = {
+          url: "cambio/cambio/cotacao",
+          data: JSON.stringify({
+            moeda: id,
+            conta_id: this.state.contaId.value,
+          }),
+          method: "POST",
+        };
+      } else {
+        data = {
+          url: "cambio/cambio/cotacao",
+          data: JSON.stringify({
+            moeda: id,
+            conta_id: Funcoes.pessoa.conta_id,
+          }),
+          method: "POST",
+        };
+      }
 
       Funcoes.Geral_API(data, true).then((responseJson) => {
         // Defina o valorCotacao diretamente como o valor recebido
@@ -148,25 +175,44 @@ export default class Cambio extends Component {
       this.state.valueMoeda == []
     ) {
       alert(i18n.t("cambio.campos"));
-    } else if (this.state.valueCompra < 10000 || this.state.valueCompra > 900000) {
+    } else if (
+      this.state.valueCompra < 10000 ||
+      this.state.valueCompra > 900000
+    ) {
       alert("Compra minima de 10.000 e Compra Maxima é de 900.000");
     } else {
       if (this.state.valueCompra < 10000) {
         alert(i18n.t("cambio.limit"));
       } else {
         this.setState({ viewValidar: false, disabled: true });
-        const data = {
-          url: "cambio/cambio/travar-cotacao",
-          data: JSON.stringify({
-            moeda: this.state.valueMoeda.value,
-            amount: this.state.valueCompra,
-            operation: "BUY",
-            conta_id: Funcoes.pessoa.conta_id,
-            senha: this.state.senha,
-            amount_total: this.state.totalPagar,
-          }),
-          method: "POST",
-        };
+        let data = {};
+        if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+          data = {
+            url: "cambio/cambio/travar-cotacao",
+            data: JSON.stringify({
+              moeda: this.state.valueMoeda.value,
+              amount: this.state.valueCompra,
+              operation: "BUY",
+              conta_id: this.state.contaId.value,
+              senha: this.state.senha,
+              amount_total: this.state.totalPagar,
+            }),
+            method: "POST",
+          };
+        } else {
+          data = {
+            url: "cambio/cambio/travar-cotacao",
+            data: JSON.stringify({
+              moeda: this.state.valueMoeda.value,
+              amount: this.state.valueCompra,
+              operation: "BUY",
+              conta_id: Funcoes.pessoa.conta_id,
+              senha: this.state.senha,
+              amount_total: this.state.totalPagar,
+            }),
+            method: "POST",
+          };
+        }
 
         Funcoes.Geral_API(data, true).then((res) => {
           console.log(res);
@@ -230,17 +276,32 @@ export default class Cambio extends Component {
       this.setState({ disabledConfirm: true });
       // Define um temporizador para exibir alerta após 15 segundos
 
-      const data = {
-        url: "cambio/cambio/comprar",
-        data: JSON.stringify({
-          id: this.state.idCotacao,
-          moeda: this.state.valueMoeda.value,
-          conta_id: Funcoes.pessoa.conta_id,
-          amount: this.state.valueCompra,
-          amount_total: this.state.totalPagarConfirmar,
-        }),
-        method: "POST",
-      };
+      let data = {};
+      if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+        data = {
+          url: "cambio/cambio/comprar",
+          data: JSON.stringify({
+            id: this.state.idCotacao,
+            moeda: this.state.valueMoeda.value,
+            conta_id: this.state.contaId.value,
+            amount: this.state.valueCompra,
+            amount_total: this.state.totalPagarConfirmar,
+          }),
+          method: "POST",
+        };
+      } else {
+        data = {
+          url: "cambio/cambio/comprar",
+          data: JSON.stringify({
+            id: this.state.idCotacao,
+            moeda: this.state.valueMoeda.value,
+            conta_id: Funcoes.pessoa.conta_id,
+            amount: this.state.valueCompra,
+            amount_total: this.state.totalPagarConfirmar,
+          }),
+          method: "POST",
+        };
+      }
 
       Funcoes.Geral_API(data).then((res) => {
         if (res.success == 0) {
@@ -308,17 +369,33 @@ export default class Cambio extends Component {
     }
 
     // Se todas as validações passarem, procede com a requisição
-    const data = {
-      url: "cambio/cambio/saque",
-      data: JSON.stringify({
-        moeda: moedaSaque.value,
-        conta_id: Funcoes.pessoa.conta_id,
-        amount: valorSaque,
-        senha: senhaSaque,
-        wallet: carteiraSaque,
-      }),
-      method: "POST",
-    };
+
+    let data = {};
+    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+      data = {
+        url: "cambio/cambio/saque",
+        data: JSON.stringify({
+          moeda: moedaSaque.value,
+          conta_id: this.state.contaId.value,
+          amount: valorSaque,
+          senha: senhaSaque,
+          wallet: carteiraSaque,
+        }),
+        method: "POST",
+      };
+    } else {
+      data = {
+        url: "cambio/cambio/saque",
+        data: JSON.stringify({
+          moeda: moedaSaque.value,
+          conta_id: Funcoes.pessoa.conta_id,
+          amount: valorSaque,
+          senha: senhaSaque,
+          wallet: carteiraSaque,
+        }),
+        method: "POST",
+      };
+    }
 
     console.log(data);
 
@@ -415,6 +492,36 @@ export default class Cambio extends Component {
     this.setState({ totalPagarConfirmar });
   };
 
+  saldoContaId = (id) => {
+    const data = {
+      url: "conta/saldo",
+      data: { conta_id: id },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      console.log(res);
+      this.setState({ saldoConta: res.digital });
+    });
+  };
+
+  saldoCrypto = (id) => {
+    const dados = {
+      url: "cambio/cambio/saldo",
+      data: JSON.stringify({
+        conta_id: id,
+      }),
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(dados, true).then((res) => {
+      console.log(res.saldos);
+      res.saldos.map((saldo) => {
+        this.setState({ saldoCrypto: saldo });
+      });
+    });
+  };
+
   render() {
     return (
       <div>
@@ -509,6 +616,62 @@ export default class Cambio extends Component {
           </Modal.Header>
           <Modal.Body>
             <Container>
+              {this.state.contaGrupos &&
+              this.state.contaGrupos !== "undefined" ? (
+                <Row>
+                  <Col md={8}>
+                    <h3>{i18n.t("home.conta")}</h3>
+                    <Select
+                      options={
+                        Array.isArray(this.state.contaGrupos)
+                          ? this.state.contaGrupos.map((conta) => ({
+                              value: conta.conta_id,
+                              label: conta.conta_id + " " + conta.nome_conta,
+                            }))
+                          : []
+                      } // Verifica se contaGrupos é um array
+                      value={this.state.contaId}
+                      onChange={(selectedOption) => {
+                        this.setState({ contaId: selectedOption });
+                        this.saldoContaId(selectedOption.value);
+                        console.log(this.state.contaId);
+                      }}
+                      isSearchable
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          height: 40,
+                          minHeight: 40,
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          fontSize: 14,
+                        }),
+                      }}
+                    />
+                  </Col>
+                  <Col md={4}>
+                    <h3>
+                      {i18n.t("home.saldo") + " " + i18n.t("home.conta")}{" "}
+                    </h3>
+                    <span style={{ marginLeft: 10 }}>
+                      <input
+                        value={
+                          this.state.saldoConta
+                            ? "R$ " + ` ${this.state.saldoConta}`
+                            : i18n.t("home.saldoNull")
+                        }
+                        placeholder=" 00,00"
+                        disabled
+                        style={{ height: 40 }}
+                      />
+                    </span>
+                  </Col>
+                </Row>
+              ) : null}
+
+              <br />
+
               <Row>
                 <Col>
                   <h3>{i18n.t("cambio.moeda")}</h3>
@@ -784,6 +947,62 @@ export default class Cambio extends Component {
           </Modal.Header>
           <Modal.Body>
             <Container>
+              {this.state.contaGrupos &&
+              this.state.contaGrupos !== "undefined" ? (
+                <Row>
+                  <Col md={8}>
+                    <h3>{i18n.t("home.conta")}</h3>
+                    <Select
+                      options={
+                        Array.isArray(this.state.contaGrupos)
+                          ? this.state.contaGrupos.map((conta) => ({
+                              value: conta.conta_id,
+                              label: conta.conta_id + " " + conta.nome_conta,
+                            }))
+                          : []
+                      } // Verifica se contaGrupos é um array
+                      value={this.state.contaId}
+                      onChange={(selectedOption) => {
+                        this.setState({ contaId: selectedOption });
+                        this.saldoCrypto(selectedOption.value);
+                        console.log(this.state.contaId);
+                      }}
+                      isSearchable
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          height: 40,
+                          minHeight: 40,
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          fontSize: 14,
+                        }),
+                      }}
+                    />
+                  </Col>
+                  <Col md={4}>
+                    <h3>
+                      {i18n.t("home.saldo") + " " + i18n.t("home.conta")}{" "}
+                    </h3>
+                    <span style={{ marginLeft: 10 }}>
+                      <input
+                        value={
+                          this.state.saldoCrypto
+                            ? "R$ " + ` ${this.state.saldoCrypto.saldo}`
+                            : i18n.t("home.saldoNull")
+                        }
+                        placeholder=" 00,00"
+                        disabled
+                        style={{ height: 40 }}
+                      />
+                    </span>
+                  </Col>
+                </Row>
+              ) : null}
+
+              <br />
+
               <Row className="mb-3">
                 <Col>
                   <h3>{i18n.t("cambio.moeda")}</h3>
@@ -801,6 +1020,7 @@ export default class Cambio extends Component {
                           moedaSaque: selectedOption, // Define o objeto completo selecionado
                           saldoForSaque: selectedOption.saldo, // Define o saldo da moeda selecionada
                         });
+                        console.log(selectedOption);
                         /* this.cotacao(selectedOption.value); */ // Passa `value` para a função `cotacao`
                       }
                     }}
@@ -821,9 +1041,9 @@ export default class Cambio extends Component {
                 <Col>
                   <h3>{i18n.t("cambio.saldo")}</h3>
                   <h4>
-                    {this.state.saldoForSaque != 0
+                    {this.state.saldoForSaque !== 0.0
                       ? " " + this.state.saldoForSaque
-                      : " 00,00"}
+                      : i18n.t("home.saldoNull")}
                   </h4>
                 </Col>
                 <Col>

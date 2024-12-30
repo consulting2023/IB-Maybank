@@ -151,7 +151,7 @@ export default class Login extends Component {
   };
 
   loginConta = (dados) => {
-    console.log(dados);
+    console.log(dados.conta.ativo);
     if (dados.conta.ativo == 0) {
       this.props.alerts(
         i18n.t("login.tituloContaNãoAprovada"),
