@@ -161,7 +161,7 @@ export default class Login extends Component {
       return;
     }
     localStorage.setItem("nivel", dados.usuario.nivel);
-    localStorage.setItem("conta_grupos", dados.usuario.conta_grupos);
+    localStorage.setItem("conta_grupos", JSON.stringify(dados.usuario.conta_grupos));
     this.enviarToken();
     this.setState({
       Qrcode_imagem: null,
