@@ -70,6 +70,14 @@ export default {
     descrData: "Data",
     descrNome: "%{descricao}",
     verMais: "Ver Mais",
+    hey: "Hello!",
+    proprietaryAccounts: "Proprietary Accounts",
+    proprietaryAccountBalance: "Proprietary Account Balance",
+    conta: "Conta",
+    saldo: "Saldo",
+    saldoNull: "Não disponível",
+    transactionalAccounts: "Transactional Accounts",
+    transactionalAccountBalance: "Transactional Account Balance",
   },
 
   extrato: {

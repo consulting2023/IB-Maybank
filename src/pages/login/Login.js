@@ -151,7 +151,7 @@ export default class Login extends Component {
   };
 
   loginConta = (dados) => {
-    console.log(dados.conta.ativo);
+    console.log(dados);
     if (dados.conta.ativo == 0) {
       this.props.alerts(
         i18n.t("login.tituloContaNãoAprovada"),
@@ -161,7 +161,7 @@ export default class Login extends Component {
       return;
     }
     localStorage.setItem("nivel", dados.usuario.nivel);
-    const contaGrupos = dados.usuario.conta_grupos || [];
+    const contaGrupos = dados.conta_grupos || [];
     console.log("Salvando conta_grupos no localStorage:", contaGrupos);
     localStorage.setItem("conta_grupos", JSON.stringify(contaGrupos));
     this.enviarToken();

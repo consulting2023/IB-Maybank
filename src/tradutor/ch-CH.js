@@ -68,6 +68,14 @@ export default {
     descrData: "日期",
     descrNome: "%{descricao}",
     verMais: "查看",
+    hey: "你好！",
+    proprietaryAccounts: "专有账户",
+    proprietaryAccountBalance: "专有账户余额",
+    conta: "账户",
+    saldo: "余额",
+    saldoNull: "不可用",
+    transactionalAccounts: "交易账户",
+    transactionalAccountBalance: "交易账户余额",
   },
 
   extrato: {
