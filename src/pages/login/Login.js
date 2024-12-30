@@ -161,7 +161,9 @@ export default class Login extends Component {
       return;
     }
     localStorage.setItem("nivel", dados.usuario.nivel);
-    localStorage.setItem("conta_grupos", JSON.stringify(dados.usuario.conta_grupos));
+    const contaGrupos = dados.usuario.conta_grupos || [];
+    console.log("Salvando conta_grupos no localStorage:", contaGrupos);
+    localStorage.setItem("conta_grupos", JSON.stringify(contaGrupos));
     this.enviarToken();
     this.setState({
       Qrcode_imagem: null,
