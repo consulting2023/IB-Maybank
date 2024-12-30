@@ -25,7 +25,7 @@ import "jspdf-autotable";
 import Produtos from "../../constants/Produtos";
 import logo from "../../assets/images/logos/icon_logo.png"; // Importa a imagem
 import i18n from "../../tradutor/tradutor";
-
+import Select from "react-select";
 export default class Pix extends Component {
   constructor() {
     super();
@@ -74,10 +74,17 @@ export default class Pix extends Component {
       pessoa: [],
 
       password: ["", "", "", "", "", ""],
+
+      contaGrupos: {},
+      contaId: 0,
+      contaIdReceber: 0,
     };
   }
 
   componentDidMount() {
+    this.setState({
+      contaGrupos: JSON.parse(localStorage.getItem("conta_grupos")),
+    });
     this.SaldoConta();
     const pessoa = Funcoes.pessoa;
     this.setState({ pessoa: pessoa });
@@ -318,34 +325,66 @@ export default class Pix extends Component {
     valor_enviar = valor_enviar.replace(".", "");
     valor_enviar = valor_enviar.replace(",", ".");
 
-    const dados = {
-      url: "pix/pix/enviar-pix",
-      method: "POST",
-      funcao: "pesquisarChave",
-      tela: "pix",
-      data: {
-        valor: valor_enviar,
-        mensagem: this.state.msg,
-        dados_recebedor: {
-          chave_pix: this.state.retornoConsulta?.chave,
-          banco: this.state.retornoConsulta?.dados_bancarios.banco,
-          conta: this.state.retornoConsulta?.dados_bancarios.conta,
-          agencia: this.state.retornoConsulta?.dados_bancarios.agencia,
-          documento: this.state.retornoConsulta?.dados_bancarios.documento,
-          tipo_conta: this.state.retornoConsulta?.dados_bancarios.tipo_conta,
-          nome: this.state.retornoConsulta?.dados_bancarios.nome,
+    let dados = {};
+    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+      dados = {
+        url: "pix/pix/enviar-pix",
+        method: "POST",
+        funcao: "pesquisarChave",
+        tela: "pix",
+        data: {
+          valor: valor_enviar,
+          mensagem: this.state.msg,
+          dados_recebedor: {
+            chave_pix: this.state.retornoConsulta?.chave,
+            banco: this.state.retornoConsulta?.dados_bancarios.banco,
+            conta: this.state.retornoConsulta?.dados_bancarios.conta,
+            agencia: this.state.retornoConsulta?.dados_bancarios.agencia,
+            documento: this.state.retornoConsulta?.dados_bancarios.documento,
+            tipo_conta: this.state.retornoConsulta?.dados_bancarios.tipo_conta,
+            nome: this.state.retornoConsulta?.dados_bancarios.nome,
+          },
+          conta_id: this.state.contaId.value,
+          senha: this.state.password,
+          token: this.state.OTP,
+          type: this.state.retornoConsulta?.type,
+          indentificador_transacao:
+            this.state.retornoConsulta?.indentificador_transacao,
+          end_to_end_id: this.state.retornoConsulta?.end_to_end_id,
+          validation_code: this.state.retornoConsulta?.validation_code,
+          tipo_pagamento_pix: this.state.retornoConsulta?.tipo_pagamento_pix,
         },
-        conta_id: this.state.pessoa.conta_id,
-        senha: this.state.password,
-        token: this.state.OTP,
-        type: this.state.retornoConsulta?.type,
-        indentificador_transacao:
-          this.state.retornoConsulta?.indentificador_transacao,
-        end_to_end_id: this.state.retornoConsulta?.end_to_end_id,
-        validation_code: this.state.retornoConsulta?.validation_code,
-        tipo_pagamento_pix: this.state.retornoConsulta?.tipo_pagamento_pix,
-      },
-    };
+      };
+    } else {
+      dados = {
+        url: "pix/pix/enviar-pix",
+        method: "POST",
+        funcao: "pesquisarChave",
+        tela: "pix",
+        data: {
+          valor: valor_enviar,
+          mensagem: this.state.msg,
+          dados_recebedor: {
+            chave_pix: this.state.retornoConsulta?.chave,
+            banco: this.state.retornoConsulta?.dados_bancarios.banco,
+            conta: this.state.retornoConsulta?.dados_bancarios.conta,
+            agencia: this.state.retornoConsulta?.dados_bancarios.agencia,
+            documento: this.state.retornoConsulta?.dados_bancarios.documento,
+            tipo_conta: this.state.retornoConsulta?.dados_bancarios.tipo_conta,
+            nome: this.state.retornoConsulta?.dados_bancarios.nome,
+          },
+          conta_id: this.state.pessoa.conta_id,
+          senha: this.state.password,
+          token: this.state.OTP,
+          type: this.state.retornoConsulta?.type,
+          indentificador_transacao:
+            this.state.retornoConsulta?.indentificador_transacao,
+          end_to_end_id: this.state.retornoConsulta?.end_to_end_id,
+          validation_code: this.state.retornoConsulta?.validation_code,
+          tipo_pagamento_pix: this.state.retornoConsulta?.tipo_pagamento_pix,
+        },
+      };
+    }
 
     Funcoes.Geral_API(dados, true).then((responseJson) => {
       console.log(responseJson);
@@ -555,21 +594,41 @@ export default class Pix extends Component {
       valor_qrcodeenviar = valor_qrcodeenviar.replace(",", ".");
     }
 
-    const dados = {
-      url: "pix/pix/gera-qrcode-estatico",
-      method: "POST",
-      funcao: "pesquisarChave",
-      tela: "pix",
-      data: {
-        nome_pagador: this.state.nomePagador,
-        cpf_pagador: this.state.cpfPagador,
-        conta_id: Funcoes.pessoa.conta_id,
-        valor: valor_qrcodeenviar,
-        pixels_modulo: 20,
-        formato_imagem: "jpeg",
-        chave_pix: this.state.selectQrChave.chave,
-      },
-    };
+    let dados = {};
+
+    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+      dados = {
+        url: "pix/pix/gera-qrcode-estatico",
+        method: "POST",
+        funcao: "pesquisarChave",
+        tela: "pix",
+        data: {
+          nome_pagador: this.state.nomePagador,
+          cpf_pagador: this.state.cpfPagador,
+          conta_id: this.state.contaIdReceber.value,
+          valor: valor_qrcodeenviar,
+          pixels_modulo: 20,
+          formato_imagem: "jpeg",
+          chave_pix: this.state.selectQrChave.chave,
+        },
+      };
+    } else {
+      dados = {
+        url: "pix/pix/gera-qrcode-estatico",
+        method: "POST",
+        funcao: "pesquisarChave",
+        tela: "pix",
+        data: {
+          nome_pagador: this.state.nomePagador,
+          cpf_pagador: this.state.cpfPagador,
+          conta_id: Funcoes.pessoa.conta_id,
+          valor: valor_qrcodeenviar,
+          pixels_modulo: 20,
+          formato_imagem: "jpeg",
+          chave_pix: this.state.selectQrChave.chave,
+        },
+      };
+    }
 
     Funcoes.Geral_API(dados, true).then((responseJson) => {
       if (responseJson != 0) {
@@ -704,6 +763,20 @@ export default class Pix extends Component {
     }
     this.setState({ cpfPagador: value });
   };
+
+  saldoContaId = (id) => {
+    const data = {
+      url: "conta/saldo",
+      data: { conta_id: id },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      console.log(res);
+      this.setState({ saldoConta: res.digital });
+    });
+  };
+
   render() {
     const pixTypesPagar = [
       // { title: 'QR Code' },
@@ -969,6 +1042,62 @@ export default class Pix extends Component {
                       </div>
 
                       <div className="pt-3">
+                        {this.state.contaGrupos &&
+                        this.state.contaGrupos !== "undefined" ? (
+                          <>
+                            <Row className="m-2">
+                              <Col className="text-right">
+                                <label>{i18n.t("home.conta")}</label>
+                              </Col>
+                              <Col className="text-left">
+                                <Select
+                                  options={
+                                    Array.isArray(this.state.contaGrupos)
+                                      ? this.state.contaGrupos.map((conta) => ({
+                                          value: conta.conta_id,
+                                          label:
+                                            conta.conta_id +
+                                            " " +
+                                            conta.nome_conta,
+                                        }))
+                                      : []
+                                  } // Verifica se contaGrupos é um array
+                                  value={this.state.contaId}
+                                  onChange={(selectedOption) => {
+                                    this.setState({ contaId: selectedOption });
+                                    this.saldoContaId(selectedOption.value);
+                                    console.log(this.state.contaId);
+                                  }}
+                                  isSearchable
+                                />
+                              </Col>
+                            </Row>
+
+                            <Row className="m-2">
+                              <Col className="text-right">
+                                <label>
+                                  {" "}
+                                  {i18n.t("home.saldo") +
+                                    " " +
+                                    i18n.t("home.conta")}{" "}
+                                </label>
+                              </Col>
+                              <Col className="text-left">
+                                <span style={{ marginLeft: 10 }}>
+                                  <input
+                                    value={
+                                      this.state.saldoConta
+                                        ? "R$ " + ` ${this.state.saldoConta}`
+                                        : i18n.t("home.saldoNull")
+                                    }
+                                    placeholder=" 00,00"
+                                    disabled
+                                  />
+                                </span>
+                              </Col>
+                            </Row>
+                          </>
+                        ) : null}
                         <Row className="m-2">
                           <Col className="text-right">
                             <label>{i18n.t("pix.valPix")}</label>
@@ -1345,6 +1474,39 @@ export default class Pix extends Component {
                         </Dropdown>
                       </div>
                     </Row>
+
+                    {this.state.contaGrupos &&
+                    this.state.contaGrupos !== "undefined" ? (
+                      <>
+                        <Row className="mt-5">
+                          <Col>
+                            <label>{i18n.t("home.conta")}</label>
+                          </Col>
+                          <Col>
+                            <Select
+                              options={
+                                Array.isArray(this.state.contaGrupos)
+                                  ? this.state.contaGrupos.map((conta) => ({
+                                      value: conta.conta_id,
+                                      label:
+                                        conta.conta_id + " " + conta.nome_conta,
+                                    }))
+                                  : []
+                              } // Verifica se contaGrupos é um array
+                              value={this.state.contaIdReceber}
+                              onChange={(selectedOption) => {
+                                this.setState({
+                                  contaIdReceber: selectedOption,
+                                });
+
+                                console.log(this.state.contaIdReceber);
+                              }}
+                              isSearchable
+                            />
+                          </Col>
+                        </Row>
+                      </>
+                    ) : null}
 
                     <Row className="mt-5">
                       <Col>

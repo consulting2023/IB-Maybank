@@ -48,7 +48,7 @@ export default class CadastroPj extends Component {
       agenciaNumero: "",
 
       liberarCNPJ: false,
-      cnpj: "92204714000130",
+      cnpj: "",
       // cnpj: "",
 
       liberarTelefone: false,
