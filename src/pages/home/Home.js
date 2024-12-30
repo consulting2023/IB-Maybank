@@ -214,11 +214,9 @@ export default class Home extends Component {
 
   render() {
     const contaGrupos = JSON.parse(localStorage.getItem("conta_grupos")) || [];
-console.log("Parsed contaGrupos:", contaGrupos);
-    const saldos = this.state.saldos || {}; // Garantir que temos os saldos carregados
+    console.log("Parsed contaGrupos:", contaGrupos);
   
     if (contaGrupos.length > 1) {
-      // Retornar os saldos das contas em um layout semelhante ao da imagem
       return (
         <div className="w-100">
           <Container className="p-3 d-flex justify-content-center">
