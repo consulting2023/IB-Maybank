@@ -213,9 +213,9 @@ export default class Home extends Component {
   };
 
   render() {
-    const contaGrupos = JSON.parse(localStorage.getItem("conta_grupos")) || [];
-    console.log("Parsed contaGrupos:", contaGrupos);
-  
+    const rawData = localStorage.getItem("conta_grupos");
+    console.log("Raw data from localStorage:", rawData);
+    const contaGrupos = JSON.parse(rawData || "[]");
     if (contaGrupos.length > 1) {
       return (
         <div className="w-100">
