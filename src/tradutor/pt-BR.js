@@ -672,7 +672,7 @@ export default {
     taxa: "Taxa",
     tarifa: "Tarifa",
     totalPagar: "Total a Pagar",
-    senhaTransfer: "Senha de Transição",
+    senhaTransfer: "Senha de Transação",
     confirmCompra: "Confirmar Compra",
     campos: "Por favor, Preencha os campos para prosseguir",
     limit: "Valor Minimo de Compra é de 10.000",
