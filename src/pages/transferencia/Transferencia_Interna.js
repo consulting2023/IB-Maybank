@@ -22,6 +22,7 @@ import ReactLoading from "react-loading";
 import i18n from "../../tradutor/tradutor";
 import Password from "../../components/password/Password";
 import { jsPDF } from "jspdf";
+import Select from "react-select";
 
 export default class TransferenciaInterna extends Component {
   constructor() {
@@ -73,10 +74,16 @@ export default class TransferenciaInterna extends Component {
       comprovante_pdf: "",
 
       password: ["", "", "", "", "", ""],
+
+      contaGrupos: {},
+      contaId: 0,
     };
   }
 
   componentDidMount() {
+    this.setState({
+      contaGrupos: JSON.parse(localStorage.getItem("conta_grupos")),
+    });
     const pessoa = Funcoes.pessoa;
     this.setState({ pessoa: pessoa });
     const data = {
@@ -212,28 +219,55 @@ export default class TransferenciaInterna extends Component {
       window.location.href = "/transferencia_interna";
     } else {
       setTimeout(() => {
-        const dados = {
-          url: "transferencia/nova",
-          data: JSON.stringify({
-            valor: valor,
-            nome_banco: "000",
-            agencia: this.state.selecionarConta.conta.agencia,
-            digitoAg: "",
-            conta: String(this.state.selecionarConta.conta.id),
-            digito: String(this.state.selecionarConta.conta.digito),
-            favorecido: this.state.favorecido,
-            documento: this.state.documento,
-            finalidade: "01",
-            tipo_conta: "Conta corrente",
-            salvar_favorecido: false,
-            data_transferencia: hoje,
-            conta_id: this.state.pessoa.conta_id,
-            cobrar: 0,
-            senha: this.state.password,
-            token: this.state.OTP,
-          }),
-          method: "POST",
-        };
+        let dados = {};
+        if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+          dados = {
+            url: "transferencia/nova",
+            data: JSON.stringify({
+              valor: valor,
+              nome_banco: "000",
+              agencia: this.state.selecionarConta.conta.agencia,
+              digitoAg: "",
+              conta: String(this.state.selecionarConta.conta.id),
+              digito: String(this.state.selecionarConta.conta.digito),
+              favorecido: this.state.favorecido,
+              documento: this.state.documento,
+              finalidade: "01",
+              tipo_conta: "Conta corrente",
+              salvar_favorecido: false,
+              data_transferencia: hoje,
+              conta_id: this.state.contaId.value,
+              cobrar: 0,
+              senha: this.state.password,
+              token: this.state.OTP,
+            }),
+            method: "POST",
+          };
+        } else {
+          dados = {
+            url: "transferencia/nova",
+            data: JSON.stringify({
+              valor: valor,
+              nome_banco: "000",
+              agencia: this.state.selecionarConta.conta.agencia,
+              digitoAg: "",
+              conta: String(this.state.selecionarConta.conta.id),
+              digito: String(this.state.selecionarConta.conta.digito),
+              favorecido: this.state.favorecido,
+              documento: this.state.documento,
+              finalidade: "01",
+              tipo_conta: "Conta corrente",
+              salvar_favorecido: false,
+              data_transferencia: hoje,
+              conta_id: this.state.pessoa.conta_id,
+              cobrar: 0,
+              senha: this.state.password,
+              token: this.state.OTP,
+            }),
+            method: "POST",
+          };
+        }
+
         Funcoes.Geral_API(dados, true).then((res) => {
           if (res.error) {
             alert("Erro: " + res.message);
@@ -244,36 +278,16 @@ export default class TransferenciaInterna extends Component {
             }
           }
 
-          this.setState({ loading: false, token_app: false, contaSelecionada: false });
-          this.props.alerts("Transação efetuada", "Comprovante instalado automaticamente.", "success");
-
-          // if (res == 0) {
-          //   // Código inválido
-          //   alert("Erro na transferencia");
-          //   window.location.href = "/transferencia_interna";
-          //   // } else if (res == 203) {
-          //   // Alerta pânico
-          //   // alert('Código de barras inválido');
-          //   // window.location.href = '/transferencia_interna'
-          // } else if (res.error) {
-          //   if (res.error == 1){
-          //     alert("Erro: " + res.message);
-          //     window.location.href = "/transferencia_interna";
-          //   }
-          // } else if (res == 2) {
-          //   //*Sem saldo na conta
-          //   alert("Saldo insuficiente");
-          //   window.location.href = "/transferencia_interna";
-          // } else if (res.dados) {
-          //   if (res.dados.mov_id) {
-          //   //*pagamento realizado
-          //     Funcoes.comprovante_pdf(res.dados.mov_id);
-          //   }
-          // } else {
-          //   //*algum erro não previsto
-          //   alert("Processamento Invalido, Contate seu Gerente!");
-          //   window.location.href = "/transferencia_interna";
-          // }
+          this.setState({
+            loading: false,
+            token_app: false,
+            contaSelecionada: false,
+          });
+          this.props.alerts(
+            "Transação efetuada",
+            "Comprovante instalado automaticamente.",
+            "success"
+          );
         });
       }, 600);
     }
@@ -445,7 +459,8 @@ export default class TransferenciaInterna extends Component {
     const data = {
       url: "utilitarios/validacao-email-confere",
       data: {
-        email: Funcoes.pessoa.email,
+        /*  email: Funcoes.pessoa.email, */
+        email: "rapa.rodrigues@gmail.com",
         token: id,
       },
       method: "POST",
@@ -461,28 +476,6 @@ export default class TransferenciaInterna extends Component {
       });
     }, 300);
   };
-
-  /* Validar_senha = (value) => {
-    const data = {
-      url: "usuario/login",
-      data: {
-        email: this.state.pessoa.email,
-        password: value,
-        sub_banco_id: "",
-        token_aparelho: "",
-        nome_aparelho: "",
-      },
-      method: "POST",
-    };
-
-    Funcoes.Geral_API(data, true).then((res) => {
-      if (res != 0) {
-        this.setState({ valida_senha_ok: true });
-      } else {
-        this.setState({ valida_senha_ok: false });
-      }
-    });
-  }; */
 
   maskaraInput = (value) => {
     value = value.replace(/[^\d]+/g, "");
@@ -626,7 +619,8 @@ export default class TransferenciaInterna extends Component {
     const data = {
       url: "utilitarios/validacao-email-envio",
       data: {
-        email: Funcoes.pessoa.email,
+        /* email: Funcoes.pessoa.email, */
+        email: "rapa.rodrigues@gmail.com",
       },
       method: "POST",
     };
@@ -638,6 +632,19 @@ export default class TransferenciaInterna extends Component {
         }
       });
     }, 300);
+  };
+
+  saldoContaId = (id) => {
+    const data = {
+      url: "conta/saldo",
+      data: { conta_id: id },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      console.log(res);
+      this.setState({ saldoConta: res.digital });
+    });
   };
 
   render() {
@@ -1026,23 +1033,69 @@ export default class TransferenciaInterna extends Component {
               <br></br>
             </Alert>
             <hr></hr>
-            <div className="showhimTransf">
-              <div className="hiddenmeTransf">
-                <p className="saldos-home texto-saldos-Transf">
-                  {i18n.t("transferencia.saldo")}{" "}
-                  <Icon.Eye
-                    className="ocultarSaldoTransf"
-                    style={{ fontWeight: "500" }}
+
+            {this.state.contaGrupos &&
+            this.state.contaGrupos !== "undefined" ? (
+              <>
+                <div className="form-group ">
+                  <label>{i18n.t("home.conta")}</label>
+                  <Select
+                    options={
+                      Array.isArray(this.state.contaGrupos)
+                        ? this.state.contaGrupos.map((conta) => ({
+                            value: conta.conta_id,
+                            label: conta.conta_id + " " + conta.nome_conta,
+                          }))
+                        : []
+                    } // Verifica se contaGrupos é um array
+                    value={this.state.contaId}
+                    onChange={(selectedOption) => {
+                      this.setState({ contaId: selectedOption });
+                      this.saldoContaId(selectedOption.value);
+                      console.log(this.state.contaId);
+                    }}
+                    isSearchable
                   />
-                </p>
+                </div>
+
+                <div className="form-group ">
+                  <label>
+                    {" "}
+                    {i18n.t("home.saldo") + " " + i18n.t("home.conta")}{" "}
+                  </label>
+                  <span style={{ marginLeft: 10 }}>
+                    <input
+                      value={
+                        this.state.saldoConta
+                          ? "R$ " + ` ${this.state.saldoConta}`
+                          : i18n.t("home.saldoNull")
+                      }
+                      placeholder=" 00,00"
+                      disabled
+                    />
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="showhimTransf">
+                <div className="hiddenmeTransf">
+                  <p className="saldos-home texto-saldos-Transf">
+                    {i18n.t("transferencia.saldo")}{" "}
+                    <Icon.Eye
+                      className="ocultarSaldoTransf"
+                      style={{ fontWeight: "500" }}
+                    />
+                  </p>
+                </div>
+                <div className="showmeTransf">
+                  <p className="saldos-home texto-saldos-Transf">
+                    {i18n.t("transferencia.saldo")}{" "}
+                    {Formatar.formatarMoeda(this.state.saldoDigital)}
+                  </p>
+                </div>
               </div>
-              <div className="showmeTransf">
-                <p className="saldos-home texto-saldos-Transf">
-                  {i18n.t("transferencia.saldo")}{" "}
-                  {Formatar.formatarMoeda(this.state.saldoDigital)}
-                </p>
-              </div>
-            </div>
+            )}
+
             <div>
               <div className="form-group ">
                 <label>{i18n.t("transferencia.valor")}</label>
