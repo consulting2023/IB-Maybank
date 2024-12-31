@@ -220,7 +220,11 @@ export default class TransferenciaInterna extends Component {
     } else {
       setTimeout(() => {
         let dados = {};
-        if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+        if (
+          this.state.contaGrupos &&
+          this.state.contaGrupos !== "undefined" &&
+          this.state.contaGrupos.length > 1
+        ) {
           dados = {
             url: "transferencia/nova",
             data: JSON.stringify({
@@ -1035,7 +1039,7 @@ export default class TransferenciaInterna extends Component {
             <hr></hr>
 
             {this.state.contaGrupos &&
-            this.state.contaGrupos !== "undefined" ? (
+            this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1 ? (
               <>
                 <div className="form-group ">
                   <label>{i18n.t("home.conta")}</label>

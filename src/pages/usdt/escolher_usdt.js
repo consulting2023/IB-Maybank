@@ -107,7 +107,7 @@ export default class Cambio extends Component {
     console.log(this.state.contaId.value);
     let data = {};
     if (id == undefined) {
-      if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+      if (this.state.contaGrupos && this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1) {
         data = {
           url: "cambio/cambio/cotacao",
           data: JSON.stringify({
@@ -137,7 +137,7 @@ export default class Cambio extends Component {
         this.setState({ taxa: responseJson.taxa });
       });
     } else {
-      if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+      if (this.state.contaGrupos && this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1) {
         data = {
           url: "cambio/cambio/cotacao",
           data: JSON.stringify({
@@ -186,7 +186,7 @@ export default class Cambio extends Component {
       } else {
         this.setState({ viewValidar: false, disabled: true });
         let data = {};
-        if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+        if (this.state.contaGrupos && this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1) {
           data = {
             url: "cambio/cambio/travar-cotacao",
             data: JSON.stringify({
@@ -277,7 +277,7 @@ export default class Cambio extends Component {
       // Define um temporizador para exibir alerta após 15 segundos
 
       let data = {};
-      if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+      if (this.state.contaGrupos && this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1) {
         data = {
           url: "cambio/cambio/comprar",
           data: JSON.stringify({
@@ -371,7 +371,7 @@ export default class Cambio extends Component {
     // Se todas as validações passarem, procede com a requisição
 
     let data = {};
-    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1) {
       data = {
         url: "cambio/cambio/saque",
         data: JSON.stringify({
@@ -617,7 +617,7 @@ export default class Cambio extends Component {
           <Modal.Body>
             <Container>
               {this.state.contaGrupos &&
-              this.state.contaGrupos !== "undefined" ? (
+              this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1? (
                 <Row>
                   <Col md={8}>
                     <h3>{i18n.t("home.conta")}</h3>
@@ -948,7 +948,7 @@ export default class Cambio extends Component {
           <Modal.Body>
             <Container>
               {this.state.contaGrupos &&
-              this.state.contaGrupos !== "undefined" ? (
+              this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1 ? (
                 <Row>
                   <Col md={8}>
                     <h3>{i18n.t("home.conta")}</h3>

@@ -326,7 +326,7 @@ export default class Pix extends Component {
     valor_enviar = valor_enviar.replace(",", ".");
 
     let dados = {};
-    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1) {
       dados = {
         url: "pix/pix/enviar-pix",
         method: "POST",
@@ -596,7 +596,7 @@ export default class Pix extends Component {
 
     let dados = {};
 
-    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined") {
+    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1) {
       dados = {
         url: "pix/pix/gera-qrcode-estatico",
         method: "POST",
@@ -1043,7 +1043,7 @@ export default class Pix extends Component {
 
                       <div className="pt-3">
                         {this.state.contaGrupos &&
-                        this.state.contaGrupos !== "undefined" ? (
+                        this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1 ? (
                           <>
                             <Row className="m-2">
                               <Col className="text-right">
@@ -1476,7 +1476,7 @@ export default class Pix extends Component {
                     </Row>
 
                     {this.state.contaGrupos &&
-                    this.state.contaGrupos !== "undefined" ? (
+                    this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1 ? (
                       <>
                         <Row className="mt-5">
                           <Col>
