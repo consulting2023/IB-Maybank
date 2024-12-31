@@ -169,10 +169,10 @@ export default class CadastroPj extends Component {
       rep_estado: "",
       liberarRepEnderecoCompleto: false,
 
-      liberarRepProcuracao: "",
+      liberarRepProcuracao: false,
       rep_procuracao: "",
 
-      liberarRepPolitico: "",
+      liberarRepPolitico: false,
       rep_politico: false
     };
 
@@ -264,52 +264,48 @@ export default class CadastroPj extends Component {
   uploadContrato = (e) => {
     const file = e.target.files[0]; // Pega o arquivo selecionado
     if (file) {
-      // Tipos válidos para imagem
-      const validImageTypes = ['image/png', 'image/jpeg'];
-      // Tipo válido para PDF
-      const validPdfType = 'application/pdf';
-
-      if (validImageTypes.includes(file.type)) {
-        // Se for imagem PNG ou JPEG
+      const validTypes = ['image/png', 'image/jpeg', 'application/pdf']; // Tipos válidos
+  
+      if (validTypes.includes(file.type)) {
         const reader = new FileReader();
-
+  
         reader.onloadend = () => {
-          const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
+          let base64String = '';
+  
+          if (file.type === 'application/pdf') {
+            // Para PDFs
+            base64String = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
+          } else {
+            // Para imagens (PNG, JPEG)
+            base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
+          }
+  
           this.setState({
             contrato: base64String,
           });
-          this.salvarDormente('imagecontrato', base64String)
+  
+          // Salvar os dados no backend ou localmente
+          this.salvarDormente('imagecontrato', base64String);
         };
-
-        // Ler o arquivo como uma URL de dados (base64)
-        reader.readAsDataURL(file);
-
-      } else if (file.type === validPdfType) {
-        // Se for PDF
-        const reader = new FileReader();
-
-        reader.onloadend = () => {
-          const base64String = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
-          this.setState({
-            contrato: base64String,
-          });
-          this.salvarDormente('imagecontrato', base64String)
-        };
-
-        // Ler o arquivo como ArrayBuffer (PDFs não podem ser lidos diretamente como Data URL)
-        reader.readAsArrayBuffer(file);
-
+  
+        // Escolhe o método de leitura com base no tipo
+        if (file.type === 'application/pdf') {
+          reader.readAsArrayBuffer(file); // PDFs precisam de ArrayBuffer
+        } else {
+          reader.readAsDataURL(file); // Imagens podem ser lidas como Data URL
+        }
       } else {
         // Caso o arquivo seja inválido
-        alert("Arquivo inválido");
+        alert('Arquivo inválido. Apenas arquivos PNG, JPEG e PDF são aceitos.');
         this.setState({
-          contrato: '', // Limpa a imagem ou PDF em caso de erro
+          contrato: '', // Limpa o estado em caso de erro
         });
       }
     } else {
-      this.setState({ contrato: '' });
+      this.setState({ contrato: '' }); // Limpa o estado caso nenhum arquivo seja selecionado
     }
   };
+  
 
   uploadDoc = (e) => {
     const file = e.target.files[0];
@@ -428,24 +424,27 @@ export default class CadastroPj extends Component {
   uploadProcuracao = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validPdfType = 'application/pdf';
-
-      if (file.type === validPdfType) {
+      const validTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+  
+      if (validTypes.includes(file.type)) {
         const reader = new FileReader();
-
+  
         reader.onloadend = () => {
-          const base64String = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
+          const binaryString = reader.result;
+          const base64String = btoa(binaryString);
+  
           this.setState({
             rep_procuracao: base64String,
-            liberarRepPolitico: true
+            liberarRepPolitico: true,
           });
-          this.salvarDormente('representante_procuracao', base64String)
+  
+          this.salvarDormente('representante_procuracao', base64String);
         };
-
-        reader.readAsArrayBuffer(file);
-
+  
+        // Aqui usamos `readAsBinaryString` diretamente
+        reader.readAsBinaryString(file);
       } else {
-        alert("Arquivo inválido");
+        alert('Arquivo inválido. Apenas arquivos PNG, JPEG e PDF são aceitos.');
         this.setState({
           rep_procuracao: '',
         });
@@ -454,6 +453,7 @@ export default class CadastroPj extends Component {
       this.setState({ rep_procuracao: '' });
     }
   };
+  
 
   componentDidMount = () => {
     this.agCadastro();
@@ -721,10 +721,11 @@ export default class CadastroPj extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
+      console.log(res)
       if (!res) {
         // alert("Falha ao cadastrar informações, tente novamente.");
         alert("Falha ao cadastrar informações, tente novamente." + campo );
-        window.location.reload();
+        
       } else {
         console.log(campo + ' ok');
       }
@@ -742,10 +743,11 @@ export default class CadastroPj extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
+      console.log(res)
       if (!res) {
         alert("Falha ao cadastrar informações, tente novamente.");
       } else {
-        alert("Cadastro realizado com sucesso");
+        alert("Cadastro realizado com sucesso, em ate 3 dias sua conta sera aprovada");
         window.location.href = "/";
       }
     });
@@ -765,7 +767,7 @@ export default class CadastroPj extends Component {
                   Retornar
                 </Button>
               </li>
-            
+              
             </ul>
           </Container>
 
@@ -1998,15 +2000,16 @@ export default class CadastroPj extends Component {
                             placeholder="Selecione o órgão expedidor"
                             // value={this.state.rep_docorgao}
                             onChange={(selectedOption) => {
+                              this.setState({
+                                liberarRepDocEstado: true
+                              });
                               if (this.state.rep_tipodoc == '1') {
                                 this.salvarDormente('representante_orgaorg', selectedOption.label);
                               } else if (this.state.rep_tipodoc == '2') {
                                 this.salvarDormente('representante_orgacnh', selectedOption.label);
                               }
 
-                              this.setState({
-                                liberarRepDocEstado: true
-                              });
+                             
                             }}
                             styles={{
                               control: (base) => ({
@@ -2027,7 +2030,7 @@ export default class CadastroPj extends Component {
                     }
 
                     {
-                      this.liberarRepDocEstado && (
+                      this.state.liberarRepDocEstado && (
 
                         <div className="mt-3">
                           <span className="ttAgencia">
