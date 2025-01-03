@@ -196,6 +196,7 @@ export default class Cambio extends Component {
               conta_id: this.state.contaId.value,
               senha: this.state.senha,
               amount_total: this.state.totalPagar,
+              usuario_id: Funcoes.pessoa.usuario_id,
             }),
             method: "POST",
           };
@@ -209,6 +210,7 @@ export default class Cambio extends Component {
               conta_id: Funcoes.pessoa.conta_id,
               senha: this.state.senha,
               amount_total: this.state.totalPagar,
+              usuario_id: Funcoes.pessoa.usuario_id,
             }),
             method: "POST",
           };
@@ -286,6 +288,7 @@ export default class Cambio extends Component {
             conta_id: this.state.contaId.value,
             amount: this.state.valueCompra,
             amount_total: this.state.totalPagarConfirmar,
+            usuario_id: Funcoes.pessoa.usuario_id,
           }),
           method: "POST",
         };
@@ -298,6 +301,7 @@ export default class Cambio extends Component {
             conta_id: Funcoes.pessoa.conta_id,
             amount: this.state.valueCompra,
             amount_total: this.state.totalPagarConfirmar,
+            usuario_id: Funcoes.pessoa.usuario_id,
           }),
           method: "POST",
         };
@@ -380,6 +384,7 @@ export default class Cambio extends Component {
           amount: valorSaque,
           senha: senhaSaque,
           wallet: carteiraSaque,
+          usuario_id: Funcoes.pessoa.usuario_id,
         }),
         method: "POST",
       };
@@ -392,6 +397,7 @@ export default class Cambio extends Component {
           amount: valorSaque,
           senha: senhaSaque,
           wallet: carteiraSaque,
+          usuario_id: Funcoes.pessoa.usuario_id,
         }),
         method: "POST",
       };

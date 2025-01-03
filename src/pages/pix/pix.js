@@ -326,7 +326,11 @@ export default class Pix extends Component {
     valor_enviar = valor_enviar.replace(",", ".");
 
     let dados = {};
-    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1) {
+    if (
+      this.state.contaGrupos &&
+      this.state.contaGrupos !== "undefined" &&
+      this.state.contaGrupos.length > 1
+    ) {
       dados = {
         url: "pix/pix/enviar-pix",
         method: "POST",
@@ -353,6 +357,7 @@ export default class Pix extends Component {
           end_to_end_id: this.state.retornoConsulta?.end_to_end_id,
           validation_code: this.state.retornoConsulta?.validation_code,
           tipo_pagamento_pix: this.state.retornoConsulta?.tipo_pagamento_pix,
+          usuario_id: Funcoes.pessoa.usuario_id,
         },
       };
     } else {
@@ -382,6 +387,7 @@ export default class Pix extends Component {
           end_to_end_id: this.state.retornoConsulta?.end_to_end_id,
           validation_code: this.state.retornoConsulta?.validation_code,
           tipo_pagamento_pix: this.state.retornoConsulta?.tipo_pagamento_pix,
+          usuario_id: Funcoes.pessoa.usuario_id,
         },
       };
     }
@@ -596,7 +602,11 @@ export default class Pix extends Component {
 
     let dados = {};
 
-    if (this.state.contaGrupos && this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1) {
+    if (
+      this.state.contaGrupos &&
+      this.state.contaGrupos !== "undefined" &&
+      this.state.contaGrupos.length > 1
+    ) {
       dados = {
         url: "pix/pix/gera-qrcode-estatico",
         method: "POST",
@@ -1043,7 +1053,8 @@ export default class Pix extends Component {
 
                       <div className="pt-3">
                         {this.state.contaGrupos &&
-                        this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1 ? (
+                        this.state.contaGrupos !== "undefined" &&
+                        this.state.contaGrupos.length > 1 ? (
                           <>
                             <Row className="m-2">
                               <Col className="text-right">
@@ -1476,7 +1487,8 @@ export default class Pix extends Component {
                     </Row>
 
                     {this.state.contaGrupos &&
-                    this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1 ? (
+                    this.state.contaGrupos !== "undefined" &&
+                    this.state.contaGrupos.length > 1 ? (
                       <>
                         <Row className="mt-5">
                           <Col>

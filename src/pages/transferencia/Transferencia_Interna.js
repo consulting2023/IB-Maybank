@@ -244,6 +244,8 @@ export default class TransferenciaInterna extends Component {
               cobrar: 0,
               senha: this.state.password,
               token: this.state.OTP,
+              usuario: this.state.pessoa.usuario_id
+              
             }),
             method: "POST",
           };
@@ -267,6 +269,7 @@ export default class TransferenciaInterna extends Component {
               cobrar: 0,
               senha: this.state.password,
               token: this.state.OTP,
+              usuario_id: this.state.pessoa.usuario_id
             }),
             method: "POST",
           };
@@ -463,8 +466,8 @@ export default class TransferenciaInterna extends Component {
     const data = {
       url: "utilitarios/validacao-email-confere",
       data: {
-        /*  email: Funcoes.pessoa.email, */
-        email: "rapa.rodrigues@gmail.com",
+        email: Funcoes.pessoa.email,
+        /*email: "rapa.rodrigues@gmail.com", */
         token: id,
       },
       method: "POST",
@@ -623,8 +626,8 @@ export default class TransferenciaInterna extends Component {
     const data = {
       url: "utilitarios/validacao-email-envio",
       data: {
-        /* email: Funcoes.pessoa.email, */
-        email: "rapa.rodrigues@gmail.com",
+       email: Funcoes.pessoa.email,
+         /* email: "rapa.rodrigues@gmail.com", */
       },
       method: "POST",
     };

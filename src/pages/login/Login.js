@@ -445,6 +445,18 @@ export default class Login extends Component {
 
                 <div>
                   <Row>
+                    {Produtos.cadastro.cadastroLiberado ? (
+                      <Col className="text-center">
+                        <Button
+                          type="button"
+                          className="botaologin btn-primary"
+                          onClick={() => this.setState({ cadastro: true })}
+                        >
+                          Cadastrar
+                        </Button>
+                      </Col>
+                    ) : null}
+
                     {/* Botao de Entrar */}
                     <Col className="text-center">
                       {this.state.loading ? (
@@ -477,17 +489,7 @@ export default class Login extends Component {
                         </Button>
                       )}
                     </Col>
-                    {Produtos.cadastro.cadastroLiberado ? (
-                      <Col className="text-center">
-                        <Button
-                          type="button"
-                          className="botaologin btn-primary"
-                          onClick={() => this.setState({ cadastro: true })}
-                        >
-                          Cadastrar
-                        </Button>
-                      </Col>
-                    ) : null}
+                    
                   </Row>
 
                   {/* {Produtos.siso ? (<Row> */}
