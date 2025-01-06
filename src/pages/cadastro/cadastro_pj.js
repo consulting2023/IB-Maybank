@@ -31,16 +31,7 @@ export default class CadastroPj extends Component {
   constructor() {
     super();
     this.state = {
-      cadastroPt1: true,
-      cadastroPt2: false,
-      cadastroPt3: false,
-      cadastroPt4: false,
-      cadastroPt5: false,
-      cadastroPt6: false,
-      cadastroPt7: false,
-      cadastroPt8: false,
-      cadastroPt9: false,
-      cadastroPt10: false,
+      cadastro: '0',
 
       agencias: [],
       valueAgencia: "",
@@ -49,7 +40,6 @@ export default class CadastroPj extends Component {
 
       liberarCNPJ: false,
       cnpj: "",
-      // cnpj: "",
 
       liberarTelefone: false,
       celEmpresa: "",
@@ -173,7 +163,9 @@ export default class CadastroPj extends Component {
       rep_procuracao: "",
 
       liberarRepPolitico: false,
-      rep_politico: false
+      rep_politico: false,
+
+      statusModal: false
     };
 
     this.inputTelefone = React.createRef();
@@ -192,6 +184,52 @@ export default class CadastroPj extends Component {
     this.inputRepNomeMae = React.createRef();
     this.inputRepData = React.createRef();
   }
+  
+  componentDidMount = () => {
+    this.agCadastro();
+    this.buscarTermoUso();
+    this.checkStatus();
+  };
+
+  checkStatus = () => {
+    // {
+    //   cnpj: 9012090090,
+    //   cadastro: "2"
+    // }
+
+    const cnpj = localStorage.getItem("cnpj");
+    const save = localStorage.getItem("save");
+    if (cnpj && save) {
+      this.setState({ cnpj: cnpj, statusModal: true });
+    }
+  };
+
+  agCadastro = () => {
+    const data = {
+      url: "agencia/lista",
+      data: {},
+      method: "GET",
+    };
+    Funcoes.Geral_API(data).then((res) => {
+      this.setState({ agencias: res });
+      // console.log(res);
+    });
+  };
+
+  buscarTermoUso = () => {
+    const data = {
+      url: "termos/texto",
+      data: {
+        chave: "termo_uso",
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data).then((res) => {
+      // console.log(res.texto);
+      this.setState({ termo: res.texto });
+    });
+  };
 
   handleFocus = (nextInputRef) => {
     if (nextInputRef && nextInputRef.current) {
@@ -453,39 +491,6 @@ export default class CadastroPj extends Component {
       this.setState({ rep_procuracao: '' });
     }
   };
-  
-
-  componentDidMount = () => {
-    this.agCadastro();
-    this.buscarTermoUso();
-  };
-
-  agCadastro = () => {
-    const data = {
-      url: "agencia/lista",
-      data: {},
-      method: "GET",
-    };
-    Funcoes.Geral_API(data).then((res) => {
-      this.setState({ agencias: res });
-      // console.log(res);
-    });
-  };
-
-  buscarTermoUso = () => {
-    const data = {
-      url: "termos/texto",
-      data: {
-        chave: "termo_uso",
-      },
-      method: "POST",
-    };
-
-    Funcoes.Geral_API(data).then((res) => {
-      // console.log(res.texto);
-      this.setState({ termo: res.texto });
-    });
-  };
 
   validarCNPJ = () => {
     const data = {
@@ -500,6 +505,7 @@ export default class CadastroPj extends Component {
     Funcoes.Geral_API(data).then((res) => {
       if (res) {
         this.salvarDormente('agencia', this.state.agenciaNumero);
+        localStorage.setItem("cnpj", this.state.cnpj);
         this.setState({ liberarTelefone: true }, () => {
           this.handleFocus(this.inputTelefone);
         });
@@ -651,7 +657,8 @@ export default class CadastroPj extends Component {
     };
     Funcoes.Geral_API(data).then((res) => {
       if (res){
-        this.setState({ smsModal: false, cadastroPt5: false, cadastroPt6: true });
+        this.setState({ cadastro: "5", smsModal: false });
+        localStorage.setItem("save", "5");
       } else {
         alert("SMS inválido.");
       }
@@ -721,13 +728,13 @@ export default class CadastroPj extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
-      console.log(res)
+      // console.log(res)
       if (!res) {
         // alert("Falha ao cadastrar informações, tente novamente.");
         alert("Falha ao cadastrar informações, tente novamente." + campo );
         
       } else {
-        console.log(campo + ' ok');
+        // console.log(campo + ' ok');
       }
     });
   }
@@ -743,7 +750,6 @@ export default class CadastroPj extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
-      console.log(res)
       if (!res) {
         alert("Falha ao cadastrar informações, tente novamente.");
       } else {
@@ -779,7 +785,7 @@ export default class CadastroPj extends Component {
                   (Aperte Enter dentro da caixa de texto para cadastrar a informação pedida.)
                 </span>
                 { 
-                  this.state.cadastroPt1 && ( <>
+                  (this.state.cadastro == "0") && ( <>
 
                     <h1 className="mb-2">
                       Iremos começar o cadastro da sua conta PJ
@@ -934,7 +940,7 @@ export default class CadastroPj extends Component {
                 }
 
                 {
-                  this.state.cadastroPt2 && ( <>
+                  (this.state.cadastro == "1") && ( <>
 
                     <hr className="divisoria" />
 
@@ -1082,23 +1088,6 @@ export default class CadastroPj extends Component {
                             Informe a Contribuição da empresa
                           </span>
 
-                          {/* <input
-                            ref={this.inputContribuicao}
-                            value={this.state.contribuicao}
-                            placeholder="Digite a Contribuição"
-                            style={{ height: 40, width: "100%" }}
-                            onChange={(e) =>
-                              this.setState({ contribuicao: e.target.value })
-                            }
-                            onKeyDown={(e) => {
-                              const contribuicao = this.state.contribuicao.trim();
-                              if (contribuicao.length > 0 && e.key === "Enter") {
-                                this.salvarDormente('contribuicao', contribuicao);
-                                this.setState({ cadastroPt2: false, cadastroPt3: true });
-                              }
-                            }}
-                          /> */}
-
                           <Select
                             options={
                               [
@@ -1132,7 +1121,8 @@ export default class CadastroPj extends Component {
                             placeholder="Selecione a Contribuição"
                             onChange={(selectedOption) => {
                               this.salvarDormente('contribuicao', selectedOption.value);
-                              this.setState({ cadastroPt2: false, cadastroPt3: true });
+                              this.setState({ cadastro: "2" });
+                              localStorage.setItem("save", "2");
                             }}
                             styles={{
                               control: (base) => ({
@@ -1156,7 +1146,7 @@ export default class CadastroPj extends Component {
                 }
 
                 {
-                  this.state.cadastroPt3 && ( <>
+                  (this.state.cadastro == "2") && ( <>
 
                     <hr className="divisoria" />
 
@@ -1297,10 +1287,12 @@ export default class CadastroPj extends Component {
                                 <Button
                                   variant="primary"
                                   className="mt-auto ml-auto" 
-                                  onClick={ () => this.setState({ 
-                                    cadastroPt3: false, 
-                                    cadastroPt4: true
-                                  })}
+                                  onClick={ () => {
+                                    this.setState({ 
+                                    cadastro: "3"
+                                    });
+                                    localStorage.setItem("save", "3");
+                                  }}
                                 >
                                   Continuar
                                 </Button>
@@ -1316,7 +1308,7 @@ export default class CadastroPj extends Component {
                 }
 
                 {
-                  this.state.cadastroPt4 && ( <>
+                  (this.state.cadastro == "3") && ( <>
 
                     <hr className="divisoria" />
 
@@ -1365,10 +1357,12 @@ export default class CadastroPj extends Component {
                                 <Button
                                   variant="primary"
                                   className="mt-auto ml-auto" 
-                                  onClick={ () => this.setState({ 
-                                    cadastroPt4: false, 
-                                    cadastroPt5: true
-                                  })}
+                                  onClick={ () => {
+                                    this.setState({ 
+                                      cadastro: "4"
+                                    });
+                                    localStorage.setItem("save", "4");
+                                  }}
                                 >
                                   Continuar para cadastro do representante
                                 </Button>
@@ -1384,7 +1378,7 @@ export default class CadastroPj extends Component {
                 }
 
                 {
-                  this.state.cadastroPt5 && ( <>
+                  (this.state.cadastro == "4") && ( <>
 
                     <hr className="divisoria" />
 
@@ -1488,7 +1482,7 @@ export default class CadastroPj extends Component {
                 }
 
                 {
-                  this.state.cadastroPt6 && ( <>
+                  (this.state.cadastro == "5") && ( <>
 
                     <hr className="divisoria" />
 
@@ -1670,14 +1664,14 @@ export default class CadastroPj extends Component {
                               ]
                             }
                             placeholder="Selecione seu gênero"
-                            value={this.state.rep_genero}
+                            // value={this.state.rep_genero}
                             onChange={(selectedOption) => {
                               this.salvarDormente('representante_sexo', selectedOption.value);
                               this.setState({
                                 // rep_genero: selectedOption,
-                                cadastroPt6: false,
-                                cadastroPt7: true
+                                cadastro: "6"
                               });
+                              localStorage.setItem("save", "6");
                             }}
                             styles={{
                               control: (base) => ({
@@ -1700,7 +1694,7 @@ export default class CadastroPj extends Component {
                 }
 
                 {
-                  this.state.cadastroPt7 && ( <>
+                  (this.state.cadastro == "6") && ( <>
                   
                     <hr className="divisoria" />
 
@@ -1870,10 +1864,12 @@ export default class CadastroPj extends Component {
                                 <Button
                                   variant="primary"
                                   className="mt-auto ml-auto" 
-                                  onClick={ () => this.setState({ 
-                                    cadastroPt7: false, 
-                                    cadastroPt8: true
-                                  })}
+                                  onClick={ () => {
+                                    this.setState({ 
+                                      cadastro: "7"
+                                    });
+                                    localStorage.setItem("save", "7");
+                                  }}
                                 >
                                   Continuar
                                 </Button>
@@ -1889,7 +1885,7 @@ export default class CadastroPj extends Component {
                 }
 
                 {
-                  this.state.cadastroPt8 && ( <>
+                  (this.state.cadastro == "7") && ( <>
                   
                     <hr className="divisoria" />
 
@@ -1947,7 +1943,6 @@ export default class CadastroPj extends Component {
                             style={{ height: 40, width: "100%" }}
                             onChange={(e) => {
                               this.setState({ rep_docemissao: e.target.value });
-                              console.log('aaaaa');
 
                               if (this.state.rep_tipodoc == '1') {
                                 this.salvarDormente('representante_datarg', e.target.value + ' 00:00:00')
@@ -1956,7 +1951,6 @@ export default class CadastroPj extends Component {
                                 this.salvarDormente('representante_datacnh', e.target.value + ' 00:00:00')
                                 this.setState({ liberarRepDocOrgao: true });
                               } else if (this.state.rep_tipodoc == '3') {
-                                console.log('3');
 
                                 this.salvarDormente('data_de_emissao_passaporte', e.target.value + ' 00:00:00')
                                 this.setState({ liberarRepPassPais: true });
@@ -2078,7 +2072,10 @@ export default class CadastroPj extends Component {
                                 this.salvarDormente('representante_ufcnh', selectedOption.label);
                               }
 
-                              this.setState({ cadastroPt8: false, cadastroPt9: true });
+                              this.setState({ 
+                                cadastro: "8"
+                              });
+                              localStorage.setItem("save", "8");
                             }}
                             styles={{
                               control: (base) => ({
@@ -2195,7 +2192,10 @@ export default class CadastroPj extends Component {
                               this.setState({ rep_passvalidade: e.target.value });
 
                               this.salvarDormente('validade_passaporte', e.target.value + ' 00:00:00')
-                              this.setState({ cadastroPt8: false, cadastroPt9: true });
+                              this.setState({
+                                cadastro: "8"
+                              });
+                              localStorage.setItem("save", "8");
                             }}
                           />
                         </div>
@@ -2207,7 +2207,7 @@ export default class CadastroPj extends Component {
                 }
 
                 {
-                  this.state.cadastroPt9 && ( <>
+                  (this.state.cadastro == "8") && ( <>
                   
                     <hr className="divisoria" />
 
@@ -2272,10 +2272,12 @@ export default class CadastroPj extends Component {
                                 <Button
                                   variant="primary"
                                   className="mt-auto ml-auto" 
-                                  onClick={ () => this.setState({ 
-                                    cadastroPt9: false, 
-                                    cadastroPt10: true
-                                  })}
+                                  onClick={ () => {
+                                    this.setState({ 
+                                      cadastro: "9"
+                                    });
+                                    localStorage.setItem("save", "9");
+                                  }}
                                 >
                                   Continuar
                                 </Button>
@@ -2292,7 +2294,7 @@ export default class CadastroPj extends Component {
                 }
 
                 {
-                  this.state.cadastroPt10 && ( <>
+                  (this.state.cadastro == "9") && ( <>
                   
                     <hr className="divisoria" />
 
@@ -2444,10 +2446,10 @@ export default class CadastroPj extends Component {
                 variant="primary"
                 onClick={() => {
                   this.setState({
-                    cadastroPt1: false,
-                    cadastroPt2: true,
+                    cadastro: "1",
                     termoModal: false,
                   });
+                  localStorage.setItem("save", "1");
                 }}
               >
                 Declaro que li e aceito os termos de uso e de privacidade {process.env.NOME_BANCO}
@@ -2773,6 +2775,41 @@ export default class CadastroPj extends Component {
                 }}
               >
                 Confirmar
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          <Modal
+            size="md"
+            show={this.state.statusModal}
+          >
+            <Modal.Body>
+              <Container>
+                Deseja continuar o cadastro da conta de CNPJ {Formatar.cnpj_mask(this.state.cnpj)}?
+              </Container>
+            </Modal.Body>
+            <Modal.Footer className="d-flex">
+              <Button
+                className="mr-auto"
+                variant="primary"
+                onClick={() => {
+                  this.setState({ 
+                    cadastro: localStorage.getItem("save"),
+                    statusModal: false
+                  });
+                }}
+              >
+                Sim
+              </Button>
+
+              <Button
+                className="ml-auto"
+                variant="primary"
+                onClick={() => {
+                  this.setState({ statusModal: false, cnpj: "" });
+                }}
+              >
+                Não
               </Button>
             </Modal.Footer>
           </Modal>
