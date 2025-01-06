@@ -192,11 +192,6 @@ export default class CadastroPj extends Component {
   };
 
   checkStatus = () => {
-    // {
-    //   cnpj: 9012090090,
-    //   cadastro: "2"
-    // }
-
     const cnpj = localStorage.getItem("cnpj");
     const save = localStorage.getItem("save");
     if (cnpj && save) {
@@ -2807,6 +2802,8 @@ export default class CadastroPj extends Component {
                 variant="primary"
                 onClick={() => {
                   this.setState({ statusModal: false, cnpj: "" });
+                  localStorage.removeItem("cnpj");
+                  localStorage.removeItem("save");
                 }}
               >
                 Não
