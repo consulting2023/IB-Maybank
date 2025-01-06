@@ -36,6 +36,8 @@ export default class Home extends Component {
   }
 
   componentDidMount() {
+    console.log(Funcoes.pessoa)
+    
     this.atualizarSaldos();
     this.getSaldo();
     this.getExtrato();
