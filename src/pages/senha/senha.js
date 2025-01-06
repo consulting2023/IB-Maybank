@@ -245,7 +245,7 @@ export default class Senha extends Component {
               </Row>
               <Row>
                 <OtpInput
-                  isInputSecure={true}
+                  isInputSecure={false}
                   focusInput={1}
                   isInputNum={true}
                   value={this.state.OTP}
