@@ -192,9 +192,11 @@ export default class Login extends Component {
       cidade: dados.endereco.cidade,
       estado: dados.endereco.estado,
       emite_boleto: dados.conta.emite_boleto,
+      termos: dados.termos
     };
 
     if (dados.pessoa_fisica.nome) {
+      pessoa.termos = dados.termos
       pessoa.celular = dados.pessoa_fisica.celular;
       pessoa.data_nascimento = dados.pessoa_fisica.datanascimentos;
       pessoa.documento_id = dados.pessoa_fisica.documento_id;
@@ -211,6 +213,7 @@ export default class Login extends Component {
       pessoa.usuario_id = dados.pessoa_fisica.usuarioid;
       pessoa.pf_pj = "pf";
     } else if (dados.representante.nome) {
+      pessoa.termos = dados.termos
       pessoa.celular = dados.representante.celular;
       pessoa.data_nascimento = dados.representante.data_nascimento;
       pessoa.documento_id = dados.representante.documento_id;

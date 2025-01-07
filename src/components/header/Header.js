@@ -33,10 +33,34 @@ export default class Header extends Component {
       msg: [],
       pessoa: {},
       saldos: {},
+      termoModal: false,
+      termo: "",
+      btnTermo: true,
+      chaveTermo: {},
     };
   }
 
   componentDidMount() {
+    if (Funcoes.pessoa.termos.length > 0) {
+      console.log(Funcoes.pessoa.termos);
+
+      // Constrói um objeto com as chaves do array de termos
+      const chaveTermo = Funcoes.pessoa.termos.reduce((acc, termo) => {
+        acc[termo.chave] = termo.chave; // Define a própria chave como valor
+        return acc;
+      }, {});
+
+      // Atualiza o estado com o objeto criado
+      this.setState({ chaveTermo, termoModal: true }, () => {
+        console.log("Chave termo armazenado:", this.state.chaveTermo);
+
+        // Chama a função termo com uma das chaves, por exemplo, "termo_uso"
+        if (this.state.chaveTermo) {
+          this.termo( this.state.chaveTermo );
+        }
+      });
+    }
+
     const pessoaObj = Funcoes.pessoa;
     this.setState({ pessoa: pessoaObj }, () => {
       this.listar_msg();
@@ -85,7 +109,8 @@ export default class Header extends Component {
     setTimeout(() => {
       const newSaldos = this.state.saldos;
       newSaldos.digital.show = !this.state.saldos.digital.show;
-      newSaldos.digital.showBloqueado = !this.state.saldos.digital.showBloqueado;
+      newSaldos.digital.showBloqueado =
+        !this.state.saldos.digital.showBloqueado;
 
       this.setState({ saldos: newSaldos });
     }, 500);
@@ -186,6 +211,61 @@ export default class Header extends Component {
     });
   };
 
+  modalTermo = () => {
+    alert("Para poder Prosseguir é Necessario Aceitar os termos");
+  };
+
+  termo = (chave) => {
+    console.log( chave);
+    const data = {
+      url: "termos/texto",
+      data: {
+        chave: chave.termo_uso, // Usa a chave "termo_uso" do objeto passado
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data).then((res) => {
+      this.setState({ termo: res });
+    });
+  };
+
+  handleScroll = (e) => {
+    const element = e.target;
+    const isAtBottom =
+      element.scrollHeight - element.scrollTop === element.clientHeight;
+    if (isAtBottom) {
+      this.setState({ btnTermo: false }); // Habilita o botão quando chegar ao final
+    }
+  };
+
+  aceiteTermo = () => {
+    console.log(this.state.termo)
+
+    const data = {
+      url: "aceite-termos/aceite",
+      data: {
+        "usuario_id": this.state.pessoa.usuario_id,
+        "conta_id": this.state.pessoa.conta_id,
+        "ip": "192.168.1.10",
+        "data_hora": "2025-01-06 15:45:00",
+        "token": "abcd1234efgh5678ijkl9101mnop",
+        "aparelho": "iPhone 13",
+        "termo_id": 303,
+        "chave_termo": "TERMO123",
+        "versao": 1
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data).then((res) => {
+      this.setState({ termo: res });
+    });
+
+  }
+
+  
+
   render() {
     const { pessoa } = this.state;
     if (Object.keys(pessoa).length > 0) {
@@ -224,7 +304,8 @@ export default class Header extends Component {
                               </Row>
 
                               <Row className="justify-content-center">
-                                <span style={{color: "red"}}
+                                <span
+                                  style={{ color: "red" }}
                                   className={
                                     "texto-saldos select-none saldoValor " +
                                     (this.state.saldos.digital.showBloqueado
@@ -435,6 +516,42 @@ export default class Header extends Component {
             <Modal.Footer className="p-0">
               <Button onClick={() => this.marcarMsg()} className="m-3">
                 {i18n.t("header.lidoNotif")}
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          <Modal
+            show={this.state.termoModal}
+            centered
+            size="xl"
+            onHide={() => this.modalTermo()}
+          >
+            <Modal.Body>
+              <Container
+                onScroll={this.handleScroll}
+                style={{
+                  maxHeight: "800px", // Limita a altura do conteúdo para permitir o scroll
+                  overflowY: "auto", // Adiciona barra de rolagem vertical
+                }}
+              >
+                <div
+                  style={{
+                    color: "black",
+                    WebkitTextFillColor: "black", // Para navegadores com preenchimento de texto
+                    textAlign: "justify", // Alinha o texto de forma justificada (opcional)
+                    fontSize: "16px", // Define a cor do texto como preto
+                  }}
+                  dangerouslySetInnerHTML={{ __html: this.state.termo.texto }}
+                ></div>
+              </Container>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                style={{ width: "50%" }}
+                disabled={this.state.btnTermo}
+                onClick={() => this.aceiteTermo()}
+              >
+                Aceito o Termo
               </Button>
             </Modal.Footer>
           </Modal>

@@ -517,6 +517,22 @@ export async function comprovante_ver(id) {
   }
 }
 
+export async function termos(chave) {
+  console.log(chave);
+
+ /*  const data = {
+    url: "termos/texto",
+    data: {
+      chave: c,
+    },
+    method: "POST",
+  };
+  await Geral_API(data).then((res) => {
+    console.log(res);
+    this.setState({ termo: res.texto });
+  }); */
+}
+
 // FUNÇÕES QUE AINDA SERÃO EXCLUÍDAS
 
 export async function tarifas(dados) {

@@ -36,8 +36,6 @@ export default class Home extends Component {
   }
 
   componentDidMount() {
-    console.log(Funcoes.pessoa)
-    
     this.atualizarSaldos();
     this.getSaldo();
     this.getExtrato();
@@ -308,7 +306,7 @@ export default class Home extends Component {
                         </span>
 
                         <p className="saldo-value">
-                          {i18n.t("home.saldo")}:{" "} R$
+                          {i18n.t("home.saldo")}: R$
                           {Formatar.formatReal(
                             this.state.saldosContas[conta.conta_id]
                           ) || i18n.t("home.saldoNull")}
@@ -330,7 +328,7 @@ export default class Home extends Component {
                           {i18n.t("home.conta")}: {conta.conta_id}
                         </span>
                         <p className="saldo-value">
-                          {i18n.t("home.saldo")}:{" "} R$
+                          {i18n.t("home.saldo")}: R$
                           {Formatar.formatReal(
                             this.state.saldosContas[conta.conta_id]
                           ) || i18n.t("home.saldoNull")}
