@@ -244,8 +244,7 @@ export default class TransferenciaInterna extends Component {
               cobrar: 0,
               senha: this.state.password,
               token: this.state.OTP,
-              usuario: this.state.pessoa.usuario_id
-              
+              usuario_id: this.state.pessoa.usuario_id
             }),
             method: "POST",
           };

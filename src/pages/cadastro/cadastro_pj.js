@@ -232,34 +232,79 @@ export default class CadastroPj extends Component {
     }
   };
 
+  // uploadComprovante = (e) => {
+  //   const file = e.target.files[0]; // Pega o arquivo selecionado
+  //   if (file) {
+  //     // Verifica se o arquivo é PNG ou JPG
+  //     const validTypes = ['image/png', 'image/jpeg'];
+  //     if (!validTypes.includes(file.type)) {
+  //       alert("Arquivo inválido");
+  //       this.setState({
+  //         comprovante: '', // Limpa a imagem em caso de erro
+  //       });
+  //     } else {
+  //       const reader = new FileReader();
+
+  //       // Quando a leitura do arquivo terminar, armazenar o base64 no estado
+
+  //       reader.onloadend = () => {
+  //         const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
+  //         this.setState({
+  //           comprovante: base64String,
+  //         });
+  //         this.salvarDormente('imagecomprovante', base64String)
+  //       };
+
+  //       // Ler o arquivo como uma URL de dados (base64)
+  //       reader.readAsDataURL(file);
+  //     }
+  //   } else {
+  //     this.setState({ comprovante: '' });
+  //   }
+  // };
+
   uploadComprovante = (e) => {
     const file = e.target.files[0]; // Pega o arquivo selecionado
     if (file) {
-      // Verifica se o arquivo é PNG ou JPG
-      const validTypes = ['image/png', 'image/jpeg'];
-      if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
-        this.setState({
-          comprovante: '', // Limpa a imagem em caso de erro
-        });
-      } else {
+      const validTypes = ['image/png', 'image/jpeg', 'application/pdf']; // Tipos válidos
+  
+      if (validTypes.includes(file.type)) {
         const reader = new FileReader();
-
-        // Quando a leitura do arquivo terminar, armazenar o base64 no estado
-
+  
         reader.onloadend = () => {
-          const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
+          let base64String = '';
+  
+          if (file.type === 'application/pdf') {
+            // Para PDFs
+            base64String = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
+          } else {
+            // Para imagens (PNG, JPEG)
+            base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
+          }
+  
           this.setState({
             comprovante: base64String,
           });
-          this.salvarDormente('imagecomprovante', base64String)
+  
+          // Salvar os dados no backend ou localmente
+          this.salvarDormente('imagecontrato', base64String);
         };
-
-        // Ler o arquivo como uma URL de dados (base64)
-        reader.readAsDataURL(file);
+  
+        // Escolhe o método de leitura com base no tipo
+        if (file.type === 'application/pdf') {
+          reader.readAsArrayBuffer(file); // PDFs precisam de ArrayBuffer
+        } else {
+          reader.readAsDataURL(file); // Imagens podem ser lidas como Data URL
+        }
+      } else {
+        // Caso o arquivo seja inválido
+        alert('Arquivo inválido. Apenas arquivos PNG, JPEG e PDF são aceitos.');
+        this.setState({
+          comprovante: '', // Limpa o estado em caso de erro
+        });
       }
     } else {
-      this.setState({ comprovante: '' });
+      this.setState({ comprovante: '' }); // Limpa o estado caso nenhum arquivo seja selecionado
     }
   };
 
@@ -1261,7 +1306,7 @@ export default class CadastroPj extends Component {
                       
                         <div className="mt-3">
                           <span className="ttAgencia">
-                            Agora precisamos do comprovante de endereço da empresa em PNG ou JPG.
+                            Agora precisamos do comprovante de endereço da empresa em PNG, JPG ou PDF.
                           </span>
 
                           <input 
@@ -2383,9 +2428,9 @@ export default class CadastroPj extends Component {
                               this.setState({ rep_politico });
                               let value;
                               if (rep_politico) {
-                                value = '1';
+                                value = 1;
                               } else {
-                                value = '0';
+                                value = 0;
                               }
                               this.salvarDormente('politico', value);
                             }}
