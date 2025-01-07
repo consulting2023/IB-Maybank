@@ -70,6 +70,14 @@ export default {
     descrData: "Data",
     descrNome: "%{descricao}",
     verMais: "Ver Mais",
+    hey: "Ola!",
+    proprietaryAccounts: "Conta proprietárias",
+    proprietaryAccountBalance: "Saldo da conta proprietária",
+    conta: "Conta",
+    saldo: "Saldo",
+    saldoNull: "Não disponível",
+    transactionalAccounts: "Contas transacionais",
+    transactionalAccountBalance: "Saldo da conta transacional",
   },
 
   extrato: {
@@ -664,7 +672,7 @@ export default {
     taxa: "Taxa",
     tarifa: "Tarifa",
     totalPagar: "Total a Pagar",
-    senhaTransfer: "Senha de Transição",
+    senhaTransfer: "Senha de Transação",
     confirmCompra: "Confirmar Compra",
     campos: "Por favor, Preencha os campos para prosseguir",
     limit: "Valor Minimo de Compra é de 10.000",

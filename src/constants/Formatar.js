@@ -134,6 +134,31 @@ export function cel_mask(num) {
   return num;
 }
 
+export function cnae_mask(cnae) {
+  cnae = cnae.replace(/\D/g, '');
+      if (cnae.length <= 4) {
+        cnae = cnae.replace(/^(\d{1,4})$/, '$1');
+    } else if (cnae.length === 5) {
+        cnae = cnae.replace(/^(\d{4})(\d{1})$/, '$1-$2');
+    } else if (cnae.length <= 7) {
+        cnae = cnae.replace(/^(\d{4})(\d{1})(\d{0,2})$/, '$1-$2/$3');
+    }
+  return cnae;
+}
+
+export function cep_mask(cep) {
+    cep = cep.replace(/\D/g, '');
+
+    if (cep.length <= 5) {
+        cep = cep.replace(/^(\d{1,5})$/, '$1');
+    } else if (cep.length === 6) {
+        cep = cep.replace(/^(\d{5})(\d{1})$/, '$1-$2');
+    } else if (cep.length <= 8) {
+        cep = cep.replace(/^(\d{5})(\d{1})(\d{0,3})$/, '$1-$2$3');
+    }
+    return cep;
+}
+
 export function formatarTelefone(value) {
   // Remove caracteres não numéricos
   value = value.replace(/\D/g, "");

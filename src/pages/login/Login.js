@@ -164,6 +164,9 @@ export default class Login extends Component {
       return;
     }
     localStorage.setItem("nivel", dados.usuario.nivel);
+    const contaGrupos = dados.conta_grupos || [];
+    console.log("Salvando conta_grupos no localStorage:", contaGrupos);
+    localStorage.setItem("conta_grupos", JSON.stringify(contaGrupos));
     this.enviarToken();
     this.setState({
       Qrcode_imagem: null,
@@ -192,9 +195,13 @@ export default class Login extends Component {
       cidade: dados.endereco.cidade,
       estado: dados.endereco.estado,
       emite_boleto: dados.conta.emite_boleto,
+      termos: dados.termos,
     };
 
+    localStorage.setItem("termos", JSON.stringify(dados.termos));
+
     if (dados.pessoa_fisica.nome) {
+      pessoa.termos = dados.termos;
       pessoa.celular = dados.pessoa_fisica.celular;
       pessoa.data_nascimento = dados.pessoa_fisica.datanascimentos;
       pessoa.documento_id = dados.pessoa_fisica.documento_id;
@@ -211,6 +218,7 @@ export default class Login extends Component {
       pessoa.usuario_id = dados.pessoa_fisica.usuarioid;
       pessoa.pf_pj = "pf";
     } else if (dados.representante.nome) {
+      pessoa.termos = dados.termos;
       pessoa.celular = dados.representante.celular;
       pessoa.data_nascimento = dados.representante.data_nascimento;
       pessoa.documento_id = dados.representante.documento_id;
@@ -445,6 +453,18 @@ export default class Login extends Component {
 
                 <div>
                   <Row>
+                    {Produtos.cadastro.cadastroLiberado ? (
+                      <Col className="text-center">
+                        <Button
+                          type="button"
+                          className="botaologin btn-primary"
+                          onClick={() => this.setState({ cadastro: true })}
+                        >
+                          Cadastrar
+                        </Button>
+                      </Col>
+                    ) : null}
+
                     {/* Botao de Entrar */}
                     <Col className="text-center">
                       {this.state.loading ? (
@@ -477,17 +497,6 @@ export default class Login extends Component {
                         </Button>
                       )}
                     </Col>
-                    {Produtos.cadastro.cadastroLiberado ? (
-                      <Col className="text-center">
-                        <Button
-                          type="button"
-                          className="botaologin btn-primary"
-                          onClick={() => this.setState({ cadastro: true })}
-                        >
-                          Cadastrar
-                        </Button>
-                      </Col>
-                    ) : null}
                   </Row>
 
                   {/* {Produtos.siso ? (<Row> */}

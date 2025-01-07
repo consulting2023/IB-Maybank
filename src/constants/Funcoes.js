@@ -518,7 +518,7 @@ export async function comprovante_ver(id) {
   }
 }
 
-export function getUniqueToken() {
+export async function getUniqueToken() {
   const localStorageKey = "uniqueInstallationToken";
 
   // Verifica se o token já existe no localStorage
@@ -531,6 +531,18 @@ export function getUniqueToken() {
   }
 
   return token;
+}
+
+export async function getUserIp() {
+  try {
+    // Faz a chamada para a API ipify
+    const response = await fetch("https://api.ipify.org?format=json");
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error("Erro ao obter o IP do usuário:", error);
+    return;
+  }
 }
 
 // FUNÇÕES QUE AINDA SERÃO EXCLUÍDAS
