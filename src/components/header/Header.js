@@ -20,7 +20,7 @@ import Produtos from "../../constants/Produtos";
 // import "bootstrap/dist/css/bootstrap.min.css";
 import { format } from "date-fns";
 import i18n from "../../tradutor/tradutor";
-
+import { browserName } from "react-device-detect";
 export default class Header extends Component {
   constructor() {
     super();
@@ -37,29 +37,21 @@ export default class Header extends Component {
       termo: "",
       btnTermo: true,
       chaveTermo: {},
+      ipUser: "",
+      tokenApp: "",
     };
   }
 
   componentDidMount() {
-    if (Funcoes.pessoa.termos.length > 0) {
-      console.log(Funcoes.pessoa.termos);
+    Funcoes.getUserIp().then((res) => {
+      this.setState({ ipUser: res });
+    });
 
-      // Constrói um objeto com as chaves do array de termos
-      const chaveTermo = Funcoes.pessoa.termos.reduce((acc, termo) => {
-        acc[termo.chave] = termo.chave; // Define a própria chave como valor
-        return acc;
-      }, {});
-
-      // Atualiza o estado com o objeto criado
-      this.setState({ chaveTermo, termoModal: true }, () => {
-        console.log("Chave termo armazenado:", this.state.chaveTermo);
-
-        // Chama a função termo com uma das chaves, por exemplo, "termo_uso"
-        if (this.state.chaveTermo) {
-          this.termo( this.state.chaveTermo );
-        }
-      });
-    }
+    Funcoes.getUniqueToken().then((res) => {
+      this.setState({ tokenApp: res });
+    });
+    this.recuperarTermos();
+    this.novoTermo();
 
     const pessoaObj = Funcoes.pessoa;
     this.setState({ pessoa: pessoaObj }, () => {
@@ -67,10 +59,18 @@ export default class Header extends Component {
     });
 
     this.SaldoConta();
+    if (this.scrollContainer) {
+      const images = this.scrollContainer.querySelectorAll("img");
+      images.forEach((img) => img.addEventListener("load", this.handleImageLoad));
+    }
   }
 
   componentWillUnmount() {
     this.componentDidMount();
+    if (this.scrollContainer) {
+      const images = this.scrollContainer.querySelectorAll("img");
+      images.forEach((img) => img.removeEventListener("load", this.handleImageLoad));
+    }
   }
 
   SaldoConta = () => {
@@ -216,55 +216,194 @@ export default class Header extends Component {
   };
 
   termo = (chave) => {
-    console.log( chave);
-    const data = {
-      url: "termos/texto",
-      data: {
-        chave: chave.termo_uso, // Usa a chave "termo_uso" do objeto passado
-      },
-      method: "POST",
-    };
+    console.log(chave);
 
-    Funcoes.Geral_API(data).then((res) => {
-      this.setState({ termo: res });
-    });
+    let data = {};
+
+    const firstKey = Object.keys(chave)[0];
+    if (firstKey) {
+      data = {
+        url: "termos/texto",
+        data: {
+          chave: chave[firstKey], // Usa a primeira chave disponível
+        },
+        method: "POST",
+      };
+    } else {
+      console.error("Nenhuma chave válida encontrada.");
+      return; // Encerra a função se não houver chaves válidas
+    }
+
+    // Chamada à API
+    Funcoes.Geral_API(data)
+      .then((res) => {
+        if (res && res.texto) {
+          this.setState({ termo: res });
+        } else {
+          console.error("Erro: Resposta inválida da API", res);
+        }
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar o termo:", error);
+      });
   };
 
   handleScroll = (e) => {
-    const element = e.target;
-    const isAtBottom =
-      element.scrollHeight - element.scrollTop === element.clientHeight;
-    if (isAtBottom) {
-      this.setState({ btnTermo: false }); // Habilita o botão quando chegar ao final
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    console.log(`Scroll Position: ${scrollTop}`);
+    console.log(`Total Scrollable Height: ${scrollHeight}`);
+    console.log(`Visible Height: ${clientHeight}`);
+  
+    // Verifica se chegou ao fim do scroll
+    if (scrollTop + clientHeight >= scrollHeight) {
+      this.setState({btnTermo: false})
+      console.log("Chegou ao fim do scroll!");
+    }
+  };
+  
+
+  handleImageLoad = () => {
+    // Força uma revalidação de layout ao carregar imagens
+    if (this.scrollContainer) {
+      this.scrollContainer.scrollTop = this.scrollContainer.scrollTop; // Mantém o scroll no mesmo lugar
     }
   };
 
+  recuperarTermos = () => {
+    const termosSalvos = localStorage.getItem("termos");
+    console.log(termosSalvos); // Verifica o que está sendo recuperado
+
+    if (termosSalvos) {
+      try {
+        // Verifica se os dados são uma string válida antes de tentar parsear
+        if (typeof termosSalvos === "string") {
+          // Tenta parsear a string JSON e atribuir à Funcoes.pessoa.termos
+          Funcoes.pessoa.termos = JSON.parse(termosSalvos);
+        } else {
+          console.error(
+            "Erro: Dados no localStorage não são uma string válida"
+          );
+          Funcoes.pessoa.termos = []; // Caso o valor não seja válido, usa um array vazio
+        }
+      } catch (error) {
+        console.error("Erro ao recuperar termos do localStorage:", error);
+        Funcoes.pessoa.termos = []; // Se o JSON não puder ser lido, usa um array vazio
+      }
+    } else {
+      Funcoes.pessoa.termos = []; // Caso não tenha termos salvos, inicia como array vazio
+    }
+  };
+
+  // Função para salvar termos no localStorage
+  salvarTermos = () => {
+    try {
+      // Converte para string JSON antes de salvar
+      localStorage.setItem("termos", JSON.stringify(Funcoes.pessoa.termos));
+    } catch (error) {
+      console.error("Erro ao salvar termos no localStorage:", error);
+    }
+  };
+
+  // Função que é chamada para aceitar o termo
   aceiteTermo = () => {
-    console.log(this.state.termo)
+    console.log(this.state.ipUser);
+    console.log(this.state.tokenApp);
+    console.log(this.state.termo);
+
+    console.log(Formatar.formatarDateAnoHoraSegundo(new Date()));
 
     const data = {
       url: "aceite-termos/aceite",
       data: {
-        "usuario_id": this.state.pessoa.usuario_id,
-        "conta_id": this.state.pessoa.conta_id,
-        "ip": "192.168.1.10",
-        "data_hora": "2025-01-06 15:45:00",
-        "token": "abcd1234efgh5678ijkl9101mnop",
-        "aparelho": "iPhone 13",
-        "termo_id": 303,
-        "chave_termo": "TERMO123",
-        "versao": 1
+        usuario_id: this.state.pessoa.usuario_id,
+        conta_id: this.state.pessoa.conta_id,
+        ip: this.state.ipUser,
+        data_hora: Formatar.formatarDateAnoHoraSegundo(new Date()),
+        token: this.state.tokenApp,
+        aparelho: "IB: " + browserName,
+        termo_id: this.state.termo.id,
+        chave_termo: this.state.termo.chave,
+        versao: this.state.termo.versao,
       },
       method: "POST",
     };
 
-    Funcoes.Geral_API(data).then((res) => {
-      this.setState({ termo: res });
-    });
+    console.log(data);
 
-  }
+    Funcoes.Geral_API(data)
+      .then((res) => {
+        console.log(res);
 
-  
+        if (res.success) {
+          // Encontra o índice do termo com a chave correspondente
+          const index = Funcoes.pessoa.termos.findIndex(
+            (termo) => termo.chave === this.state.termo.chave
+          );
+
+          // Se o índice for válido (termo encontrado), remova-o
+          if (index !== -1) {
+            Funcoes.pessoa.termos.splice(index, 1); // Remove o termo do array
+          }
+
+          // Persistir os termos atualizados no localStorage
+          this.salvarTermos();
+
+          // Atualiza o estado
+          this.setState({
+            termoModal: false,
+            termo: "",
+            chaveTermo: {},
+            btnTermo: true,
+          });
+
+          // Após atualizar, podemos recarregar a página
+          this.novoTermo();
+        } else {
+          console.error("Erro: Não foi possível remover o termo.", res);
+        }
+      })
+      .catch((error) => {
+        console.error("Erro ao processar a API:", error);
+      });
+  };
+
+  // Função chamada para carregar os termos atualizados
+  novoTermo = () => {
+    console.log(Funcoes.pessoa.termos);
+
+    // Recupera os termos do localStorage (se existirem)
+    this.recuperarTermos(); // Garante que Funcoes.pessoa.termos está atualizado
+
+    if (
+      Array.isArray(Funcoes.pessoa.termos) &&
+      Funcoes.pessoa.termos.length > 0
+    ) {
+      // Constrói um objeto com as chaves do array de termos
+      const chaveTermo = Funcoes.pessoa.termos.reduce((acc, termo) => {
+        acc[termo.chave] = termo.chave; // Define a própria chave como valor
+        return acc;
+      }, {});
+
+      // Atualiza o estado com o objeto criado
+      this.setState({ chaveTermo, termoModal: true }, () => {
+        console.log("Chave termo armazenado:", this.state.chaveTermo);
+
+        // Chama a função termo
+        if (this.state.chaveTermo) {
+          // Verifica se existe a chave "termo_uso"
+          if (this.state.chaveTermo["termo_uso"]) {
+            this.termo({ termo_uso: this.state.chaveTermo["termo_uso"] });
+          } else {
+            // Pega a primeira chave do objeto caso "termo_uso" não exista
+            const firstKey = Object.keys(this.state.chaveTermo)[0];
+            this.termo({ [firstKey]: this.state.chaveTermo[firstKey] });
+          }
+        }
+      });
+    } else {
+      console.error("Funcoes.pessoa.termos não é um array ou está vazio.");
+    }
+  };
 
   render() {
     const { pessoa } = this.state;
@@ -528,6 +667,7 @@ export default class Header extends Component {
           >
             <Modal.Body>
               <Container
+                ref={(el) => (this.scrollContainer = el)} // Ref para o Container
                 onScroll={this.handleScroll}
                 style={{
                   maxHeight: "800px", // Limita a altura do conteúdo para permitir o scroll
@@ -539,7 +679,7 @@ export default class Header extends Component {
                     color: "black",
                     WebkitTextFillColor: "black", // Para navegadores com preenchimento de texto
                     textAlign: "justify", // Alinha o texto de forma justificada (opcional)
-                    fontSize: "16px", // Define a cor do texto como preto
+                    fontSize: "16px", // Define o tamanho da fonte
                   }}
                   dangerouslySetInnerHTML={{ __html: this.state.termo.texto }}
                 ></div>

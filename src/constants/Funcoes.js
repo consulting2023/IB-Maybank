@@ -3,6 +3,7 @@ import CryptoJS from "crypto-js";
 import { decode, encode } from "base-64";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { v4 as uuidv4 } from "uuid";
 
 const tokenKey = "super_chave_secreta";
 const this_version = "1.0";
@@ -517,20 +518,31 @@ export async function comprovante_ver(id) {
   }
 }
 
-export async function termos(chave) {
-  console.log(chave);
+export async function getUniqueToken() {
+  const localStorageKey = "uniqueInstallationToken";
 
- /*  const data = {
-    url: "termos/texto",
-    data: {
-      chave: c,
-    },
-    method: "POST",
-  };
-  await Geral_API(data).then((res) => {
-    console.log(res);
-    this.setState({ termo: res.texto });
-  }); */
+  // Verifica se o token já existe no localStorage
+  let token = localStorage.getItem(localStorageKey);
+
+  if (!token) {
+    // Gera um novo token se não existir
+    token = uuidv4();
+    localStorage.setItem(localStorageKey, token);
+  }
+
+  return token;
+}
+
+export async function getUserIp() {
+  try {
+    // Faz a chamada para a API ipify
+    const response = await fetch("https://api.ipify.org?format=json");
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error("Erro ao obter o IP do usuário:", error);
+    return;
+  }
 }
 
 // FUNÇÕES QUE AINDA SERÃO EXCLUÍDAS

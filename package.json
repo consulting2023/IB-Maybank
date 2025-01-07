@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "proxy": "https://ib.maybank.dev.br",
   "scripts": {
     "build": "NODE_OPTIONS=--openssl-legacy-provider webpack --mode production",
     "start": "webpack serve --mode production --env production",
@@ -45,6 +46,7 @@
     "react-router-dom": "^6.14.1",
     "react-text-mask": "^5.5.0",
     "semantic-ui-react": "^2.0.3",
+    "uuid": "^11.0.3",
     "yarn": "^1.22.19"
   },
   "devDependencies": {
