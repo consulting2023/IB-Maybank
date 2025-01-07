@@ -235,7 +235,7 @@ export default class Header extends Component {
     }
 
     // Chamada à API
-    Funcoes.Geral_API(data)
+    Funcoes.Geral_API(data, true)
       .then((res) => {
         if (res && res.texto) {
           this.setState({ termo: res });
@@ -330,7 +330,7 @@ export default class Header extends Component {
 
     console.log(data);
 
-    Funcoes.Geral_API(data)
+    Funcoes.Geral_API(data, true)
       .then((res) => {
         console.log(res);
 
