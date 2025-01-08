@@ -50,8 +50,8 @@ export default class Header extends Component {
     Funcoes.getUniqueToken().then((res) => {
       this.setState({ tokenApp: res });
     });
-    //6this.recuperarTermos();
-    //this.novoTermo();
+    this.recuperarTermos();
+    this.novoTermo();
 
     const pessoaObj = Funcoes.pessoa;
     this.setState({ pessoa: pessoaObj }, () => {
@@ -61,7 +61,9 @@ export default class Header extends Component {
     this.SaldoConta();
     if (this.scrollContainer) {
       const images = this.scrollContainer.querySelectorAll("img");
-      images.forEach((img) => img.addEventListener("load", this.handleImageLoad));
+      images.forEach((img) =>
+        img.addEventListener("load", this.handleImageLoad)
+      );
     }
   }
 
@@ -69,7 +71,9 @@ export default class Header extends Component {
     this.componentDidMount();
     if (this.scrollContainer) {
       const images = this.scrollContainer.querySelectorAll("img");
-      images.forEach((img) => img.removeEventListener("load", this.handleImageLoad));
+      images.forEach((img) =>
+        img.removeEventListener("load", this.handleImageLoad)
+      );
     }
   }
 
@@ -237,8 +241,10 @@ export default class Header extends Component {
     // Chamada à API
     Funcoes.Geral_API(data, true)
       .then((res) => {
+        console.log(res.texto);
         if (res && res.texto) {
           this.setState({ termo: res });
+          this.checkScrollRequirement();
         } else {
           console.error("Erro: Resposta inválida da API", res);
         }
@@ -250,17 +256,28 @@ export default class Header extends Component {
 
   handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
-    console.log(`Scroll Position: ${scrollTop}`);
-    console.log(`Total Scrollable Height: ${scrollHeight}`);
-    console.log(`Visible Height: ${clientHeight}`);
-  
-    // Verifica se chegou ao fim do scroll
+
+    // Se chegou ao fim do scroll, libera o botão
     if (scrollTop + clientHeight >= scrollHeight) {
-      this.setState({btnTermo: false})
+      this.setState({ btnTermo: false });
       console.log("Chegou ao fim do scroll!");
+    } else {
+      this.setState({ btnTermo: true });
+      console.log("Ainda há conteúdo para rolar.");
     }
   };
-  
+
+  checkScrollRequirement = () => {
+    if (this.scrollContainer) {
+      const { scrollHeight, clientHeight } = this.scrollContainer;
+
+      // Se não há scroll necessário, libera o botão
+      if (scrollHeight <= clientHeight) {
+        this.setState({ btnTermo: false });
+        console.log("Sem necessidade de scroll, botão ativado!");
+      }
+    }
+  };
 
   handleImageLoad = () => {
     // Força uma revalidação de layout ao carregar imagens
