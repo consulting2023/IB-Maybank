@@ -50,8 +50,8 @@ export default class Header extends Component {
     Funcoes.getUniqueToken().then((res) => {
       this.setState({ tokenApp: res });
     });
-    this.recuperarTermos();
-    this.novoTermo();
+    //6this.recuperarTermos();
+    //this.novoTermo();
 
     const pessoaObj = Funcoes.pessoa;
     this.setState({ pessoa: pessoaObj }, () => {
