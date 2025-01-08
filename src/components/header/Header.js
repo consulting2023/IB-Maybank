@@ -256,9 +256,11 @@ export default class Header extends Component {
 
   handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
-
-    // Se chegou ao fim do scroll, libera o botão
-    if (scrollTop + clientHeight >= scrollHeight) {
+  
+    // Adiciona uma margem para lidar com diferenças mínimas de valores
+    const isAtBottom = Math.ceil(scrollTop + clientHeight) >= Math.floor(scrollHeight);
+  
+    if (isAtBottom) {
       this.setState({ btnTermo: false });
       console.log("Chegou ao fim do scroll!");
     } else {
@@ -266,6 +268,7 @@ export default class Header extends Component {
       console.log("Ainda há conteúdo para rolar.");
     }
   };
+  
 
   checkScrollRequirement = () => {
     if (this.scrollContainer) {
