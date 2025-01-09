@@ -703,9 +703,16 @@ export default class Header extends Component {
                   }}
                   dangerouslySetInnerHTML={{ __html: this.state.termo.texto }}
                 ></div>
+                  <Button
+                style={{ width: "50%" }}
+                /* disabled={this.state.btnTermo} */
+                onClick={() => this.aceiteTermo()}
+              >
+                Aceito o Termo
+              </Button>
               </Container>
             </Modal.Body>
-            <Modal.Footer>
+           {/*  <Modal.Footer>
               <Button
                 style={{ width: "50%" }}
                 disabled={this.state.btnTermo}
@@ -713,7 +720,7 @@ export default class Header extends Component {
               >
                 Aceito o Termo
               </Button>
-            </Modal.Footer>
+            </Modal.Footer> */}
           </Modal>
         </div>
       );
