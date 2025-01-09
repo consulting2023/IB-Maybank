@@ -260,11 +260,7 @@ export default class Cambio extends Component {
               modalConfirmComprar: true,
               modalComprar: false,
             });
-          }
-          
-          
-          
-          else {
+          }else {
             alert("Erro interno");
           }
         });
