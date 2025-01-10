@@ -51,28 +51,6 @@
     }
   }
 
-  .loginPassWrapper {
-    .password {
-      .caixa_senha {
-        .senha {
-          border-color: $cor_5;
-        }
-
-        .numSenha.numSenha {
-          background-color: $cor_5;
-        }
-      }
-
-      .caixa_digitos {
-        .button_digitos:not(:hover):not(:focus) {
-          background: $cor_5;
-          color: $cor_6;
-        }
-      }
-    }
-  }
-
-  // BODY
 
   $titleFont: 22pt;
   // $windowHeight: 450px;
@@ -96,9 +74,7 @@
   }
 
   .cadastropj {
-    // height: $windowHeight;
-    // width: $windowHeight * 2;
-    max-width: 800px;
+    // max-width: 800px;
     border-radius: 10px;
 
     padding: $sideMargin;
@@ -112,31 +88,5 @@
       color: $cor_5;
     }
 
-    .botaologin {
-      height: 50px;
-      width: 65%;
-      border: 0;
-      border-radius: $borderRadius;
-      color: $cor_2;
-      font-size: 12pt;
-      font-weight: 800 !important;
-
-      background: linear-gradient(to left, $cor_1 50%, $cor_4 50%) right;
-      background-size: 200%;
-      transition: 0.3s ease-out;
-    }
-
-    .ttAgencia {
-      color: $cor_4;
-      font-size: 18px;
-      font-weight: 500;
-      line-height: 35px;
-    }
   }
-
-  // .loadingLogin {
-  //   display: block;
-  //   margin: auto;
-  //   // color: $cor_1 !important;
-  // }
 }

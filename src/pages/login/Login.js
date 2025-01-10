@@ -260,7 +260,6 @@ export default class Login extends Component {
       },
       method: "POST",
     };
-    console.log(data);
     setTimeout(() => {
       // Funcoes.Geral_API(data, true).then((res) => {
       Funcoes.Geral_API(data, true).then((res) => {
@@ -682,9 +681,9 @@ export default class Login extends Component {
                         className={
                           "btn-primary col-12 mx-1 text-center modalBtn"
                         }
-                        onClick={() => this.loginConta(conta)}
+                        onClick={() => (window.location.href = "/cadastropf")}
                       >
-                        <h5 className="py-2">Conta PF</h5>
+                        <h5 className="py-2">Pessoa Física</h5>
                       </Button>
                     ) : null}
 
@@ -696,7 +695,7 @@ export default class Login extends Component {
                         }
                         onClick={() => (window.location.href = "/cadastropj")}
                       >
-                        <h5 className="py-2">Conta PJ</h5>
+                        <h5 className="py-2">Pessoa Jurídica</h5>
                       </Button>
                     ) : null}
                   </ButtonGroup>
