@@ -308,7 +308,9 @@ export default class Transferencia_Lote extends Component {
 
               // Valida o campo id_banco
               const id_banco =
-                item.id_banco === "000" ? process.env.NOME_BANCO : "Banco não identificado";
+                item.id_banco === "000"
+                  ? process.env.NOME_BANCO
+                  : "Banco não identificado";
 
               return {
                 ...resto,
@@ -339,6 +341,35 @@ export default class Transferencia_Lote extends Component {
     }
   };
 
+ validarCSV = (arq) => {
+  const file = arq.target.files[0]; // Obtém o arquivo selecionado
+
+  if (!file) {
+    console.error("Nenhum arquivo selecionado.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("arquivo", file); // Adiciona o arquivo ao FormData
+
+  const data = {
+    url: "transferencia/ver-transferencia-lote",
+    data: formData, // O FormData é usado diretamente
+    method: "POST",
+  };
+
+  console.log("Dados prontos para envio:", data);
+
+  Funcoes.Geral_API(data, true)
+    .then((res) => {
+      console.log("Resposta do backend:", res);
+    })
+    .catch((err) => {
+      console.error("Erro ao enviar o arquivo:", err);
+    });
+};
+
+
   render() {
     return (
       <>
@@ -367,7 +398,10 @@ export default class Transferencia_Lote extends Component {
                   >
                     <input
                       type="file"
-                      onChange={(event) => this.receberCsv(event)}
+                      onChange={(event) => {
+                        this.receberCsv(event);
+                        this.validarCSV(event);
+                      }}
                     />
                     {i18n.t("transferencia.textEscolhaLote")}
                   </label>

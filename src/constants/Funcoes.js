@@ -45,7 +45,7 @@ export const encryptKey = async () => {
 };
 
 export async function Geral_API(dados, logado) {
-  //Checando versão do web
+  // Checando versão do web
   let version = localStorage.getItem("ver");
   if (version !== this_version) {
     localStorage.clear();
@@ -53,28 +53,26 @@ export async function Geral_API(dados, logado) {
     window.location.href = "/";
   }
   localStorage.setItem("ver", this_version);
-  //
 
   let num_aparelho = localStorage.getItem("num");
 
-  if (num_aparelho == "" || num_aparelho == null || num_aparelho == undefined) {
+  if (!num_aparelho) {
     const chave_nova = Math.random().toString();
     localStorage.setItem("num", chave_nova);
   }
 
   const num_cadastrado = localStorage.getItem("num");
   const key = await dateServer();
-  // const criptografar = CryptoJS.AES.encrypt(num_cadastrado, key).toString();
   const criptografar = await encryptKey();
 
+  // Define os headers iniciais
   var headers = {
     Accept: "application/json",
-    "Content-type": "application/json",
     token2f: criptografar,
   };
 
+  // Adiciona headers para requisições autenticadas
   const info = getToken();
-
   if (logado) {
     onAction();
     headers["token"] = info.token_api;
@@ -83,6 +81,12 @@ export async function Geral_API(dados, logado) {
   }
 
   const data = dados.data;
+
+  // Se o `data` for `FormData`, não define manualmente o `Content-Type`
+  const isFormData = data instanceof FormData;
+  if (!isFormData) {
+    headers["Content-type"] = "application/json";
+  }
 
   const url = dados.url.startsWith("/") ? dados.url.slice(1) : dados.url;
 
@@ -104,13 +108,12 @@ export async function Geral_API(dados, logado) {
 
   const [err, result] = await callbackWrapper(apiFunc);
   if (err) {
-    // console.log("Erro: ", err);
-    alert("Processamento Invalido, Contate seu Gerente!");
-    // this.logout();
+    alert("Processamento inválido, contate seu gerente!");
   } else {
     return result.data;
   }
 }
+
 
 function getToken() {
   let pessoa = {};
