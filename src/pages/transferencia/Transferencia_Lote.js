@@ -265,32 +265,55 @@ export default class Transferencia_Lote extends Component {
           header: true,
           skipEmptyLines: true,
           complete: (result) => {
-            console.log("Dados processados:", result.data);
+            console.log("Dados processados do CSV:", result.data);
 
-            // Simulação de erros para demonstração
-            const errosRetorno = [
-              { error: 1, code: 302, line: 1, message: "Faltando dados" },
-              {
-                error: 1,
-                code: 304,
-                line: 3,
-                message: "Número banco errado, tem que ser 000",
-              },
-              { error: 1, code: 301, line: 5, message: "Conta não encontrada" },
-            ];
+            const formData = new FormData();
+            formData.append("arquivo", arquivo);
 
-            const dadosComErros = result.data.map((item, index) => {
-              const erro = errosRetorno.find((err) => err.line === index + 1);
-              return {
-                ...item,
-                error: erro ? erro.message : null, // Adiciona mensagem de erro, se houver
-              };
-            });
+            // Enviar o CSV ao backend para validação
+            const data = {
+              url: "transferencia/ver-transferencia-lote",
+              data: formData,
+              method: "POST",
+            };
 
-            this.setState({
-              dadosCsv: dadosComErros,
-              nome_do_arquivo: arquivo.name,
-            });
+            Funcoes.Geral_API(data, true)
+              .then((res) => {
+                console.log("Erros retornados pelo backend:", res);
+
+                if (res == [] || res.length == 0) {
+                  alert(
+                    "Não foi Possivel validar o CSV, tente novamente mais tarde"
+                  );
+                  return;
+                }
+
+                // Mapear os erros para as linhas correspondentes
+                const dadosComErros = result.data.map((item, index) => {
+                  const errosNaLinha = res.filter(
+                    (erro) => erro.line === index + 1
+                  );
+                  return {
+                    ...item,
+                    error: errosNaLinha.length
+                      ? errosNaLinha
+                          .map((err) => `Código ${err.code}`)
+                          .join(", ")
+                      : null, // Adiciona os códigos de erro se houver
+                  };
+                });
+
+                this.setState({
+                  dadosCsv: dadosComErros,
+                  nome_do_arquivo: arquivo.name,
+                });
+              })
+              .catch((err) => {
+                console.error("Erro ao validar o arquivo no backend:", err);
+                this.setState({
+                  mensagemErro: "Erro ao validar o arquivo. Tente novamente.",
+                });
+              });
           },
           error: (err) => {
             console.error("Erro ao processar o CSV:", err);
@@ -356,34 +379,6 @@ export default class Transferencia_Lote extends Component {
         </Table>
       </div>
     );
-  };
-
-  validarCSV = (arq) => {
-    const file = arq.target.files[0]; // Obtém o arquivo selecionado
-
-    if (!file) {
-      console.error("Nenhum arquivo selecionado.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("arquivo", file); // Adiciona o arquivo ao FormData
-
-    const data = {
-      url: "transferencia/ver-transferencia-lote",
-      data: formData, // O FormData é usado diretamente
-      method: "POST",
-    };
-
-    console.log("Dados prontos para envio:", data);
-
-    Funcoes.Geral_API(data, true)
-      .then((res) => {
-        console.log("Resposta do backend:", res);
-      })
-      .catch((err) => {
-        console.error("Erro ao enviar o arquivo:", err);
-      });
   };
 
   render() {
