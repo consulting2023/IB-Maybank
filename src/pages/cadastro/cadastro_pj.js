@@ -84,6 +84,9 @@ export default class CadastroPj extends Component {
       rep_cidade: "",
       rep_estado: "",
 
+
+
+
       rep_celular: "",
       smsModal: false,
       sms: "",
@@ -134,7 +137,7 @@ export default class CadastroPj extends Component {
       rep_procuracao: "",
 
       liberarRepPolitico: false,
-      rep_politico: false,
+      rep_politico: '0',
 
       statusModal: false
     };
@@ -784,34 +787,68 @@ export default class CadastroPj extends Component {
     });
   }
 
-
   salvarEmpresaInfo = () => {
-    this.salvarDormente('telefone', this.state.celEmpresa.replace(/\s+/g, ""));
-    this.salvarDormente('email', this.state.emailEmpresa);
-    this.salvarDormente('razao_social', this.state.razaoSocial.trim());
-    this.salvarDormente('nome_fantasia', this.state.nomeFantasia.trim());
-    this.salvarDormente('inscricao_estadual', this.state.inscricaoEstadual.trim());
-    this.salvarDormente('faturamento', this.state.faturamento.trim());
-    this.salvarDormente('contribuicao', this.state.contribuicao);
-    this.salvarDormente('dataabertura', this.state.dataAbertura + ' 00:00:00');
-    this.salvarDormente('cnae', this.state.cnae);
+    // this.salvarDormente('telefone', this.state.celEmpresa.replace(/\s+/g, ""));
+    // this.salvarDormente('email', this.state.emailEmpresa);
+    // this.salvarDormente('razao_social', this.state.razaoSocial.trim());
+    // this.salvarDormente('nome_fantasia', this.state.nomeFantasia.trim());
+    // this.salvarDormente('inscricao_estadual', this.state.inscricaoEstadual.trim());
+    // this.salvarDormente('faturamento', this.state.faturamento.trim());
+    // this.salvarDormente('contribuicao', this.state.contribuicao);
+    // this.salvarDormente('dataabertura', this.state.dataAbertura + ' 00:00:00');
+    // this.salvarDormente('cnae', this.state.cnae);
     
-    this.salvarDormente('cep', this.state.cep);
-    this.salvarDormente('endereco', this.state.endereco);
-    this.salvarDormente('numero', this.state.numero);
-    this.salvarDormente('bairro', this.state.bairro);
-    this.salvarDormente('cidade', this.state.cidade);
-    this.salvarDormente('estado', this.state.estado);
-    if (this.state.complemento != '') {
-      this.salvarDormente('complemento', this.state.complemento);
-    }
+    // this.salvarDormente('cep', this.state.cep);
+    // this.salvarDormente('endereco', this.state.endereco);
+    // this.salvarDormente('numero', this.state.numero);
+    // this.salvarDormente('bairro', this.state.bairro);
+    // this.salvarDormente('cidade', this.state.cidade);
+    // this.salvarDormente('estado', this.state.estado);
+    // if (this.state.complemento != '') {
+    //   this.salvarDormente('complemento', this.state.complemento);
+    // }
 
-    this.salvarDormente('imagecomprovante', this.state.comprovante);
-    this.salvarDormente('imagecnpj', this.state.cartao);
-    this.salvarDormente('imagecontrato', this.state.contrato);
+    // this.salvarDormente('imagecomprovante', this.state.comprovante);
+    // this.salvarDormente('imagecnpj', this.state.cartao);
+    // this.salvarDormente('imagecontrato', this.state.contrato);
+
+
+    const dados = {
+      telefone: this.state.celEmpresa.replace(/\s+/g, ""),
+      email: this.state.emailEmpresa,
+      razao_social: this.state.razaoSocial.trim(),
+      nome_fantasia: this.state.nomeFantasia.trim(),
+      inscricao_estadual: this.state.inscricaoEstadual.trim(),
+      faturamento: this.state.faturamento.trim(),
+      contribuicao: this.state.contribuicao,
+      dataabertura: this.state.dataAbertura + ' 00:00:00',
+      cnae: this.state.cnae,
+
+      cep: this.state.cep,
+      endereco: this.state.endereco,
+      numero: this.state.numero,
+      bairro: this.state.bairro,
+      cidade: this.state.cidade,
+      estado: this.state.estado,
+      complemento: this.state.complemento,
+
+      imagecomprovante: this.state.comprovante,
+      imagecnpj: this.state.cartao,
+      imagecontrato: this.state.contrato,
+    };
+
+    Object.entries(dados).forEach(([key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        this.salvarDormente(key, value);
+      }
+    });
 
     this.setState({ cadastro: "2" });
     localStorage.setItem("save", "2");
+  }
+
+  salvarRepresentante = () => {
+
   }
 
   render() {
@@ -1587,12 +1624,12 @@ export default class CadastroPj extends Component {
                               style={{ height: 40, width: 300 }}
                               onChange={(e) => {
                                 // this.salvarDormente('representante_data_nascimento', e.target.value + ' 00:00:00')
-                                // this.setState({ 
-                                //   rep_data: e.target.value, 
+                                this.setState({ 
+                                  rep_data: e.target.value, 
                                 //   liberarRepGenero: true 
                                 // }, () => {
                                 //   this.handleFocus(this.inputRepGenero);
-                                // })
+                                })
                               }}
                             />
                           </FormGroup>
@@ -1611,13 +1648,13 @@ export default class CadastroPj extends Component {
                                 ]
                               }
                               placeholder="Selecione seu gênero"
-                              // value={this.state.rep_genero}
+                              value={this.state.rep_genero}
                               onChange={(selectedOption) => {
                                 // this.salvarDormente('representante_sexo', selectedOption.value);
-                                // this.setState({
-                                //   // rep_genero: selectedOption,
+                                this.setState({
+                                  rep_genero: selectedOption,
                                 //   cadastro: "6"
-                                // });
+                                });
                                 // localStorage.setItem("save", "6");
                               }}
 
@@ -1648,12 +1685,13 @@ export default class CadastroPj extends Component {
                                 ]
                               }
                               placeholder="Selecione seu estado civil"
-                              value={this.state.rep_genero}
+                              value={this.state.rep_estadocivil}
                               onChange={(selectedOption) => {
                                 // this.salvarDormente('representante_estado_civil', selectedOption.label);
-                                // this.setState({
+                                this.setState({
+                                  rep_estadocivil: selectedOption
                                 //   liberarRepTipodoc: true
-                                // });
+                                });
                               }}
                               styles={{
                                 control: (base) => ({
@@ -1845,12 +1883,19 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            {/* <label>O Representante é uma pessoa políticamente exposta?</label> */}
+                            {/* <label>O Representante é uma pessoa politicamente exposta?</label> */}
                             <FormCheck
-                              label="O Representante é uma pessoa políticamente exposta?"
+                              id="rep_politico"
+                              label="O Representante é uma pessoa politicamente exposta?"
                               type="switch"
-                              checked={this.state.rep_politico}
-                              onChange={ (event) => this.setState({ rep_politico: event.target.checked }) }
+                              checked={this.state.rep_politico == '1'}
+                              onChange={ (event) => {
+                                if (event.target.checked) {
+                                  this.setState({ rep_politico: '1' });
+                                } else {
+                                  this.setState({ rep_politico: '0' });
+                                }
+                              }}
                             />
                             
                           </FormGroup>
@@ -1865,6 +1910,7 @@ export default class CadastroPj extends Component {
                     className="float-right mt-3"
                     onClick={ () => {
                       // this.salvarEmpresaInfo();
+                      console.log(this.state.rep_politico);
                     }}
                   >
                     Continuar
@@ -2683,6 +2729,7 @@ export default class CadastroPj extends Component {
           <Modal
             size="lg"
             show={this.state.cepModal}
+            // backdrop="static"
             onHide={() => this.setState({ cepModal: false, endereco: "", numero: "", complemento: "", bairro: "", cidade: "", estado: "" })}
           >
             <Modal.Header closeButton>
@@ -2880,105 +2927,110 @@ export default class CadastroPj extends Component {
           <Modal
             size="lg"
             show={this.state.rep_cepModal}
-            onHide={() => this.setState({ rep_cepModal: false })}
+            // backdrop="static"
+            onHide={() => this.setState({ rep_cepModal: false, rep_endereco: "", rep_numero: "", rep_complemento: "", rep_bairro: "", rep_cidade: "", rep_estado: "" })}
           >
             <Modal.Header closeButton>
               <Modal.Title>Confirme se as informações de endereço estão corretas. Você pode editá-las se precisar.</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Container>
-                <span className="ttAgencia">
-                  CEP
-                </span>
-                <input
-                  value={this.state.rep_cep}
-                  style={{ height: 40, width: "100%" }}
-                  disabled
-                />
+                <Row>
+                  <Col>
+                    <FormGroup>
+                      <label>CEP</label>
+                      <FormControl
+                        value={this.state.rep_cep}
+                        style={{ height: 40, width: 300 }}
+                        disabled                     
+                      />
+                    </FormGroup>
+                  </Col>
 
-                <br />
-                <br />
-                <span className="ttAgencia">
-                  Endereço
-                </span>
-                <input
-                  value={this.state.rep_endereco}
-                  style={{ height: 40, width: "100%" }}
-                  onChange={(e) => {
-                    const rep_endereco = e.target.value.trim();
-                    this.setState({ rep_endereco });
-                  }}
-                />
+                  <Col>
+                    <FormGroup>
+                      <label>Endereço</label>
+                      <FormControl 
+                        value={this.state.rep_endereco}
+                        style={{ height: 40, width: 300 }}
+                        onChange={(e) => {
+                          const rep_endereco = e.target.value.trim();
+                          this.setState({ rep_endereco });
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
 
-                <br />
-                <br />
-                <span className="ttAgencia">
-                  Número
-                </span>
-                <input
-                  value={this.state.rep_numero}
-                  style={{ height: 40, width: "100%" }}
-                  onChange={(e) => {
-                    const rep_numero = e.target.value.trim();
-                    this.setState({ rep_numero });
-                  }}
-                />
+                  <Col>
+                    <FormGroup>
+                      <label>Número</label>
+                      <FormControl
+                        value={this.state.rep_numero}
+                        style={{ height: 40, width: 300 }}
+                        onChange={(e) => {
+                          const rep_numero = e.target.value.trim();
+                          this.setState({ rep_numero });
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
 
-                <br />
-                <br />
-                <span className="ttAgencia">
-                  Complemento
-                </span>
-                <input
-                  value={this.state.rep_complemento}
-                  style={{ height: 40, width: "100%" }}
-                  onChange={(e) => {
-                    const rep_complemento = e.target.value.trim();
-                    this.setState({ rep_complemento });
-                  }}
-                />
+                  <Col>
+                    <FormGroup>
+                      <label>Complemento</label>
+                      <FormControl 
+                        value={this.state.rep_complemento}
+                        style={{ height: 40, width: 300 }}
+                        onChange={(e) => {
+                          const rep_complemento = e.target.value.trim();
+                          this.setState({ rep_complemento });
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
 
-                <br />
-                <br />
-                <span className="ttAgencia">
-                  Bairro
-                </span>
-                <input
-                  value={this.state.rep_bairro}
-                  style={{ height: 40, width: "100%" }}
-                  onChange={(e) => {
-                    const rep_bairro = e.target.value.trim();
-                    this.setState({ rep_bairro });
-                  }}
-                />
+                  <Col>
+                    <FormGroup>
+                      <label>Bairro</label>
+                      <FormControl
+                        value={this.state.rep_bairro}
+                        style={{ height: 40, width: 300 }}
+                        onChange={(e) => {
+                          const rep_bairro = e.target.value.trim();
+                          this.setState({ rep_bairro });
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
 
-                <br />
-                <br />
-                <span className="ttAgencia">
-                  Cidade
-                </span>
-                <input
-                  value={this.state.rep_cidade}
-                  style={{ height: 40, width: "100%" }}
-                  onChange={(e) => {
-                    const rep_cidade = e.target.value.trim();
-                    this.setState({ rep_cidade });
-                  }}
-                />
+                  <Col>
+                    <FormGroup>
+                      <label>Cidade</label>
+                      <FormControl
+                        value={this.state.rep_cidade}
+                        style={{ height: 40, width: 300 }}
+                        onChange={(e) => {
+                          const rep_cidade = e.target.value.trim();
+                          this.setState({ rep_cidade });
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
 
-                <br />
-                <br />
-                <span className="ttAgencia">
-                  Estado
-                </span>
-                <input
-                  value={this.state.rep_estado}
-                  style={{ height: 40, width: "100%" }}
-                  onChange={(e) => {
-                    const rep_estado = e.target.value.trim();
-                    this.setState({ rep_estado });
-                  }}
-                />
+                  <Col>
+                    <FormGroup>
+                      <label>Estado</label>
+                      <FormControl
+                        value={this.state.rep_estado}
+                        style={{ height: 40, width: 300 }}
+                        onChange={(e) => {
+                          const rep_estado = e.target.value.trim();
+                          this.setState({ rep_estado });
+                        }}
+                      />
+                    </FormGroup>
+                  </Col>
+                </Row>
               </Container>
             </Modal.Body>
             <Modal.Footer>
@@ -2986,13 +3038,13 @@ export default class CadastroPj extends Component {
                 variant="primary"
                 onClick={() => {
                   if (this.state.rep_numero == '' || this.state.rep_endereco == '' || this.state.rep_numero == '' || this.state.rep_bairro == '' || this.state.rep_cidade == '' || this.state.rep_estado == '') {
-                    alert('Por favor, complete o endereço de sua empresa.');
+                    alert('Por favor, complete o endereço do representante.');
                   } else {
-                    this.salvarRepEndereco();
+                    // this.salvarRepEndereco();
                     this.setState({
                       rep_cepModal: false,
-                      liberarRepEnderecoCompleto: true,
-                      liberarRepProcuracao: true,
+                      // liberarRepEnderecoCompleto: true,
+                      // liberarRepProcuracao: true,
                     });
                   }
                 }}
@@ -3005,6 +3057,7 @@ export default class CadastroPj extends Component {
           <Modal
             size="md"
             show={this.state.statusModal}
+            backdrop="static"
           >
             <Modal.Body>
               <Container>
