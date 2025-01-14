@@ -23,6 +23,7 @@ import {
   isBrowser,
   deviceType,
 } from "react-device-detect";
+import { UAParser } from 'ua-parser-js';
 import Produtos from "../../constants/Produtos";
 import i18n from "../../tradutor/tradutor"; import LangButton from "../../components/langButton/LangButton";
 import Select from "react-select";
@@ -165,7 +166,12 @@ export default class CadastroPj extends Component {
       liberarRepPolitico: false,
       rep_politico: false,
 
-      statusModal: false
+      statusModal: false,
+
+      os: "",
+      browser: "",
+      cpu: "",
+      identificador: ""
     };
 
     this.inputTelefone = React.createRef();
@@ -189,6 +195,19 @@ export default class CadastroPj extends Component {
     this.agCadastro();
     this.buscarTermoUso();
     this.checkStatus();
+
+    UAParser().withClientHints().then(result => {
+      console.log(result);
+      this.setState({ 
+        os: result.os.name + ' ' + result.os.version,
+        browser: result.browser.name + ' ' + result.browser.major,
+        cpu: result.cpu.architecture,
+      });
+    });
+
+    Funcoes.getUniqueToken().then((res) => {
+      this.setState({ identificador: res });
+    });
   };
 
   checkStatus = () => {
@@ -763,7 +782,12 @@ export default class CadastroPj extends Component {
         "documento": this.state.cnpj,
         "campo": campo,
         "valor": valor,
-        "representante": 1
+        "representante": 1,
+
+        so: this.state.os,
+        brand: this.state.browser,
+        model: this.state.cpu,
+        identificador: this.state.identificador
       },
       method: "POST",
     };
@@ -785,7 +809,12 @@ export default class CadastroPj extends Component {
       data: {
         "documento": this.state.cnpj,
         "representante": 1,
-        "nome_banco": process.env.NOME_BANCO
+        "nome_banco": process.env.NOME_BANCO,
+
+        so: this.state.os,
+        brand: this.state.browser,
+        model: this.state.cpu,
+        identificador: this.state.identificador
       },
       method: "POST",
     };
