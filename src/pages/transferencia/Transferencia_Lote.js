@@ -270,7 +270,6 @@ export default class Transferencia_Lote extends Component {
             const formData = new FormData();
             formData.append("arquivo", arquivo);
 
-            // Enviar o CSV ao backend para validação
             const data = {
               url: "transferencia/ver-transferencia-lote",
               data: formData,
@@ -279,34 +278,37 @@ export default class Transferencia_Lote extends Component {
 
             Funcoes.Geral_API(data, true)
               .then((res) => {
-                console.log("Erros retornados pelo backend:", res);
+                console.log("Resposta do backend:", res);
 
-                if (res == [] || res.length == 0) {
+                if (res.error === 0 && res.code === 1) {
+                  alert("CSV validado com sucesso! Nenhum erro encontrado.");
+
+                  this.setState({
+                    dadosCsv: result.data,
+                    nome_do_arquivo: arquivo.name,
+                  });
+                } else if (!res || res.length === 0) {
                   alert(
-                    "Não foi Possivel validar o CSV, tente novamente mais tarde"
+                    "Não foi possível validar o CSV. Tente novamente mais tarde."
                   );
-                  return;
+                } else {
+                  const dadosComErros = result.data.map((item, index) => {
+                    const errosNaLinha = res.filter(
+                      (erro) => erro.line - 1 === index + 1
+                    );
+                    return {
+                      ...item,
+                      error: errosNaLinha.length
+                        ? errosNaLinha.map((err) => err.code) // Mantém os códigos como números
+                        : null,
+                    };
+                  });
+
+                  this.setState({
+                    dadosCsv: dadosComErros,
+                    nome_do_arquivo: arquivo.name,
+                  });
                 }
-
-                // Mapear os erros para as linhas correspondentes
-                const dadosComErros = result.data.map((item, index) => {
-                  const errosNaLinha = res.filter(
-                    (erro) => erro.line === index + 1
-                  );
-                  return {
-                    ...item,
-                    error: errosNaLinha.length
-                      ? errosNaLinha
-                          .map((err) => `Código ${err.code}`)
-                          .join(", ")
-                      : null, // Adiciona os códigos de erro se houver
-                  };
-                });
-
-                this.setState({
-                  dadosCsv: dadosComErros,
-                  nome_do_arquivo: arquivo.name,
-                });
               })
               .catch((err) => {
                 console.error("Erro ao validar o arquivo no backend:", err);
@@ -348,11 +350,11 @@ export default class Transferencia_Lote extends Component {
           <thead>
             <tr>
               {Object.keys(dadosCsv[0])
-                .filter((key) => key !== "error") // Exclui a propriedade "error" da tabela
+                .filter((key) => key !== "error")
                 .map((key) => (
                   <th key={key}>{key}</th>
                 ))}
-              <th>Erro</th> {/* Coluna adicional para exibir erros */}
+              <th>Erro</th>
             </tr>
           </thead>
           <tbody>
@@ -366,12 +368,37 @@ export default class Transferencia_Lote extends Component {
                 }}
               >
                 {Object.entries(linha)
-                  .filter(([key]) => key !== "error") // Exclui a propriedade "error" da exibição de valores
+                  .filter(([key]) => key !== "error")
                   .map(([_, valor], i) => (
                     <td key={i}>{valor}</td>
                   ))}
                 <td style={{ color: linha.error ? "red" : "inherit" }}>
-                  {linha.error || "Sem Erros"}
+                  {linha.error
+                    ? Array.isArray(linha.error)
+                      ? linha.error
+                          .map((err) => {
+                            switch (err) {
+                              case 304:
+                                return i18n.t("transferencia.loteCod304");
+                              case 301:
+                                return i18n.t("transferencia.loteCod301");
+                              case 302:
+                                return i18n.t("transferencia.loteCod302");
+                              case 303:
+                                return i18n.t("transferencia.loteCod303");
+                              case 305:
+                                return i18n.t("transferencia.loteCod305");
+                              case 306:
+                                return i18n.t("transferencia.loteCod306");
+                              case 307:
+                                return i18n.t("transferencia.loteCod307");
+                              default:
+                                return i18n.t("transferencia.erroDesconhecido");
+                            }
+                          })
+                          .join(", ")
+                      : i18n.t("transferencia.erroDesconhecido")
+                    : i18n.t("transferencia.semErro")}
                 </td>
               </tr>
             ))}
@@ -411,7 +438,6 @@ export default class Transferencia_Lote extends Component {
                       type="file"
                       onChange={(event) => {
                         this.receberCsv(event);
-                        this.validarCSV(event);
                       }}
                     />
                     {i18n.t("transferencia.textEscolhaLote")}

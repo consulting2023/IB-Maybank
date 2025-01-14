@@ -462,6 +462,18 @@ export default {
     contaPoupanca: "Conta poupança",
     digiteNumeroConta: "Digite o número da conta",
     transferencia: "Transferência",
+    loteCod304: "O número do banco está incorreto. O valor esperado é '000'.",
+    loteCod301: "A conta informada não foi encontrada. Por favor, verifique.",
+    loteCod302:
+      "Há dados faltando no registro. Confira os campos obrigatórios.",
+    loteCod303: "O valor informado não pode ser zero. Insira um valor válido.",
+    loteCod305:
+      "A agência informada não corresponde à conta fornecida. Verifique os dados.",
+    loteCod306:
+      "O documento informado não está relacionado à conta fornecida. Revise os dados.",
+    loteCod307:
+      "O CSV contém campos ausentes ou fora de ordem. Por favor, ajuste o arquivo.",
+    semErro: "Sem Erros",
   },
 
   escolha_cartao: {
