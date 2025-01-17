@@ -721,22 +721,24 @@ export default class CadastroPj extends Component {
       representante_cpf: this.state.rep_cpf,
       representante_nomemae: this.state.rep_nomeMae.trim(),
       representante_data_nascimento: this.state.rep_data + ' 00:00:00',
-      representante_sexo: this.state.rep_genero,
-      representante_estado_civil: this.state.rep_estadocivil,
+      representante_sexo: this.state.rep_genero.value,
+      representante_estado_civil: this.state.rep_estadocivil.label,
 
-      cep: this.state.rep_cep,
-      endereco: this.state.rep_endereco,
-      numero: this.state.rep_numero,
-      bairro: this.state.rep_bairro,
-      cidade: this.state.rep_cidade,
-      estado: this.state.rep_estado,
-      complemento: this.state.rep_complemento,
+      representante_cep: this.state.rep_cep,
+      representante_endereco: this.state.rep_endereco,
+      representante_numero: this.state.rep_numero,
+      representante_bairro: this.state.rep_bairro,
+      representante_cidade: this.state.rep_cidade,
+      representante_estado: this.state.rep_estado,
+      representante_complemento: this.state.rep_complemento,
 
       representante_imageself: this.state.rep_selfie,
       representante_imagecomprovante_endereco: this.state.rep_comprovante,
       representante_procuracao: this.state.rep_procuracao,
       politico: this.state.rep_politico
     };
+
+    console.log(dados);
 
     Object.entries(dados).forEach(([key, value]) => {
       if (value !== '' && value !== null && value !== undefined) {
@@ -746,6 +748,14 @@ export default class CadastroPj extends Component {
 
     this.setState({ cadastro: "3" });
     localStorage.setItem("save", "3");
+  }
+
+  salvarEmailPhone = () => {
+    const { rep_email, rep_celular }  = this.state;
+    if (rep_email.length > 0 && rep_celular.length > 0) {
+      this.salvarDormente('representante_email', rep_email);
+      this.salvarDormente('representante_celular', rep_celular);
+    }
   }
 
   salvarSenha = () => {
@@ -821,7 +831,7 @@ export default class CadastroPj extends Component {
       if (!res) {
         alert("Falha ao cadastrar informações, tente novamente.");
       } else {
-        alert("Cadastro realizado com sucesso, em ate 3 dias sua conta sera aprovada");
+        alert("Cadastro realizado com sucesso, em até 3 dias sua conta sera aprovada");
         window.location.href = "/";
       }
     });
@@ -1918,6 +1928,7 @@ export default class CadastroPj extends Component {
                     }
                     onClick={ () => {
                       if (this.state.email_validado && this.state.celular_validado) {
+                        this.salvarEmailPhone();
                         this.setState({ cadastro: "4" });
                         localStorage.setItem("save", "4");
                       }
