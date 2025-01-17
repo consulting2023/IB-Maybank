@@ -441,6 +441,14 @@ export default {
     contaPoupanca: "付款储蓄账户",
     digiteNumeroConta: "输入账号",
     transferencia: "转账",
+    loteCod304: "银行号码不正确。预期值是 '000'。",
+    loteCod301: "未找到提供的账户。请检查。",
+    loteCod302: "记录中缺少数据。请检查必填字段。",
+    loteCod303: "提供的金额不能为零。请输入有效的金额。",
+    loteCod305: "提供的银行分行与提供的账户不匹配。请检查数据。",
+    loteCod306: "提供的文件与提供的账户不匹配。请检查数据。",
+    loteCod307: "CSV文件缺少字段或字段顺序错误。请调整文件。",
+    semErro: "没有错误",
   },
 
   escolha_cartao: {

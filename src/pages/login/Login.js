@@ -23,6 +23,7 @@ import {
   isBrowser,
   deviceType,
 } from "react-device-detect";
+import { UAParser } from 'ua-parser-js';
 import Produtos from "../../constants/Produtos";
 import i18n from "../../tradutor/tradutor";
 import Password from "../../components/password/Password";
@@ -53,11 +54,32 @@ export default class Login extends Component {
       loading: false,
       lang: "",
       cadastro: false,
+
+      os: "",
+      browser: "",
+      cpu: "",
+      identificador: ""
     };
   }
 
   componentDidMount() {
     Funcoes.logout();
+
+    UAParser().withClientHints().then(result => {
+      console.log(result);
+      this.setState({ 
+        os: result.os.name + ' ' + result.os.version,
+        browser: result.browser.name + ' ' + result.browser.major,
+        cpu: result.cpu.architecture,
+      });
+    });
+
+    Funcoes.getUniqueToken().then((res) => {
+      this.setState({ identificador: res });
+    });
+
+    const token = Funcoes.getUniqueToken();
+    console.log("Token: " + token);
   }
 
   componentWillUnmount() {
@@ -108,6 +130,11 @@ export default class Login extends Component {
           sub_banco_id: "",
           token_aparelho: "",
           nome_aparelho: "",
+
+          so: this.state.os,
+          brand: this.state.browser,
+          model: this.state.cpu,
+          identificador: this.state.identificador
         },
         method: "POST",
       };
@@ -192,9 +219,13 @@ export default class Login extends Component {
       cidade: dados.endereco.cidade,
       estado: dados.endereco.estado,
       emite_boleto: dados.conta.emite_boleto,
+      termos: dados.termos,
     };
 
+    localStorage.setItem("termos", JSON.stringify(dados.termos));
+
     if (dados.pessoa_fisica.nome) {
+      pessoa.termos = dados.termos;
       pessoa.celular = dados.pessoa_fisica.celular;
       pessoa.data_nascimento = dados.pessoa_fisica.datanascimentos;
       pessoa.documento_id = dados.pessoa_fisica.documento_id;
@@ -211,6 +242,7 @@ export default class Login extends Component {
       pessoa.usuario_id = dados.pessoa_fisica.usuarioid;
       pessoa.pf_pj = "pf";
     } else if (dados.representante.nome) {
+      pessoa.termos = dados.termos;
       pessoa.celular = dados.representante.celular;
       pessoa.data_nascimento = dados.representante.data_nascimento;
       pessoa.documento_id = dados.representante.documento_id;
@@ -488,7 +520,6 @@ export default class Login extends Component {
                         </Button>
                       )}
                     </Col>
-                    
                   </Row>
 
                   {/* {Produtos.siso ? (<Row> */}

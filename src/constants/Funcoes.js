@@ -3,6 +3,7 @@ import CryptoJS from "crypto-js";
 import { decode, encode } from "base-64";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { v4 as uuidv4 } from "uuid";
 
 const tokenKey = "super_chave_secreta";
 const this_version = "1.0";
@@ -44,7 +45,7 @@ export const encryptKey = async () => {
 };
 
 export async function Geral_API(dados, logado) {
-  //Checando versão do web
+  // Checando versão do web
   let version = localStorage.getItem("ver");
   if (version !== this_version) {
     localStorage.clear();
@@ -52,28 +53,27 @@ export async function Geral_API(dados, logado) {
     window.location.href = "/";
   }
   localStorage.setItem("ver", this_version);
-  //
 
   let num_aparelho = localStorage.getItem("num");
 
-  if (num_aparelho == "" || num_aparelho == null || num_aparelho == undefined) {
+  if (!num_aparelho) {
     const chave_nova = Math.random().toString();
     localStorage.setItem("num", chave_nova);
   }
 
   const num_cadastrado = localStorage.getItem("num");
   const key = await dateServer();
-  // const criptografar = CryptoJS.AES.encrypt(num_cadastrado, key).toString();
   const criptografar = await encryptKey();
 
+  // Define os headers iniciais
   var headers = {
     Accept: "application/json",
-    "Content-type": "application/json",
     token2f: criptografar,
+    banco: process.env.NOME_BANCO
   };
 
+  // Adiciona headers para requisições autenticadas
   const info = getToken();
-
   if (logado) {
     onAction();
     headers["token"] = info.token_api;
@@ -82,6 +82,12 @@ export async function Geral_API(dados, logado) {
   }
 
   const data = dados.data;
+
+  // Se o `data` for `FormData`, não define manualmente o `Content-Type`
+  const isFormData = data instanceof FormData;
+  if (!isFormData) {
+    headers["Content-type"] = "application/json";
+  }
 
   const url = dados.url.startsWith("/") ? dados.url.slice(1) : dados.url;
 
@@ -103,13 +109,12 @@ export async function Geral_API(dados, logado) {
 
   const [err, result] = await callbackWrapper(apiFunc);
   if (err) {
-    // console.log("Erro: ", err);
-    alert("Processamento Invalido, Contate seu Gerente!");
-    // this.logout();
+    alert("Processamento inválido, contate seu gerente!");
   } else {
     return result.data;
   }
 }
+
 
 function getToken() {
   let pessoa = {};
@@ -514,6 +519,33 @@ export async function comprovante_ver(id) {
     console.error("Erro na requisição ou ao gerar o PDF", error);
     setLoading(false);
     setShowModalComprovante({ visible: false });
+  }
+}
+
+export async function getUniqueToken() {
+  const localStorageKey = "uniqueInstallationToken";
+
+  // Verifica se o token já existe no localStorage
+  let token = localStorage.getItem(localStorageKey);
+
+  if (!token) {
+    // Gera um novo token se não existir
+    token = uuidv4();
+    localStorage.setItem(localStorageKey, token);
+  }
+
+  return token;
+}
+
+export async function getUserIp() {
+  try {
+    // Faz a chamada para a API ipify
+    const response = await fetch("https://api.ipify.org?format=json");
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error("Erro ao obter o IP do usuário:", error);
+    return;
   }
 }
 

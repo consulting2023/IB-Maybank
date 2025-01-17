@@ -315,6 +315,7 @@ export default class TransferenciaOutros extends Component {
         cobrar: 1,
         senha: this.state.password,
         token: this.state.OTP,
+        usuario_id: this.state.pessoa.usuario_id
       }),
       method: "POST",
     };

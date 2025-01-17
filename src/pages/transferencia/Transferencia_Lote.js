@@ -30,6 +30,7 @@ export default class Transferencia_Lote extends Component {
       valida_token_ok: false,
       dadosCsv: [], // Armazena os dados processados do CSV
       password: ["", "", "", "", "", ""],
+      mensagemErro: "",
     };
   }
 
@@ -252,76 +253,69 @@ export default class Transferencia_Lote extends Component {
   };
 
   verRetorno = (event) => {
-    const arquivo = event.target.files[0]; // Obtém o arquivo selecionado
+    const arquivo = event.target.files[0];
+
     if (arquivo && arquivo.type === "text/csv") {
       const reader = new FileReader();
 
       reader.onload = (e) => {
-        const conteudo = e.target.result; // Lê o conteúdo do arquivo como texto
-        // Usa o PapaParse para fazer o parsing do CSV
+        const conteudo = e.target.result;
+
         Papa.parse(conteudo, {
-          header: true, // Define que o CSV tem cabeçalhos
-          skipEmptyLines: true, // Ignora linhas vazias
+          header: true,
+          skipEmptyLines: true,
           complete: (result) => {
-            console.log("Dados processados:", result.data);
+            console.log("Dados processados do CSV:", result.data);
 
-            // Mapeia as finalidades para suas descrições
-            const finalidades = {
-              1: "Crédito em Conta",
-              2: "Pagamento de Aluguel/Condomínio",
-              3: "Pagamento de Duplicata/Títulos",
-              4: "Pagamento de Dividendos",
-              5: "Pagamento de Mensalidade Escolar",
-              6: "Pagamento de Salários",
-              7: "Pagamento de Fornecedores/Honorários",
-              8: "Operações de Câmbios/Fundos/Bolsa de Valores",
-              9: "Repasse de Arrecadação/Pagamento de Tributos",
-              10: "Transferência Internacional em Real",
-              11: "DOC para Poupança",
-              12: "DOC para Depósito Judicial",
-              13: "Outros",
-              16: "Pagamento de bolsa auxílio",
-              17: "Remuneração à cooperado",
+            const formData = new FormData();
+            formData.append("arquivo", arquivo);
+
+            const data = {
+              url: "transferencia/ver-transferencia-lote",
+              data: formData,
+              method: "POST",
             };
 
-            // Função para formatar os valores como moeda
-            const formatarMoeda = (valor) => {
-              return new Intl.NumberFormat("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              }).format(valor);
-            };
+            Funcoes.Geral_API(data, true)
+              .then((res) => {
+                console.log("Resposta do backend:", res);
 
-            // Manipula os dados para remover o digitoAgencia, validar a finalidade e formatar valores
-            const dadosProcessados = result.data.map((item) => {
-              // Remove o campo digitoAgencia
-              const { digitoAgencia, ...resto } = item;
+                if (res.error === 0 && res.code === 1) {
+                  alert("CSV validado com sucesso! Nenhum erro encontrado.");
 
-              // Valida e substitui a finalidade pelo nome correspondente
-              const finalidade =
-                finalidades[item.finalidade] || "Finalidade desconhecida";
+                  this.setState({
+                    dadosCsv: result.data,
+                    nome_do_arquivo: arquivo.name,
+                  });
+                } else if (!res || res.length === 0) {
+                  alert(
+                    "Não foi possível validar o CSV. Tente novamente mais tarde."
+                  );
+                } else {
+                  const dadosComErros = result.data.map((item, index) => {
+                    const errosNaLinha = res.filter(
+                      (erro) => erro.line - 1 === index + 1
+                    );
+                    return {
+                      ...item,
+                      error: errosNaLinha.length
+                        ? errosNaLinha.map((err) => err.code) // Mantém os códigos como números
+                        : null,
+                    };
+                  });
 
-              // Formata o valor como moeda (exemplo de campo 'valor', substitua conforme necessário)
-              const valorFormatado = item.valor
-                ? formatarMoeda(parseFloat(item.valor))
-                : item.valor;
-
-              // Valida o campo id_banco
-              const id_banco =
-                item.id_banco === "000" ? process.env.NOME_BANCO : "Banco não identificado";
-
-              return {
-                ...resto,
-                finalidade, // Substitui o valor de finalidade pela descrição
-                valor: valorFormatado, // Substitui o valor pelo formato de moeda
-                id_banco, // Define o nome correspondente ao id_banco
-              };
-            });
-
-            this.setState({
-              dadosCsv: dadosProcessados, // Atualiza o estado com os dados processados
-              nome_do_arquivo: arquivo.name, // Atualiza o nome do arquivo
-            });
+                  this.setState({
+                    dadosCsv: dadosComErros,
+                    nome_do_arquivo: arquivo.name,
+                  });
+                }
+              })
+              .catch((err) => {
+                console.error("Erro ao validar o arquivo no backend:", err);
+                this.setState({
+                  mensagemErro: "Erro ao validar o arquivo. Tente novamente.",
+                });
+              });
           },
           error: (err) => {
             console.error("Erro ao processar o CSV:", err);
@@ -333,10 +327,85 @@ export default class Transferencia_Lote extends Component {
         console.error("Erro ao ler o arquivo:", err);
       };
 
-      reader.readAsText(arquivo); // Lê o arquivo como texto
+      reader.readAsText(arquivo);
     } else {
-      alert("Por favor, selecione um arquivo CSV válido.");
+      this.setState({
+        dadosCsv: [],
+        mensagemErro: "Por favor, selecione um arquivo CSV válido.",
+      });
     }
+  };
+
+  renderTabelaComErros = () => {
+    const { dadosCsv } = this.state;
+
+    if (dadosCsv.length === 0) {
+      return null;
+    }
+
+    return (
+      <div>
+        <h4>Dados Processados:</h4>
+        <Table striped bordered id="tabela-extrato">
+          <thead>
+            <tr>
+              {Object.keys(dadosCsv[0])
+                .filter((key) => key !== "error")
+                .map((key) => (
+                  <th key={key}>{key}</th>
+                ))}
+              <th>Erro</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dadosCsv.map((linha, index) => (
+              <tr
+                key={index}
+                style={{
+                  backgroundColor: linha.error
+                    ? "rgba(255, 0, 0, 0.2)"
+                    : "inherit",
+                }}
+              >
+                {Object.entries(linha)
+                  .filter(([key]) => key !== "error")
+                  .map(([_, valor], i) => (
+                    <td key={i}>{valor}</td>
+                  ))}
+                <td style={{ color: linha.error ? "red" : "inherit" }}>
+                  {linha.error
+                    ? Array.isArray(linha.error)
+                      ? linha.error
+                          .map((err) => {
+                            switch (err) {
+                              case 304:
+                                return i18n.t("transferencia.loteCod304");
+                              case 301:
+                                return i18n.t("transferencia.loteCod301");
+                              case 302:
+                                return i18n.t("transferencia.loteCod302");
+                              case 303:
+                                return i18n.t("transferencia.loteCod303");
+                              case 305:
+                                return i18n.t("transferencia.loteCod305");
+                              case 306:
+                                return i18n.t("transferencia.loteCod306");
+                              case 307:
+                                return i18n.t("transferencia.loteCod307");
+                              default:
+                                return i18n.t("transferencia.erroDesconhecido");
+                            }
+                          })
+                          .join(", ")
+                      : i18n.t("transferencia.erroDesconhecido")
+                    : i18n.t("transferencia.semErro")}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
+    );
   };
 
   render() {
@@ -367,7 +436,9 @@ export default class Transferencia_Lote extends Component {
                   >
                     <input
                       type="file"
-                      onChange={(event) => this.receberCsv(event)}
+                      onChange={(event) => {
+                        this.receberCsv(event);
+                      }}
                     />
                     {i18n.t("transferencia.textEscolhaLote")}
                   </label>
@@ -408,29 +479,11 @@ export default class Transferencia_Lote extends Component {
         <br />
 
         <Container>
-          {this.state.dadosCsv.length > 0 && (
-            <div>
-              <h4>Dados Processados:</h4>
-              <Table striped bordered id="tabela-extrato">
-                <thead>
-                  <tr>
-                    {Object.keys(this.state.dadosCsv[0]).map((key) => (
-                      <th key={key}>{key}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.dadosCsv.map((linha, index) => (
-                    <tr key={index}>
-                      {Object.values(linha).map((valor, i) => (
-                        <td key={i}>{valor}</td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
+          {" "}
+          {this.state.mensagemErro && (
+            <p style={{ color: "red" }}>{this.state.mensagemErro}</p>
           )}
+          {this.renderTabelaComErros()}
         </Container>
 
         <Modal
