@@ -48,6 +48,8 @@ export default {
     alertErroAlterarSenha: "修改密码时出错，请稍后再试",
     tituloContaNãoAprovada: "帐户未批准",
     contaNãoAprovada: "帐户未批准，请联系经理了解更多信息",
+    cadastrar: "注册",
+    selecionarConta: "请选择要注册的账户类型",
   },
 
   home: {

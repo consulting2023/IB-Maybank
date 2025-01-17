@@ -23,7 +23,7 @@ import {
   isBrowser,
   deviceType,
 } from "react-device-detect";
-import { UAParser } from 'ua-parser-js';
+import { UAParser } from "ua-parser-js";
 import Produtos from "../../constants/Produtos";
 import i18n from "../../tradutor/tradutor";
 import Password from "../../components/password/Password";
@@ -58,21 +58,23 @@ export default class Login extends Component {
       os: "",
       browser: "",
       cpu: "",
-      identificador: ""
+      identificador: "",
     };
   }
 
   componentDidMount() {
     Funcoes.logout();
 
-    UAParser().withClientHints().then(result => {
-      console.log(result);
-      this.setState({ 
-        os: result.os.name + ' ' + result.os.version,
-        browser: result.browser.name + ' ' + result.browser.major,
-        cpu: result.cpu.architecture,
+    UAParser()
+      .withClientHints()
+      .then((result) => {
+        console.log(result);
+        this.setState({
+          os: result.os.name + " " + result.os.version,
+          browser: result.browser.name + " " + result.browser.major,
+          cpu: result.cpu.architecture,
+        });
       });
-    });
 
     Funcoes.getUniqueToken().then((res) => {
       this.setState({ identificador: res });
@@ -134,7 +136,7 @@ export default class Login extends Component {
           so: this.state.os,
           brand: this.state.browser,
           model: this.state.cpu,
-          identificador: this.state.identificador
+          identificador: this.state.identificador,
         },
         method: "POST",
       };
@@ -483,7 +485,7 @@ export default class Login extends Component {
                           className="botaologin btn-primary"
                           onClick={() => this.setState({ cadastro: true })}
                         >
-                          Cadastrar
+                          {i18n.t("login.cadastrar")}
                         </Button>
                       </Col>
                     ) : null}
@@ -703,7 +705,7 @@ export default class Login extends Component {
               <Modal.Body>
                 <div className="container text-center">
                   <h1 style={{ color: "white" }}>
-                    Selecione o tipo de conta para cadastro
+                    {i18n.t("login.selecionarConta")}
                   </h1>
                   <ButtonGroup className="mt-4 d-flex flex-row justify-content-between">
                     {Produtos.cadastro.cadastroPF ? (
@@ -714,7 +716,7 @@ export default class Login extends Component {
                         }
                         onClick={() => (window.location.href = "/cadastropf")}
                       >
-                        <h5 className="py-2">Pessoa Física</h5>
+                        <h5 className="py-2">{i18n.t("login.pessoa_fisica")}</h5>
                       </Button>
                     ) : null}
 
@@ -726,7 +728,7 @@ export default class Login extends Component {
                         }
                         onClick={() => (window.location.href = "/cadastropj")}
                       >
-                        <h5 className="py-2">Pessoa Jurídica</h5>
+                        <h5 className="py-2">{i18n.t("login.pessoa_juridica")}</h5>
                       </Button>
                     ) : null}
                   </ButtonGroup>

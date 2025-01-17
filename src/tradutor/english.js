@@ -51,6 +51,8 @@ export default {
     tituloContaNãoAprovada: "Account Not Approved",
     contaNãoAprovada:
       "Account not approved, contact the manager for more details",
+    cadastrar: "Register",
+    selecionarConta: "Select the type of account to register",
   },
 
   home: {

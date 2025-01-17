@@ -55,6 +55,8 @@ export default {
     tituloContaNãoAprovada: "Cuenta No Aprobada",
     contaNãoAprovada:
       "Cuenta no aprobada, contacte al gerente para más información",
+    cadastrar: "Registrar",
+    selecionarConta: "Seleccione el tipo de cuenta para registrar",
   },
 
   home: {
