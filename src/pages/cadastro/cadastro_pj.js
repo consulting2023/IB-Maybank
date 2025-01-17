@@ -128,22 +128,6 @@ export default class CadastroPj extends Component {
       concluirModal: false
     };
 
-    this.inputTelefone = React.createRef();
-    this.inputEmail = React.createRef();
-    this.inputFantasia = React.createRef();
-    this.inputInscricao = React.createRef();
-    this.inputFaturamento = React.createRef();
-    this.inputContribuicao = React.createRef();
-    this.inputAbertura = React.createRef();
-    this.inputCnae = React.createRef();
-    this.inputCep = React.createRef();
-    this.inputRepCpf = React.createRef();
-    this.inputRepCelular = React.createRef();
-    this.inputSenha1 = React.createRef();
-    this.inputSenha2 = React.createRef();
-    this.inputRepNomeMae = React.createRef();
-    this.inputRepData = React.createRef();
-
     this.inputComprovante = React.createRef();
     this.inputCartao = React.createRef();
     this.inputContrato = React.createRef();
@@ -188,7 +172,6 @@ export default class CadastroPj extends Component {
     };
     Funcoes.Geral_API(data).then((res) => {
       this.setState({ agencias: res });
-      // console.log(res);
     });
   };
 
@@ -202,47 +185,15 @@ export default class CadastroPj extends Component {
     };
 
     Funcoes.Geral_API(data).then((res) => {
-      // console.log(res.texto);
       this.setState({ termo: res.texto });
     });
   };
 
   handleFocus = (nextInputRef) => {
     if (nextInputRef && nextInputRef.current) {
-      nextInputRef.current.focus(); // Muda o foco para o próximo input
+      nextInputRef.current.focus();
     }
   };
-
-  // uploadComprovante = (e) => {
-  //   const file = e.target.files[0]; // Pega o arquivo selecionado
-  //   if (file) {
-  //     // Verifica se o arquivo é PNG ou JPG
-  //     const validTypes = ['image/png', 'image/jpeg'];
-  //     if (!validTypes.includes(file.type)) {
-  //       alert("Arquivo inválido");
-  //       this.setState({
-  //         comprovante: '', // Limpa a imagem em caso de erro
-  //       });
-  //     } else {
-  //       const reader = new FileReader();
-
-  //       // Quando a leitura do arquivo terminar, armazenar o base64 no estado
-
-  //       reader.onloadend = () => {
-  //         const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
-  //         this.setState({
-  //           comprovante: base64String,
-  //         });
-  //         this.salvarDormente('imagecomprovante', base64String)
-  //       };
-
-  //       // Ler o arquivo como uma URL de dados (base64)
-  //       reader.readAsDataURL(file);
-  //     }
-  //   } else {
-  //     this.setState({ comprovante: '' });
-  //   }
-  // };
 
   uploadComprovante = (e) => {
     const file = e.target.files[0]; // Pega o arquivo selecionado
@@ -729,26 +680,6 @@ export default class CadastroPj extends Component {
     });
   }
 
-  concluir = () => {
-    const data = {
-      url: "dormente-pj/concluir",
-      data: {
-        "documento": this.state.cnpj,
-        "representante": 1,
-        "nome_banco": process.env.NOME_BANCO
-      },
-      method: "POST",
-    };
-    Funcoes.Geral_API(data).then((res) => {
-      if (!res) {
-        alert("Falha ao cadastrar informações, tente novamente.");
-      } else {
-        alert("Cadastro realizado com sucesso, em ate 3 dias sua conta sera aprovada");
-        window.location.href = "/";
-      }
-    });
-  }
-
   salvarEmpresaInfo = () => {
     const dados = {
       telefone: this.state.celEmpresa.replace(/\s+/g, ""),
@@ -831,10 +762,70 @@ export default class CadastroPj extends Component {
   }
 
   salvarDoc = () => {
+    const tipo = this.state.rep_tipodoc.value;
 
+    const dados = {
+      idoc: this.state.rep_tipodoc.value,
+      representante_imagedoc: this.state.rep_doc,
+      representante_imagedoc_verso: this.state.rep_docverso,
+    }
+
+    if (tipo == '1') {
+      dados['representante_numerorg'] = this.state.rep_docnumero;
+      dados['representante_datarg'] = this.state.rep_docemissao;
+      dados['representante_orgaorg'] = this.state.rep_docorgao;
+      dados['representante_ufrg'] = this.state.rep_docestadoStr;
+    } else if (tipo == '2') {
+      dados['representante_numerocnh'] = this.state.rep_docnumero;
+      dados['representante_datacnh'] = this.state.rep_docemissao;
+      dados['representante_orgaocnh'] = this.state.rep_docorgao;
+      dados['representante_ufcnh'] = this.state.rep_docestadoStr;
+    } else if (tipo == '3') {
+      dados['numero_passaporte'] = this.state.rep_docnumero;
+      dados['data_de_emissao_passaporte'] = this.state.rep_docemissao;
+      dados['pais_emissor_passaporte'] = this.state.rep_passpais;
+      dados['nacionalidade_passaporte'] = this.state.rep_passnaci;
+      dados['naturalidade_passaporte'] = this.state.rep_passnatu;
+      dados['tipo_passaporte'] = this.state.rep_passtipo;
+      dados['validade_passaporte'] = this.state.rep_passvalidade;
+    } else {
+      alert('Erro: tipo de documento não selecionado');
+      return;
+    }
+
+    Object.entries(dados).forEach(([key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        this.salvarDormente(key, value);
+      }
+    });
+
+    this.concluir();
   }
 
+  concluir = () => {
+    const data = {
+      url: "dormente-pj/concluir",
+      data: {
+        "documento": this.state.cnpj,
+        "representante": 1,
+        "nome_banco": process.env.NOME_BANCO,
 
+        so: this.state.os,
+        brand: this.state.browser,
+        model: this.state.cpu,
+        identificador: this.state.identificador
+      },
+      method: "POST",
+    };
+    Funcoes.Geral_API(data).then((res) => {
+      if (!res) {
+        alert("Falha ao cadastrar informações, tente novamente.");
+      } else {
+        alert("Cadastro realizado com sucesso, em ate 3 dias sua conta sera aprovada");
+        window.location.href = "/";
+      }
+    });
+  }
 
   render() {
     if (deviceType == "browser") {
@@ -2855,7 +2846,7 @@ export default class CadastroPj extends Component {
                 className="mr-auto"
                 variant="primary"
                 onClick={() => {
-                  this.concluir();
+                  this.salvarDoc();
                 }}
               >
                 Sim
