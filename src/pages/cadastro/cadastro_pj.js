@@ -2035,7 +2035,7 @@ export default class CadastroPj extends Component {
                           [
                             { label: "RG", value: "1" },
                             { label: "CNH", value: "2" },
-                            { label: "Passaporte", value: "3" }
+                            // { label: "Passaporte", value: "3" }
                           ]
                         }
                         placeholder="Selecione seu tipo de documento"
