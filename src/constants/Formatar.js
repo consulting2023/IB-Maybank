@@ -122,6 +122,22 @@ export function cnpj_mask(cnpj) {
   return cnpj;
 }
 
+export function rg_mask(rg) {
+  rg = rg.replace(/\D/g, "");
+  rg = rg.replace(/(\d{2})(\d)/, "$1.$2");
+  rg = rg.replace(/(\d{3})(\d)/, "$1.$2");
+  rg = rg.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  return rg;
+}
+
+export function cnh_mask(cnh) {
+  cnh = cnh.replace(/\D/g, "");
+  cnh = cnh.replace(/(\d{4})(\d)/, "$1.$2");
+  cnh = cnh.replace(/(\d{4})(\d)/, "$1.$2");
+  cnh = cnh.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  return cnh;
+}
+
 export function cel_mask(num) {
   num = num.replace(/\D/g, "");
   num = num.replace(/(\d{2})(\d)/, "($1) $2");

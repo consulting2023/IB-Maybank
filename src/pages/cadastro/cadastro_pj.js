@@ -17,6 +17,7 @@ import OtpInput from "react-otp-input";
 import Objetos from "../../constants/Objetos";
 import * as Funcoes from "../../constants/Funcoes";
 import ReactLoading from "react-loading";
+import * as Icon from "react-bootstrap-icons";
 import {
   isIOS,
   isAndroid,
@@ -24,6 +25,7 @@ import {
   isBrowser,
   deviceType,
 } from "react-device-detect";
+import { UAParser } from 'ua-parser-js';
 import Produtos from "../../constants/Produtos";
 import i18n from "../../tradutor/tradutor"; import LangButton from "../../components/langButton/LangButton";
 import Select from "react-select";
@@ -84,62 +86,46 @@ export default class CadastroPj extends Component {
       rep_cidade: "",
       rep_estado: "",
 
-
-
-
-      rep_celular: "",
-      smsModal: false,
-      sms: "",
-
-      rep_email: "",
-      tokenModal: false,
-      token: "",
-
-      liberarSenha1: false,
-      senha1: "",
-
-      liberarSenha2: false,
-      senha2: "",
-
-
-      liberarRepTipodoc: false,
-      rep_tipodoc: "",
-
-      liberarRepDoc: false,
-      rep_doc: "",
-
-      liberarRepDocVerso: false,
-      rep_docverso: "",
-      rep_docnumero: "",
-      liberarRepDocEmissao: false,
-      rep_docemissao: "",
-
-      liberarRepDocOrgao: false,
-      // rep_docorgao: "",
-      liberarRepDocEstado: false,
-      // rep_docestado: "",
-
-      liberarRepPassPais: false,
-      rep_passpais: "",
-      liberarRepPassNaci: false,
-      rep_passnaci: "",
-      liberarRepPassNatu: false,
-      rep_passnatu: "",
-      liberarRepPassValidade: false,
-      rep_passvalidade: "",
-
       rep_selfie: "",
-
-      liberarRepComprovante: false,
       rep_comprovante: "",
-
-      liberarRepProcuracao: false,
       rep_procuracao: "",
-
-      liberarRepPolitico: false,
       rep_politico: '0',
 
-      statusModal: false
+      rep_email: "",
+      rep_emailLoading: false,
+      tokenModal: false,
+      token: "",
+      email_validado: false,
+
+      rep_celular: "",
+      rep_celularLoading: false,
+      smsModal: false,
+      sms: "",
+      celular_validado: false,
+
+      senha1: "",
+      senha2: "",
+
+      rep_tipodoc: {},
+
+      rep_doc: "",
+      rep_docverso: "",
+      rep_docnumero: "",
+      rep_docemissao: "",
+
+      rep_docorgao: "",
+      rep_docestado: {},
+      rep_docestadoStr: "",
+
+      rep_passpais: "",
+      rep_passnaci: "",
+      rep_passnatu: "",
+      rep_passtipo: "",
+      rep_passvalidade: "",
+
+      statusModal: false,
+
+      concluirModal: false
     };
 
     this.inputTelefone = React.createRef();
@@ -163,12 +149,27 @@ export default class CadastroPj extends Component {
     this.inputContrato = React.createRef();
     this.inputRepComprovante = React.createRef();
     this.inputRepProcuracao = React.createRef();
+    this.inputRepSelfie = React.createRef();
+    this.inputRepDoc = React.createRef();
+    this.inputRepDocVerso = React.createRef();
   }
   
   componentDidMount = () => {
     this.agCadastro();
     this.buscarTermoUso();
     this.checkStatus();
+
+    UAParser().withClientHints().then(result => {
+      this.setState({ 
+        os: result.os.name + ' ' + result.os.version,
+        browser: result.browser.name + ' ' + result.browser.major,
+        cpu: result.cpu.architecture,
+      });
+    });
+
+    Funcoes.getUniqueToken().then((res) => {
+      this.setState({ identificador: res });
+    });
   };
 
   checkStatus = () => {
@@ -212,23 +213,56 @@ export default class CadastroPj extends Component {
     }
   };
 
+  // uploadComprovante = (e) => {
+  //   const file = e.target.files[0]; // Pega o arquivo selecionado
+  //   if (file) {
+  //     // Verifica se o arquivo é PNG ou JPG
+  //     const validTypes = ['image/png', 'image/jpeg'];
+  //     if (!validTypes.includes(file.type)) {
+  //       alert("Arquivo inválido");
+  //       this.setState({
+  //         comprovante: '', // Limpa a imagem em caso de erro
+  //       });
+  //     } else {
+  //       const reader = new FileReader();
+
+  //       // Quando a leitura do arquivo terminar, armazenar o base64 no estado
+
+  //       reader.onloadend = () => {
+  //         const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
+  //         this.setState({
+  //           comprovante: base64String,
+  //         });
+  //         this.salvarDormente('imagecomprovante', base64String)
+  //       };
+
+  //       // Ler o arquivo como uma URL de dados (base64)
+  //       reader.readAsDataURL(file);
+  //     }
+  //   } else {
+  //     this.setState({ comprovante: '' });
+  //   }
+  // };
+
   uploadComprovante = (e) => {
     const file = e.target.files[0]; // Pega o arquivo selecionado
     if (file) {
-      // Verifica se o arquivo é PNG ou JPG
-      const validTypes = ['image/png', 'image/jpeg'];
-      if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
-        this.setState({
-          comprovante: '', // Limpa a imagem em caso de erro
-        });
-      } else {
+      const validTypes = ['image/png', 'image/jpeg', 'application/pdf']; // Tipos válidos
+  
+      if (validTypes.includes(file.type)) {
         const reader = new FileReader();
-
-        // Quando a leitura do arquivo terminar, armazenar o base64 no estado
-
+  
         reader.onloadend = () => {
-          const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
+          let base64String = '';
+  
+          if (file.type === 'application/pdf') {
+            // Para PDFs
+            base64String = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
+          } else {
+            // Para imagens (PNG, JPEG)
+            base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
+          }
+  
           this.setState({
             comprovante: base64String,
           });
@@ -330,10 +364,7 @@ export default class CadastroPj extends Component {
           const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
           this.setState({
             rep_doc: base64String,
-            liberarRepDocVerso: true 
           });
-
-          this.salvarDormente('representante_imagedoc', base64String)
         };
 
         reader.readAsDataURL(file);
@@ -360,8 +391,6 @@ export default class CadastroPj extends Component {
           this.setState({
             rep_docverso: base64String,
           });
-
-          this.salvarDormente('representante_imagedoc_verso', base64String)
         };
 
         reader.readAsDataURL(file);
@@ -387,10 +416,7 @@ export default class CadastroPj extends Component {
           const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
           this.setState({
             rep_selfie: base64String,
-            liberarRepComprovante: true,
           });
-
-          this.salvarDormente('representante_imageself', base64String)
         };
 
         reader.readAsDataURL(file);
@@ -426,39 +452,6 @@ export default class CadastroPj extends Component {
     }
   };
 
-  // uploadProcuracao = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const validTypes = ['application/pdf', 'image/png', 'image/jpeg'];
-  
-  //     if (validTypes.includes(file.type)) {
-  //       const reader = new FileReader();
-  
-  //       reader.onloadend = () => {
-  //         const binaryString = reader.result;
-  //         const base64String = btoa(binaryString);
-  
-  //         this.setState({
-  //           rep_procuracao: base64String,
-  //           liberarRepPolitico: true,
-  //         });
-  
-  //         this.salvarDormente('representante_procuracao', base64String);
-  //       };
-  
-  //       // Aqui usamos `readAsBinaryString` diretamente
-  //       reader.readAsBinaryString(file);
-  //     } else {
-  //       alert('Arquivo inválido. Apenas arquivos PNG, JPEG e PDF são aceitos.');
-  //       this.setState({
-  //         rep_procuracao: '',
-  //       });
-  //     }
-  //   } else {
-  //     this.setState({ rep_procuracao: '' });
-  //   }
-  // };
-
   uploadProcuracao = (e) => {
     const file = e.target.files[0]; // Pega o arquivo selecionado
     if (file) {
@@ -480,7 +473,6 @@ export default class CadastroPj extends Component {
 
           this.setState({
             rep_procuracao: base64String,
-            liberarRepPolitico: true,
           });
   
         };
@@ -596,18 +588,6 @@ export default class CadastroPj extends Component {
     return estados[estado] || "Estado não encontrado";
   };
 
-  salvarEndereco = () => {
-    this.salvarDormente('cep', this.state.cep);
-    this.salvarDormente('endereco', this.state.endereco);
-    this.salvarDormente('numero', this.state.numero);
-    this.salvarDormente('bairro', this.state.bairro);
-    this.salvarDormente('cidade', this.state.cidade);
-    this.salvarDormente('estado', this.state.estado);
-    if (this.state.complemento != '') {
-      this.salvarDormente('complemento', this.state.complemento);
-    }
-  };
-
   consultarRepCEP = () => {
     const regex = /^\d{5}-\d{3}$/;
     if (regex.test(this.state.rep_cep)) {
@@ -645,19 +625,8 @@ export default class CadastroPj extends Component {
     }
   };
 
-  salvarRepEndereco = () => {
-    this.salvarDormente('representante_cep', this.state.rep_cep);
-    this.salvarDormente('representante_endereco', this.state.rep_endereco);
-    this.salvarDormente('representante_numero', this.state.rep_numero);
-    this.salvarDormente('representante_bairro', this.state.rep_bairro);
-    this.salvarDormente('representante_cidade', this.state.rep_cidade);
-    this.salvarDormente('representante_estado', this.state.rep_estado);
-    if (this.state.rep_complemento != '') {
-      this.salvarDormente('representante_complemento', this.state.complemento);
-    }
-  };
-
   sms_envia = () => {
+    this.setState({ rep_celularLoading: true });
     const data = {
       url: "utilitarios/validacao-sms-envio",
       data: {
@@ -671,10 +640,12 @@ export default class CadastroPj extends Component {
       } else {
         alert("Erro ao enviar SMS.");
       }
+      this.setState({ rep_celularLoading: false });
     });
   };
 
   sms_valida = () => {
+    this.setState({ rep_celularLoading: true });
     const data = {
       url: "utilitarios/validacao-sms-confere",
       data: {
@@ -685,15 +656,17 @@ export default class CadastroPj extends Component {
     };
     Funcoes.Geral_API(data).then((res) => {
       if (res){
-        this.setState({ cadastro: "5", smsModal: false });
-        localStorage.setItem("save", "5");
+        this.salvarDormente('representante_celular', this.state.rep_celular);
+        this.setState({ smsModal: false, celular_validado: true });
       } else {
-        alert("SMS inválido.");
+        alert("Código inválido.");
       }
+      this.setState({ rep_celularLoading: false });
     });
   }
 
   email_envia = () => {
+    this.setState({ rep_emailLoading: true });
     const data = {
       url: "utilitarios/validacao-email-envio",
       data: {
@@ -702,15 +675,17 @@ export default class CadastroPj extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
-      if (res){
+      if (res) {
         this.setState({ tokenModal: true });
       } else {
-        alert("Erro ao enviar SMS.");
+        alert("Erro ao enviar Token.");
       }
+      this.setState({ rep_emailLoading: false });
     });
   };
 
   email_valida = () => {
+    this.setState({ rep_emailLoading: true });
     const data = {
       url: "utilitarios/validacao-email-confere",
       data: {
@@ -720,49 +695,36 @@ export default class CadastroPj extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
-      if (res){
-        this.setState({ tokenModal: false, liberarSenha1: true }, () => {
-          this.handleFocus(this.inputSenha1)
-        });
+      if (res) {
+        this.salvarDormente('representante_email', this.state.rep_celular);
+        this.setState({ tokenModal: false, email_validado: true });
       } else {
-        alert("SMS inválido.");
+        alert("Token inválido.");
       }
+      this.setState({ rep_emailLoading: false });
     });
-  }
-
-  setSenha = () => {
-    const { senha1, senha2 }  = this.state;
-    if (senha1 === senha2) {
-      this.salvarDormente('senha', senha1);
-      this.setState({
-        liberarRepNomeMae: true,
-      }, () => {
-        this.handleFocus(this.inputRepNomeMae);
-      })
-    } else {
-      alert("As senhas não são iguais. Tente novamente.");
-    }
   }
 
   salvarDormente = (campo, valor) => {
     const data = {
       url: "dormente-pj/previa",
       data: {
-        "documento": this.state.cnpj,
-        "campo": campo,
-        "valor": valor,
-        "representante": 1
+        documento: this.state.cnpj,
+        campo: campo,
+        valor: valor,
+        representante: 1,
+
+        so: this.state.os,
+        brand: this.state.browser,
+        model: this.state.cpu,
+        identificador: this.state.identificador
       },
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
-      // console.log(res)
       if (!res) {
-        // alert("Falha ao cadastrar informações, tente novamente.");
-        alert("Falha ao cadastrar informações, tente novamente." + campo );
-        
-      } else {
-        // console.log(campo + ' ok');
+        alert("Falha ao cadastrar informações, tente novamente.");
+        // alert("Falha ao cadastrar informações, tente novamente." + campo );
       }
     });
   }
@@ -788,31 +750,6 @@ export default class CadastroPj extends Component {
   }
 
   salvarEmpresaInfo = () => {
-    // this.salvarDormente('telefone', this.state.celEmpresa.replace(/\s+/g, ""));
-    // this.salvarDormente('email', this.state.emailEmpresa);
-    // this.salvarDormente('razao_social', this.state.razaoSocial.trim());
-    // this.salvarDormente('nome_fantasia', this.state.nomeFantasia.trim());
-    // this.salvarDormente('inscricao_estadual', this.state.inscricaoEstadual.trim());
-    // this.salvarDormente('faturamento', this.state.faturamento.trim());
-    // this.salvarDormente('contribuicao', this.state.contribuicao);
-    // this.salvarDormente('dataabertura', this.state.dataAbertura + ' 00:00:00');
-    // this.salvarDormente('cnae', this.state.cnae);
-    
-    // this.salvarDormente('cep', this.state.cep);
-    // this.salvarDormente('endereco', this.state.endereco);
-    // this.salvarDormente('numero', this.state.numero);
-    // this.salvarDormente('bairro', this.state.bairro);
-    // this.salvarDormente('cidade', this.state.cidade);
-    // this.salvarDormente('estado', this.state.estado);
-    // if (this.state.complemento != '') {
-    //   this.salvarDormente('complemento', this.state.complemento);
-    // }
-
-    // this.salvarDormente('imagecomprovante', this.state.comprovante);
-    // this.salvarDormente('imagecnpj', this.state.cartao);
-    // this.salvarDormente('imagecontrato', this.state.contrato);
-
-
     const dados = {
       telefone: this.state.celEmpresa.replace(/\s+/g, ""),
       email: this.state.emailEmpresa,
@@ -847,9 +784,57 @@ export default class CadastroPj extends Component {
     localStorage.setItem("save", "2");
   }
 
-  salvarRepresentante = () => {
+  salvarRepresentanteInfo = () => {
+    const dados = {
+      representante_nome: this.state.rep_nome.trim(),
+      representante_cpf: this.state.rep_cpf,
+      representante_nomemae: this.state.rep_nomeMae.trim(),
+      representante_data_nascimento: this.state.rep_data + ' 00:00:00',
+      representante_sexo: this.state.rep_genero,
+      representante_estado_civil: this.state.rep_estadocivil,
+
+      cep: this.state.rep_cep,
+      endereco: this.state.rep_endereco,
+      numero: this.state.rep_numero,
+      bairro: this.state.rep_bairro,
+      cidade: this.state.rep_cidade,
+      estado: this.state.rep_estado,
+      complemento: this.state.rep_complemento,
+
+      representante_imageself: this.state.rep_selfie,
+      representante_imagecomprovante_endereco: this.state.rep_comprovante,
+      representante_procuracao: this.state.rep_procuracao,
+      politico: this.state.rep_politico
+    };
+
+    Object.entries(dados).forEach(([key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        this.salvarDormente(key, value);
+      }
+    });
+
+    this.setState({ cadastro: "3" });
+    localStorage.setItem("save", "3");
+  }
+
+  salvarSenha = () => {
+    const { senha1, senha2 }  = this.state;
+    if (senha1.length == 6 && senha2.length == 6) {
+      if (senha1 === senha2) {
+        this.salvarDormente('senha', senha1);
+        this.setState({ cadastro: "5" });
+        localStorage.setItem("save", "5");
+      } else {
+        alert("As senhas não são iguais. Tente novamente.");
+      }
+    }
+  }
+
+  salvarDoc = () => {
 
   }
+
+
 
   render() {
     if (deviceType == "browser") {
@@ -893,7 +878,6 @@ export default class CadastroPj extends Component {
                       onChange={(selectedOption) => {
                         this.setState({
                           valueAgencia: selectedOption,
-                        //   liberarCNPJ: true, // Guarda o nome da agência selecionada
                         });
                       }}
                       isSearchable
@@ -961,19 +945,6 @@ export default class CadastroPj extends Component {
                                   celEmpresa: numericValue.length > 0 ? formattedValue : "",
                                 });
                               }}
-                              // onKeyDown={(e) => {
-                              //   const cel = this.state.celEmpresa;
-                              //   if (cel.length > 0 && e.key === "Enter") {
-                              //     if(cel.length > 13){
-                              //       this.salvarDormente('telefone', cel.replace(/\s+/g, ""))
-                              //       this.setState({ liberarEmail: true }, () => {
-                              //         this.handleFocus(this.inputEmail);
-                              //       });
-                              //     } else {
-                              //       alert("Por favor, termine de digitar o telefone.");
-                              //     }
-                              //   }
-                              // }}
                             />
                           </FormGroup>
                         </Col>
@@ -989,19 +960,6 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ emailEmpresa: e.target.value })
                               }
-                              // onKeyDown={(e) => {
-                              //   const email = e.target.value;
-                              //   if (email.length > 0 && e.key === "Enter") {
-                              //     const email = this.state.emailEmpresa;
-                              //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                              //     if (emailRegex.test(email)) {
-                              //       this.salvarDormente('email', email);
-                              //       this.setState({ termoModal: true });
-                              //     } else {
-                              //       alert("Por favor, insira um e-mail válido.");
-                              //     }
-                              //   }
-                              // }}
                             />
 
                           </FormGroup>
@@ -1018,15 +976,6 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ razaoSocial: e.target.value })
                               }
-                              // onKeyDown={(e) => {
-                              //   const razaoSocial = this.state.razaoSocial.trim();
-                              //   if (razaoSocial.length > 0 && e.key === "Enter") {
-                              //     this.salvarDormente('razao_social', razaoSocial);
-                              //     this.setState({ liberarFantasia: true }, () => {
-                              //       this.handleFocus(this.inputFantasia);
-                              //     });
-                              //   }
-                              // }}       
                             />
                           </FormGroup>
                         </Col>
@@ -1042,15 +991,6 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ nomeFantasia: e.target.value })
                               }
-                              // onKeyDown={(e) => {
-                              //   const nomeFantasia = this.state.nomeFantasia.trim();
-                              //   if (nomeFantasia.length > 0 && e.key === "Enter") {
-                              //     this.salvarDormente('nome_fantasia', nomeFantasia);
-                              //     this.setState({ liberarInscricao: true }, () => {
-                              //       this.handleFocus(this.inputInscricao);
-                              //     });
-                              //   }
-                              // }}
                             />
                           </FormGroup>
                         </Col>
@@ -1068,15 +1008,6 @@ export default class CadastroPj extends Component {
                                   inscricaoEstadual: e.target.value,
                                 })
                               }
-                              // onKeyDown={(e) => {
-                              //   const inscricaoEstadual = this.state.inscricaoEstadual.trim();
-                              //   if (inscricaoEstadual.length > 0 && e.key === "Enter") {
-                              //     this.salvarDormente('inscricao_estadual', inscricaoEstadual);
-                              //     this.setState({ liberaFaturamento: true }, () => {
-                              //       this.handleFocus(this.inputFaturamento);
-                              //     });
-                              //   }
-                              // }}
                             />
                           </FormGroup>
                         </Col>
@@ -1107,19 +1038,6 @@ export default class CadastroPj extends Component {
                                 // Atualiza o estado com o valor formatado
                                 this.setState({ faturamento: formattedValue });
                               }}
-                              // onKeyDown={(e) => {
-                              //   const faturamento = this.state.faturamento.trim();
-                              //   if (faturamento.length > 0 && e.key === "Enter") {
-                              //     if (faturamento != "R$ 0,00") {
-                              //       this.salvarDormente('faturamento', faturamento);
-                              //       this.setState({ liberarContribuicao: true }, () => {
-                              //         this.handleFocus(this.inputContribuicao);
-                              //       });
-                              //     } else {
-                              //       alert("Insira o valor de faturamento.");
-                              //     }
-                              //   }
-                              // }}
                             />
 
                           </FormGroup>
@@ -1162,9 +1080,6 @@ export default class CadastroPj extends Component {
                               placeholder="Selecione a Contribuição"
                               onChange={(selectedOption) => {
                                 this.setState({ contribuicao: selectedOption.value });
-                                // this.salvarDormente('contribuicao', selectedOption.value);
-                              //   this.setState({ cadastro: "2" });
-                              //   localStorage.setItem("save", "2");
                               }}
                               styles={{
                                 control: (base) => ({
@@ -1186,7 +1101,6 @@ export default class CadastroPj extends Component {
                               value={this.state.dataAbertura}
                               style={{ height: 40, width: 300 }}
                               onChange={(e) => {
-                                // this.salvarDormente('dataabertura', e.target.value + ' 00:00:00')
                                 this.setState({ dataAbertura: e.target.value });
                               }}
                             />
@@ -1205,19 +1119,6 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ cnae: e.target.value })
                               }
-                              // onKeyDown={(e) => {
-                              //   const nomeCnae = this.state.cnae;
-                              //   if (nomeCnae.length > 0 && e.key === "Enter") {
-                              //     if (nomeCnae.length === 9) {
-                              //       this.salvarDormente('cnae', nomeCnae);
-                              //       this.setState({ liberarCep: true }, () => {
-                              //         this.handleFocus(this.inputCep);
-                              //       });
-                              //     } else {
-                              //       alert("Por favor, termine de digitar a CNAE.");
-                              //     }
-                              //   }
-                              // }} 
                             />
                           </FormGroup>
                         </Col>
@@ -1235,16 +1136,6 @@ export default class CadastroPj extends Component {
                                 onChange={(e) => {
                                   this.setState({ cep: e.target.value })
                                 }}
-                                // onKeyDown={(e) => {
-                                //   const cep = this.state.cep;
-                                //   if (cep.length > 0 && e.key === "Enter") {
-                                //     if (cep.length === 9){
-                                //       this.consultarCEP();
-                                //     } else {
-                                //       alert("Por favor, termine de digitar o CEP.");
-                                //     }
-                                //   }
-                                // }}
                               />
 
                               {
@@ -1319,8 +1210,6 @@ export default class CadastroPj extends Component {
                                 active={this.state.comprovante == ''}
                                 className="mx-1"
                                 onClick={ () => {
-                                  // this.setState({ cadastro: "3" });
-                                  // localStorage.setItem("save", "3");
                                   this.setState({ comprovante: '' });
                                 }}
                               >
@@ -1342,7 +1231,6 @@ export default class CadastroPj extends Component {
                                   <img
                                     className="m-auto"
                                     src={`data:image/jpeg;base64,${this.state.comprovante}`}
-                                    alt="Comprovante de endereço"
                                     style={{ maxHeight: '50px' }} 
                                   />
                                 )
@@ -1390,7 +1278,6 @@ export default class CadastroPj extends Component {
                                   <img
                                     className="m-auto"
                                     src={`data:image/jpeg;base64,${this.state.cartao}`}
-                                    alt="Cartão CNPJ"
                                     style={{ maxHeight: '50px' }} 
                                   />
                                 )
@@ -1452,6 +1339,10 @@ export default class CadastroPj extends Component {
                       (this.state.cnae == "") ||
                       (this.state.cep == "") ||
                       (this.state.endereco == "") ||
+                      (this.state.numero == "") ||
+                      (this.state.bairro == "") ||
+                      (this.state.cidade == "") ||
+                      (this.state.estado == "") ||
                       (this.state.contrato == "")
                     }
                     onClick={ () => {
@@ -1530,66 +1421,9 @@ export default class CadastroPj extends Component {
                           </FormGroup>
                         </Col>
 
-                        {/* <Col className="m-2">
-                          <FormGroup>
-                            <label>Celular do Representante</label>
+                        {/* 
 
-                            <FormControl
-                              value={this.state.rep_celular}
-                              placeholder="(00) 00000-0000"
-                              style={{ height: 40, width: 300 }}
-                              maxLength={15} // Limite do formato com máscara
-                              onChange={(e) => {
-                                const rawValue = e.target.value;
-                                const numericValue = rawValue.replace(/\D/g, "");
-                                const formattedValue = Formatar.formatarTelefone(numericValue); // Reaplica a máscara
-
-                                this.setState({
-                                  rep_celular: numericValue.length > 0 ? formattedValue : "",
-                                });
-                              }}
-                              // onKeyDown={(e) => {
-                              //   const cel = this.state.rep_celular;
-                              //   if (cel.length > 0 && e.key === "Enter") {
-                              //     if(cel.length > 13){
-                              //       this.salvarDormente('representante_celular', cel.replace(/\s+/g, ""));
-                              //       this.sms_envia(); 
-                              //     } else {
-                              //       alert("Por favor, termine de digitar o telefone.");
-                              //     }
-                              //   }
-                              // }}
-                            />
-                          </FormGroup>
-                        </Col>
-
-                        <Col className="m-2">
-                          <FormGroup>
-                            <label>E-Mail do Representante</label>
-
-                            <FormControl
-                              value={this.state.rep_email}
-                              placeholder="exemplo@mail.com"
-                              style={{ height: 40, width: 300 }}
-                              onChange={(e) =>
-                                this.setState({ rep_email: e.target.value })
-                              }
-                              // onKeyDown={(e) => {
-                              //   const email = e.target.value;
-                              //   if (email.length > 0 && e.key === "Enter") {
-                              //     const email = this.state.rep_email;
-                              //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                              //     if (emailRegex.test(email)) {
-                              //       this.salvarDormente('representante_email', email);
-                              //       this.email_envia(); 
-                              //     } else {
-                              //       alert("Por favor, insira um e-mail válido.");
-                              //     }
-                              //   }
-                              // }}
-                            />
-                          </FormGroup>
-                        </Col> */}
+                        */}
 
                         <Col className="m-2">
                           <FormGroup>
@@ -1650,12 +1484,9 @@ export default class CadastroPj extends Component {
                               placeholder="Selecione seu gênero"
                               value={this.state.rep_genero}
                               onChange={(selectedOption) => {
-                                // this.salvarDormente('representante_sexo', selectedOption.value);
                                 this.setState({
                                   rep_genero: selectedOption,
-                                //   cadastro: "6"
                                 });
-                                // localStorage.setItem("save", "6");
                               }}
 
                               styles={{
@@ -1787,6 +1618,42 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2 border rounded">
                           <FormGroup>
+                            <label>Selfie do Representate (PNG ou JPG)</label>
+                            <div className="d-flex">
+                              <Button 
+                                className="mx-1"
+                                onClick={ () => {
+                                  this.inputRepSelfie.current.click() 
+                                }}
+                              >
+                                Escolher arquivo
+                              </Button>
+                            </div>
+
+                            <input
+                              ref={this.inputRepSelfie}
+                              // className="d-block"
+                              type="file" 
+                              accept="image/png, image/jpeg" 
+                              onChange={ (event) => this.uploadSelfie(event) } 
+                            />
+
+                            <div className="d-flex p-2" style={{ height: 50, width: 300 }}>
+                              {
+                                (this.state.rep_selfie.length > 0) && (
+                                  <img
+                                    className="m-auto"
+                                    src={`data:image/jpeg;base64,${this.state.rep_selfie}`}
+                                    style={{ maxHeight: '50px' }} 
+                                  />
+                                )
+                              }
+                            </div>
+                          </FormGroup>
+                        </Col>
+
+                        <Col className="m-2 border rounded">
+                          <FormGroup>
                             <label>Foto do Comprovante de endereço (PNG ou JPG)</label>
                             <div className="d-flex">
                               <Button 
@@ -1801,9 +1668,7 @@ export default class CadastroPj extends Component {
                                 active={this.state.rep_comprovante == ''}
                                 className="mx-1"
                                 onClick={ () => {
-                                  // this.setState({ cadastro: "3" });
-                                  // localStorage.setItem("save", "3");
-                                  this.setState({ comprovante: '' });
+                                  this.setState({ rep_comprovante: '' });
                                 }}
                               >
                                 Não tenho
@@ -1824,7 +1689,6 @@ export default class CadastroPj extends Component {
                                   <img
                                     className="m-auto"
                                     src={`data:image/jpeg;base64,${this.state.rep_comprovante}`}
-                                    alt="Comprovante de endereço"
                                     style={{ maxHeight: '50px' }} 
                                   />
                                 )
@@ -1849,8 +1713,6 @@ export default class CadastroPj extends Component {
                                 active={this.state.rep_procuracao == ''}
                                 className="mx-1"
                                 onClick={ () => {
-                                  // this.setState({ cadastro: "3" });
-                                  // localStorage.setItem("save", "3");
                                   this.setState({ rep_procuracao: '' });
                                 }}
                               >
@@ -1862,19 +1724,14 @@ export default class CadastroPj extends Component {
                               ref={this.inputRepProcuracao}
                               // className="d-block"
                               type="file" 
-                              accept="image/png, image/jpeg" 
+                              accept="application/pdf" 
                               onChange={(event) => this.uploadProcuracao(event)} 
                             />
 
                             <div className="d-flex p-2" style={{ height: 50, width: 300 }}>
                               {
                                 (this.state.rep_procuracao.length > 0) && (
-                                  <img
-                                    className="m-auto"
-                                    src={`data:image/jpeg;base64,${this.state.rep_procuracao}`}
-                                    alt="Comprovante de endereço"
-                                    style={{ maxHeight: '50px' }} 
-                                  />
+                                  <h6>PROCURAÇÃO CARREGADA COM SUCESSO</h6>
                                 )
                               }
                             </div>
@@ -1883,7 +1740,6 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            {/* <label>O Representante é uma pessoa politicamente exposta?</label> */}
                             <FormCheck
                               id="rep_politico"
                               label="O Representante é uma pessoa politicamente exposta?"
@@ -1908,9 +1764,250 @@ export default class CadastroPj extends Component {
 
                   <Button 
                     className="float-right mt-3"
+                    disabled={
+                      (this.state.rep_nome.trim() == "") ||
+                      (this.state.rep_cpf.length != 11) ||
+                      (this.state.rep_nomeMae.trim() == "") ||
+                      (this.state.rep_data == "") ||
+                      (this.state.rep_genero == "") ||
+                      (this.state.rep_estadocivil == "") ||
+                      (this.state.rep_cep == "") ||
+                      (this.state.rep_endereco == "") ||
+                      (this.state.rep_numero == "") ||
+                      (this.state.rep_bairro == "") ||
+                      (this.state.rep_cidade == "") ||
+                      (this.state.rep_estado == "") ||
+                      (this.state.rep_selfie == "")
+                    }
                     onClick={ () => {
-                      // this.salvarEmpresaInfo();
-                      console.log(this.state.rep_politico);
+                      this.salvarRepresentanteInfo();
+                    }}
+                  >
+                    Continuar
+                  </Button>
+
+                </> )
+              }
+
+              {
+                (this.state.cadastro == "3") && ( <>
+
+                  <div>
+                    <h1 className="mb-2">
+                      Validação de E-mail e celular do representante
+                    </h1>
+                    <hr className="divisoria" />
+
+                    <Container>
+                      <Row>
+
+                        <Col className="m-2">
+                          <FormGroup>
+                            <label>E-mail do Representante</label>
+
+                            <div className="d-flex flex-row">
+                              <FormControl
+                                value={this.state.rep_email}
+                                placeholder="exemplo@mail.com"
+                                style={{ height: 40, width: 300 }}
+                                onChange={(e) =>
+                                  this.setState({ rep_email: e.target.value })
+                                }
+                              />
+
+                              {
+                                this.state.rep_emailLoading ? ( <>
+
+                                  <ReactLoading
+                                    className="ml-2"
+                                    type={"spin"}
+                                    color={"#00000"}
+                                    width={"38px"}
+                                    height={"40px"}
+                                  />
+
+                                </> ) : ( <>
+
+                                {
+                                  !this.state.email_validado ? ( <>
+
+                                    <Button
+                                      className="ml-2"
+                                      disabled={!this.state.rep_email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)}
+                                      onClick={ () => {
+                                        this.email_envia();
+                                      }}
+                                    >
+                                      Validar
+                                    </Button>
+
+                                  </> ) : ( <>
+
+                                    <Icon.CheckCircle className="ml-3" style={{ fontSize: 40 }}/>
+
+                                  </> )
+                                }
+
+                              </> )
+                              }
+
+                            </div>
+                          </FormGroup>
+                        </Col>
+
+                        <Col className="m-2">
+                          <FormGroup>
+                            <label>Celular do Representante</label>
+
+                            <div className="d-flex flex-row">
+                              <FormControl
+                                value={this.state.rep_celular}
+                                placeholder="(00) 00000-0000"
+                                style={{ height: 40, width: 300 }}
+                                maxLength={15} // Limite do formato com máscara
+                                onChange={(e) => {
+                                  const rawValue = e.target.value;
+                                  const numericValue = rawValue.replace(/\D/g, "");
+                                  const formattedValue = Formatar.formatarTelefone(numericValue); // Reaplica a máscara
+
+                                  this.setState({
+                                    rep_celular: numericValue.length > 0 ? formattedValue : "",
+                                  });
+                                }}
+                              />
+
+                              {
+                                this.state.rep_celularLoading ? ( <>
+
+                                  <ReactLoading
+                                    className="ml-2"
+                                    type={"spin"}
+                                    color={"#00000"}
+                                    width={"38px"}
+                                    height={"40px"}
+                                  />
+
+                                </> ) : ( <>
+
+                                {
+                                  !this.state.celular_validado ? ( <>
+
+                                    <Button
+                                      className="ml-2"
+                                      disabled={this.state.rep_celular.length < 14}
+                                      onClick={ () => {
+                                        this.sms_envia();
+                                      }}
+                                    >
+                                      Validar
+                                    </Button>
+
+                                  </> ) : ( <>
+
+                                    <Icon.CheckCircle className="ml-3" style={{ fontSize: 40 }}/>
+
+                                  </> )
+                                }
+
+                              </> )
+                              }
+                            </div>
+                          </FormGroup>
+                        </Col>
+
+                      </Row>
+                    </Container>
+                  </div>
+
+                  <Button 
+                    className="float-right mt-3"
+                    disabled={
+                      !this.state.email_validado ||
+                      !this.state.celular_validado
+                    }
+                    onClick={ () => {
+                      if (this.state.email_validado && this.state.celular_validado) {
+                        this.setState({ cadastro: "4" });
+                        localStorage.setItem("save", "4");
+                      }
+                    }}
+                  >
+                    Continuar
+                  </Button>
+                    
+                </> )
+              }
+
+              {
+                (this.state.cadastro == "4") && ( <>
+
+                  <div>
+                    <h1 className="mb-2">
+                      Agora cadastre sua senha
+                    </h1>
+                    <div>
+                      <span>
+                        Dicas:
+                      </span>
+
+                      <ul className="ml-2">
+                        <li>-a senha deve conter 6 números</li>
+                        <li>-não use números sequenciais</li>
+                        <li>-utilize, no máximo, 3 números repetidos</li>
+                        <li>-evite usar seus dados pessoas</li>
+                      </ul>
+                    </div>
+                    <hr className="divisoria" />
+
+                    <Container>
+                      <Row>
+                        <Col className="m-2">
+                          <FormGroup>
+                            <label>Insira aqui sua senha</label>
+
+                            <FormControl
+                              type="password"
+                              maxLength={6}
+                              value={this.state.senha1}
+                              style={{ height: 40, width: 300, textAlign: 'center' }}
+                              onChange={(e) => {
+                                const rawValue = e.target.value;
+                                const numericValue = rawValue.replace(/\D/g, "");
+                                this.setState({ senha1: numericValue });
+                              }}
+                            />
+                          </FormGroup>
+                        </Col>
+
+                        <Col className="m-2">
+                          <FormGroup>
+                            <label>Repita aqui sua senha</label>
+
+                            <FormControl
+                              type="password"
+                              maxLength={6}
+                              value={this.state.senha2}
+                              style={{ height: 40, width: 300, textAlign: 'center' }}
+                              onChange={(e) => {
+                                const rawValue = e.target.value;
+                                const numericValue = rawValue.replace(/\D/g, "");
+                                this.setState({ senha2: numericValue });
+                              }}
+                            />
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                    </Container>
+                  </div>
+
+                  <Button 
+                    className="float-right mt-3"
+                    disabled={
+                      this.state.senha1.length < 6 || 
+                      this.state.senha2.length < 6 
+                    }
+                    onClick={ () => {
+                      this.salvarSenha()
                     }}
                   >
                     Continuar
@@ -1922,768 +2019,423 @@ export default class CadastroPj extends Component {
               {
                 (this.state.cadastro == "5") && ( <>
 
-                  {
-                    this.state.liberarSenha1 && (
+                  <div>
+                    <h1 className="mb-2">
+                      Precisamos de fotos de um documento do representante
+                      <br/>
+                      Qual documento você usará para abrir sua conta?
+                    </h1>
+                    <hr className="divisoria" />
 
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Ótimo! Agora, vamos criar sua senha de acesso.
-                        </span>
+                    <div className="d-flex">
+                      <Select
+                        options={
+                          [
+                            { label: "RG", value: "1" },
+                            { label: "CNH", value: "2" },
+                            { label: "Passaporte", value: "3" }
+                          ]
+                        }
+                        placeholder="Selecione seu tipo de documento"
+                        className="m-auto"
+                        value={this.state.rep_tipodoc}
+                        onChange={(selectedOption) => {
+                          this.setState({
+                            rep_tipodoc: selectedOption,
+                          });
+                        }}
 
-                        <div>
-                          <span>
-                            Dicas:
-                          </span>
+                        styles={{
+                          control: (base) => ({
+                            ...base,
+                            width: 300,
+                            height: 40
+                          })
+                        }}
+                      />
+                    </div>
+                  </div>
 
-                          <ul className="ml-2">
-                            <li>-a senha deve conter 6 números</li>
-                            <li>-não use números sequenciais</li>
-                            <li>-utilize, no máximo, 3 números repetidos</li>
-                            <li>-evite usar seus dados pessoas</li>
-                          </ul>
-                        </div>
-
-                        <input
-                          ref={this.inputSenha1}
-                          maxLength={6}
-                          type="password"
-                          value={this.state.senha1}
-                          placeholder="Digite sua senha"
-                          style={{ height: 40, width: "100%" }}
-                          onChange={(e) =>
-                            this.setState({ senha1: e.target.value })
-                          }
-                          onKeyDown={(e) => {
-                            const senha = this.state.senha1;
-                            if (senha.length > 0 && e.key === "Enter") {
-                              this.setState({ liberarSenha2: true }, () => {
-                                this.handleFocus(this.inputSenha2);
-                              });
-                            }
-                          }}
-                        />
-                      </div>
-
-                    )
-                  }
-
-                  {
-                    this.state.liberarSenha2 && (
-
-                       <div className="mt-3">
-                        <span className="ttAgencia">
-                          Repita a senha
-                        </span>
-
-                        <input
-                          ref={this.inputSenha2}
-                          maxLength={6}
-                          type="password"
-                          value={this.state.senha2}
-                          placeholder="Repita sua senha"
-                          style={{ height: 40, width: "100%" }}
-                          onChange={(e) =>
-                            this.setState({ senha2: e.target.value })
-                          }
-                          onKeyDown={(e) => {
-                            const senha = this.state.senha2;
-                            if (senha.length > 0 && e.key === "Enter") {
-                              this.setSenha();
-                            }
-                          }}
-                        />
-                      </div>                       
-
-                    )
-                  }
-
+                  <Button 
+                    className="float-right mt-3"
+                    disabled={this.state.rep_tipodoc == ""}
+                    onClick={ () => {
+                      this.setState({ cadastro: "6" });
+                    }}
+                  >
+                    Continuar
+                  </Button>
                 </> )
               }
 
               {
                 (this.state.cadastro == "6") && ( <>
 
-                  {
-                    this.state.liberarRepTipodoc && (
-
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Precisamos da foto de um documento.
-                          Qual documento você usará para abrir sua conta?
-                        </span>
-
-                        <div className="d-flex">
-                          <Button
-                            className="mr-3"
-                            onClick={ () => {
-                              this.salvarDormente('idoc', '1');
-                              this.setState({ rep_tipodoc: '1', liberarRepDoc: true, liberarRepDocVerso: false, rep_doc: "", rep_docverso: "", rep_docnumero: "", rep_docemissao: "", rep_docorgao: "", rep_docestado: "", rep_passpais: "", rep_passnacionalidade: "", rep_passnaturalidade: "", rep_passvalidade: "" });
-                            }}
-                          >
-                            RG
-                          </Button>
-
-                          <Button
-                            className="mr-3"
-                            onClick={ () => {
-                              this.salvarDormente('idoc', '2');
-                              this.setState({ rep_tipodoc: '2', liberarRepDoc: true, liberarRepDocVerso: false, rep_doc: "", rep_docverso: "", rep_docnumero: "", rep_docemissao: "", rep_docorgao: "", rep_docestado: "", rep_passpais: "", rep_passnacionalidade: "", rep_passnaturalidade: "", rep_passvalidade: "" });
-                            }}
-                          >
-                            CNH
-                          </Button>
-
-                          <Button
-                            className="mr-3"
-                            onClick={ () => {
-                              this.salvarDormente('idoc', '3');
-                              this.setState({ rep_tipodoc: '3', liberarRepDoc: true, liberarRepDocVerso: false, rep_doc: "", rep_docverso: "", rep_docnumero: "", rep_docemissao: "", rep_docorgao: "", rep_docestado: "", rep_passpais: "", rep_passnacionalidade: "", rep_passnaturalidade: "", rep_passvalidade: "" });
-                            }}
-                          >
-                            Passaporte
-                          </Button>
-                        </div>
-                      </div>
-
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepDoc && (
-
-                      <div className="mt-3">
-                        
-                        {
-                          this.state.rep_tipodoc == '1' ? (
-                            <span className="ttAgencia">
-                              Por favor, tire uma foto da frente do seu RG.
-                            </span>
-                          ) : this.state.rep_tipodoc == '2' ? (
-                            <span className="ttAgencia">
-                              Por favor, tire uma foto da frente da sua CNH.
-                            </span>
-                          ) : this.state.rep_tipodoc == '3' ? (
-                            <span className="ttAgencia">
-                              Por favor, tire uma foto do seu Passaporte.
-                            </span>
-                          ) : null
-                        }
-
-                        <input 
-                          style={{ "display": "block" }}
-                          type="file" 
-                          accept="image/png, image/jpeg" 
-                          onChange={(event) => {
-                            this.uploadDoc(event);
-                            
-                          }} 
-                        />
-                        <br/>
-                          {
-                            (this.state.rep_doc.length > 0) && (
-                              <img 
-                                src={`data:image/jpeg;base64,${this.state.rep_doc}`}
-                                style={{ maxWidth: '200px' }} 
-                              />
-                            )
-                          }
-
-                      </div>
-
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepDocVerso && (
-
-                      <div className="mt-3">
-
-                        {
-                          this.state.rep_tipodoc == '1' ? (
-                            <span className="ttAgencia">
-                              Agora, tire uma foto do verso do RG.
-                            </span>
-                          ) : this.state.rep_tipodoc == '2' ? (
-                            <span className="ttAgencia">
-                              Agora, tire uma foto do verso da CNH.
-                            </span>
-                          ) : this.state.rep_tipodoc == '3' ? (
-                            <span className="ttAgencia">
-                              Agora, tire uma foto da página do visto.
-                            </span>
-                          ) : null
-                        }
-
-                        <input 
-                          style={{ "display": "block" }}
-                          type="file" 
-                          accept="image/png, image/jpeg" 
-                          onChange={(event) => this.uploadDocVerso(event)} 
-                        />
-                        <br/>
-                        {
-                          (this.state.rep_docverso.length > 0) && (
-                            <div className="w-100 d-flex">
-                              <img 
-                                src={`data:image/jpeg;base64,${this.state.rep_docverso}`}
-                                style={{ maxWidth: '200px' }} 
-                              />
-                              <Button
-                                variant="primary"
-                                className="mt-auto ml-auto" 
-                                onClick={ () => {
-                                  this.setState({ 
-                                    cadastro: "7"
-                                  });
-                                  localStorage.setItem("save", "7");
-                                }}
-                              >
-                                Continuar
-                              </Button>
-                            </div>
-                          )
-                        }
-                      </div>
-
-                    )
-                  }
-                
-                </> )
-              }
-
-              {
-                (this.state.cadastro == "7") && ( <>
-                
-                  <hr className="divisoria" />
-
-                  {
-                    this.state.rep_tipodoc == '1' ? (
-                      <span className="ttAgencia">
-                        Insira o número do seu RG.
-                      </span>
-                    ) : this.state.rep_tipodoc == '2' ? (
-                      <span className="ttAgencia">
-                        Insira o número do sua CNH.
-                      </span>
-                    ) : this.state.rep_tipodoc == '3' ? (
-                      <span className="ttAgencia">
-                        Insira o número do seu Passaporte.
-                      </span>
-                    ) : null
-                  }
-
-                  <input
-                    value={this.state.rep_docnumero}
-                    placeholder="Digite o número do documento"
-                    style={{ height: 40, width: "100%" }}
-                    onChange={(e) =>
-                      this.setState({ rep_docnumero: e.target.value })
-                    }
-                    onKeyDown={(e) => {
-                      const numero = this.state.rep_docnumero.trim();
-                      if (numero.length > 0 && e.key === "Enter") {
-
-                        if (this.state.rep_tipodoc == '1') {
-                          this.salvarDormente('representante_numerorg', numero);
-                        } else if (this.state.rep_tipodoc == '2') {
-                          this.salvarDormente('representante_numercnh', numero);
-                        } else if (this.state.rep_tipodoc == '3') {
-                          this.salvarDormente('numero_passaporte', numero);
-                        }
-
-                        this.setState({ liberarRepDocEmissao: true });
-                      }
-                    }}
-                  />
-
-                  {
-                    this.state.liberarRepDocEmissao && (
-
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Insira a data de emissão
-                        </span>
-
-                        <input
-                          type="date"
-                          value={this.state.rep_docemissao}
-                          style={{ height: 40, width: "100%" }}
-                          onChange={(e) => {
-                            this.setState({ rep_docemissao: e.target.value });
-
-                            if (this.state.rep_tipodoc == '1') {
-                              this.salvarDormente('representante_datarg', e.target.value + ' 00:00:00')
-                              this.setState({ liberarRepDocOrgao: true });
-                            } else if (this.state.rep_tipodoc == '2') {
-                              this.salvarDormente('representante_datacnh', e.target.value + ' 00:00:00')
-                              this.setState({ liberarRepDocOrgao: true });
-                            } else if (this.state.rep_tipodoc == '3') {
-
-                              this.salvarDormente('data_de_emissao_passaporte', e.target.value + ' 00:00:00')
-                              this.setState({ liberarRepPassPais: true });
-                            }
-                          }}
-                        />
-                      </div>
-
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepDocOrgao && (
-
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Insira o órgão expedidor
-                        </span>
-
-                        <Select
-                          options={
-                            [
-                              { label: "SSP" },
-                              { label: "DETRAN" },
-                              { label: "IFP" },
-                              { label: "IPF" },
-                              { label: "POM" },
-                              { label: "SPTC" },
-                              { label: "MMA" },
-                              { label: "SEDS" },
-                              { label: "TSE" },
-                              { label: "DPT" },
-                              { label: "CRA" },
-                              { label: "FLS" },
-                              { label: "FGTS" },
-                              { label: "OAB" },
-                              { label: "TEM" },
-                              { label: "DPF" },
-                            ]
-                          }
-                          placeholder="Selecione o órgão expedidor"
-                          // value={this.state.rep_docorgao}
-                          onChange={(selectedOption) => {
-                            this.setState({
-                              liberarRepDocEstado: true
-                            });
-                            if (this.state.rep_tipodoc == '1') {
-                              this.salvarDormente('representante_orgaorg', selectedOption.label);
-                            } else if (this.state.rep_tipodoc == '2') {
-                              this.salvarDormente('representante_orgacnh', selectedOption.label);
-                            }
-
-                           
-                          }}
-                          styles={{
-                            control: (base) => ({
-                              ...base,
-                              height: 40,
-                              minHeight: 40,
-                            }),
-                            placeholder: (base) => ({
-                              ...base,
-                              fontSize: 14,
-                            }),
-                          }}
-                        />
-                        
-                      </div>
-
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepDocEstado && (
-
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Insira o estado emissor
-                        </span>
-
-                        <Select
-                          options={
-                            [
-                              { label: "AC" },
-                              { label: "AL" },
-                              { label: "AM" },
-                              { label: "AP" },
-                              { label: "BA" },
-                              { label: "CE" },
-                              { label: "DF" },
-                              { label: "ES" },
-                              { label: "GO" },
-                              { label: "MA" },
-                              { label: "MT" },
-                              { label: "MS" },
-                              { label: "MG" },
-                              { label: "PA" },
-                              { label: "PB" },
-                              { label: "PR" },
-                              { label: "PE" },
-                              { label: "PI" },
-                              { label: "RJ" },
-                              { label: "RN" },
-                              { label: "RS" },
-                              { label: "RO" },
-                              { label: "RR" },
-                              { label: "SC" },
-                              { label: "SP" },
-                              { label: "SE" },
-                              { label: "TO" },
-                            ]
-                          }
-                          placeholder="Selecione o estado emissor"
-                          // value={this.state.rep_docorgao}
-                          onChange={(selectedOption) => {
-                            if (this.state.rep_tipodoc == '1') {
-                              this.salvarDormente('representante_ufrg', selectedOption.label);
-                            } else if (this.state.rep_tipodoc == '2') {
-                              this.salvarDormente('representante_ufcnh', selectedOption.label);
-                            }
-
-                            this.setState({ 
-                              cadastro: "8"
-                            });
-                            localStorage.setItem("save", "8");
-                          }}
-                          styles={{
-                            control: (base) => ({
-                              ...base,
-                              height: 40,
-                              minHeight: 40,
-                            }),
-                            placeholder: (base) => ({
-                              ...base,
-                              fontSize: 14,
-                            }),
-                          }}
-                        />
-                      </div>
-
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepPassPais && (
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Insira o país emissor.
-                        </span>
-
-                        <input
-                          value={this.state.rep_passpais}
-                          placeholder="Digite o país emissor"
-                          style={{ height: 40, width: "100%" }}
-                          onChange={(e) =>
-                            this.setState({ rep_passpais: e.target.value })
-                          }
-                          onKeyDown={(e) => {
-                            const pais = this.state.rep_passpais.trim();
-                            if (pais.length > 0 && e.key === "Enter") {
-                              this.salvarDormente('pais_emissor_passaporte', pais);
-                              this.setState({ liberarRepPassNaci: true });
-                            }
-                          }}
-                        />
-                      </div>
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepPassNaci && (
-
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Insira a nacionalidade
-                        </span>
-
-                        <input
-                          value={this.state.rep_passnaci}
-                          placeholder="Digite o nome da nacionalidade"
-                          style={{ height: 40, width: "100%" }}
-                          onChange={(e) =>
-                            this.setState({ rep_passnaci: e.target.value })
-                          }
-                          onKeyDown={(e) => {
-                            const naci = this.state.rep_passnaci.trim();
-                            if (naci.length > 0 && e.key === "Enter") {
-                              this.salvarDormente('nacionalidade_passaporte', naci);
-                              this.setState({ liberarRepPassNatu: true });
-                            }
-                          }}
-                        />
-                      </div>
-
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepPassNatu && (
-
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Insira a naturalidade
-                        </span>
-
-                        <input
-                          value={this.state.rep_passnatu}
-                          placeholder="Digite o nome da naturalidade"
-                          style={{ height: 40, width: "100%" }}
-                          onChange={(e) =>
-                            this.setState({ rep_passnatu: e.target.value })
-                          }
-                          onKeyDown={(e) => {
-                            const natu = this.state.rep_passnatu.trim();
-                            if (natu.length > 0 && e.key === "Enter") {
-                              this.salvarDormente('naturalidade_passaporte', natu);
-                              this.setState({ liberarRepPassValidade: true });
-                            }
-                          }}
-                        />
-                      </div>
-
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepPassValidade && (
-
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Insira a data de validade do passaporte
-                        </span>
-
-                        <input
-                          type="date"
-                          value={this.state.rep_passvalidade}
-                          style={{ height: 40, width: "100%" }}
-                          onChange={(e) => {
-                            this.setState({ rep_passvalidade: e.target.value });
-
-                            this.salvarDormente('validade_passaporte', e.target.value + ' 00:00:00')
-                            this.setState({
-                              cadastro: "8"
-                            });
-                            localStorage.setItem("save", "8");
-                          }}
-                        />
-                      </div>
-
-                    )
-                  }
-                
-                </> )
-              }
-
-              {
-                (this.state.cadastro == "8") && ( <>
-                
-                  <hr className="divisoria" />
-
-                  <span className="ttAgencia">
-                    Precisamos da sua selfie em PNG ou JPG.
-                  </span>
-
                   <div>
-                    <ul className="ml-2">
-                      <li>-Importante estar em local com boa iluminação.</li>
-                      <li>-Não estar usando boné, chapéu ou quaisquer adereços que interfiram em seu rosto.</li>
-                      <li>-Retire óculos de Sol ou de grau.</li>
-                    </ul>
+                    <h1 className="mb-2">
+                      {
+                        (this.state.rep_tipodoc.value == '1') ?
+                          (<>Preencha os dados de seu RG</>)
 
-                    <span className="ttAgencia">
-                      Precisamos da sua selfie.
-                    </span>
+                        :
+                        
+                        (this.state.rep_tipodoc.value == '2') ?
+                          (<>Preencha os dados de sua CNH</>)
+
+                        :
+
+                        (this.state.rep_tipodoc.value == '3') &&
+                          (<>Preencha os dados de seu Passaporte</>)
+                      }
+                    </h1>
+                    <hr className="divisoria" />
+
+                    <div className="d-flex">
+                      <Container>
+                        <Row>
+                          <Col className="m-2 border rounded">
+                            <FormGroup>
+                              <label>
+                                {
+                                  (this.state.rep_tipodoc.value == '1') ?
+                                    (<>Foto da frente de seu RG</>)
+
+                                  :
+
+                                  (this.state.rep_tipodoc.value == '2') ?
+                                    (<>Foto da frente de sua CNH</>)
+
+                                  :
+
+                                  (this.state.rep_tipodoc.value == '3') &&
+                                    (<>Foto de seu Passaporte</>)
+                                  
+                                }
+                              </label>
+                              <div className="d-flex">
+                                <Button 
+                                  className="mx-1"
+                                  onClick={ () => {
+                                    this.inputRepDoc.current.click();
+                                  }}
+                                >
+                                  Escolher arquivo
+                                </Button>
+                              </div>
+
+                              <input
+                                ref={this.inputRepDoc}
+                                // className="d-block"
+                                type="file" 
+                                accept="image/png, image/jpeg" 
+                                onChange={ (event) => this.uploadDoc(event) } 
+                              />
+
+                              <div className="d-flex p-2" style={{ height: 50, width: 300 }}>
+                                {
+                                  (this.state.rep_doc.length > 0) && (
+                                    <img
+                                      className="m-auto"
+                                      src={`data:image/jpeg;base64,${this.state.rep_doc}`}
+                                      style={{ maxHeight: '50px' }} 
+                                    />
+                                  )
+                                }
+                              </div>
+                            </FormGroup>
+                          </Col>
+
+                          <Col className="m-2 border rounded">
+                            <FormGroup>
+                              <label>
+                                {
+                                  (this.state.rep_tipodoc.value == '1') ?
+                                    (<>Foto do verso de seu RG</>)
+
+                                  :
+
+                                  (this.state.rep_tipodoc.value == '2') ?
+                                    (<>Foto do verso de sua CNH</>)
+
+                                  :
+
+                                  (this.state.rep_tipodoc.value == '3') &&
+                                    (<>Foto da página do visto</>)
+                                }
+                              </label>
+                              <div className="d-flex">
+                                <Button 
+                                  className="mx-1"
+                                  onClick={ () => {
+                                    this.inputRepDocVerso.current.click();
+                                  }}
+                                >
+                                  Escolher arquivo
+                                </Button>
+                              </div>
+
+                              <input
+                                ref={this.inputRepDocVerso}
+                                type="file" 
+                                accept="image/png, image/jpeg" 
+                                onChange={ (event) => this.uploadDocVerso(event) } 
+                              />
+
+                              <div className="d-flex p-2" style={{ height: 50, width: 300 }}>
+                                {
+                                  (this.state.rep_docverso.length > 0) && (
+                                    <img
+                                      className="m-auto"
+                                      src={`data:image/jpeg;base64,${this.state.rep_docverso}`}
+                                      style={{ maxHeight: '50px' }} 
+                                    />
+                                  )
+                                }
+                              </div>
+                            </FormGroup>
+                          </Col>
+
+                          <Col className="m-2">
+                            <FormGroup>
+                              <label>
+                                {
+                                  (this.state.rep_tipodoc.value == '1') ?
+                                    (<>Número de seu RG</>)
+
+                                  :
+
+                                  (this.state.rep_tipodoc.value == '2') ?
+                                    (<>Número de sua CNH</>)
+
+                                  :
+
+                                  (this.state.rep_tipodoc.value == '3') &&
+                                    (<>Número de seu Passaporte</>)
+                                }
+                              </label>
+
+                              <FormControl
+                                value={this.state.rep_docnumero}
+                                style={{ height: 40, width: 300 }}
+                                onChange={(e) => {
+                                  this.setState({ rep_docnumero: e.target.value });
+                                }}
+                              />
+                            </FormGroup>
+                          </Col>
+
+                          <Col className="m-2">
+                            <FormGroup>
+                              <label>Data de emissão</label>
+
+                              <FormControl
+                                type="date"
+                                value={this.state.rep_docemissao}
+                                style={{ height: 40, width: 300 }}
+                                onChange={(e) => {
+                                  this.setState({ rep_docemissao: e.target.value });
+                                }}
+                              />
+                            </FormGroup>
+                          </Col>
+
+                          {
+                            (this.state.rep_tipodoc.value == '1' || this.state.rep_tipodoc.value == '2') ?
+
+                              ( <>
+
+                                <Col className="m-2">
+                                  <FormGroup>
+                                    <label>Órgão emissor</label>
+
+                                    <FormControl
+                                      value={this.state.rep_docorgao}
+                                      style={{ height: 40, width: 300 }}
+                                      onChange={(e) => {
+                                        this.setState({ rep_docorgao: e.target.value });
+                                      }}
+                                    />
+                                  </FormGroup>
+                                </Col>
+
+                                <Col className="m-2">
+                                  <FormGroup>
+                                    <label>Estado emissor</label>
+
+                                    <Select
+                                      options = {
+                                        [
+                                          { label: "Acre", value: "AC" },
+                                          { label: "Alagoas", value: "AL" },
+                                          { label: "Amazonas", value: "AM" },
+                                          { label: "Bahia", value: "BA" },
+                                          { label: "Ceará", value: "CE" },
+                                          { label: "Distrito Federal", value: "DF" },
+                                          { label: "Espírito Santo", value: "ES" },
+                                          { label: "Goiás", value: "GO" },
+                                          { label: "Maranhão", value: "MA" },
+                                          { label: "Mato Grosso", value: "MT" },
+                                          { label: "Mato Grosso do Sul", value: "MS" },
+                                          { label: "Minas Gerais", value: "MG" },
+                                          { label: "Pará", value: "PA" },
+                                          { label: "Paraíba", value: "PB" },
+                                          { label: "Paraná", value: "PR" },
+                                          { label: "Pernambuco", value: "PE" },
+                                          { label: "Piauí", value: "PI" },
+                                          { label: "Rio de Janeiro", value: "RJ" },
+                                          { label: "Rio Grande do Norte", value: "RN" },
+                                          { label: "Rio Grande do Sul", value: "RS" },
+                                          { label: "Rondônia", value: "RO" },
+                                          { label: "Roraima", value: "RR" },
+                                          { label: "Santa Catarina", value: "SC" },
+                                          { label: "São Paulo", value: "SP" },
+                                          { label: "Sergipe", value: "SE" },
+                                          { label: "Tocantins", value: "TO" }
+                                        ]
+                                      }
+
+                                      placeholder="Selecione o estado emissor"
+                                      className="m-auto"
+                                      value={this.state.rep_docestado}
+                                      onChange={(selectedOption) => {
+                                        this.setState({
+                                          rep_docestado: selectedOption,
+                                          rep_docestadoStr: selectedOption.value
+                                        });
+                                      }}
+
+                                      styles={{
+                                        control: (base) => ({
+                                          ...base,
+                                          width: 300,
+                                          height: 40
+                                        })
+                                      }}
+                                    />
+                                  </FormGroup>
+                                </Col>
+
+                              </> )
+
+                            : (this.state.rep_tipodoc.value == '3') &&
+
+                              ( <>
+
+                                 <Col className="m-2">
+                                  <FormGroup>
+                                    <label>País emissor</label>
+
+                                    <FormControl
+                                      value={this.state.rep_passpais}
+                                      style={{ height: 40, width: 300 }}
+                                      onChange={(e) => {
+                                        this.setState({ rep_passpais: e.target.value });
+                                      }}
+                                    />
+                                  </FormGroup>
+                                </Col>
+
+                                <Col className="m-2">
+                                  <FormGroup>
+                                    <label>Nacionalidade</label>
+
+                                    <FormControl
+                                      value={this.state.rep_passnaci}
+                                      style={{ height: 40, width: 300 }}
+                                      onChange={(e) => {
+                                        this.setState({ rep_passnaci: e.target.value });
+                                      }}
+                                    />
+                                  </FormGroup>
+                                </Col>
+
+                                <Col className="m-2">
+                                  <FormGroup>
+                                    <label>Naturalidade</label>
+
+                                    <FormControl
+                                      value={this.state.rep_passnatu}
+                                      style={{ height: 40, width: 300 }}
+                                      onChange={(e) => {
+                                        this.setState({ rep_passnatu: e.target.value });
+                                      }}
+                                    />
+                                  </FormGroup>
+                                </Col>
+
+                                <Col className="m-2">
+                                  <FormGroup>
+                                    <label>Tipo de Passaporte</label>
+
+                                    <FormControl
+                                      value={this.state.rep_passtipo}
+                                      style={{ height: 40, width: 300 }}
+                                      onChange={(e) => {
+                                        this.setState({ rep_passtipo: e.target.value });
+                                      }}
+                                    />
+                                  </FormGroup>
+                                </Col>
+
+                                <Col className="m-2">
+                                  <FormGroup>
+                                    <label>Data de validade</label>
+
+                                    <FormControl
+                                      type="date"
+                                      value={this.state.rep_passvalidade}
+                                      style={{ height: 40, width: 300 }}
+                                      onChange={(e) => {
+                                        this.setState({ rep_passvalidade: e.target.value });
+                                      }}
+                                    />
+                                  </FormGroup>
+                                </Col>
+
+                              </> )
+                          }
+                        </Row>
+                      </Container>
+                    </div>
                   </div>
 
-                  <input 
-                    style={{ "display": "block" }}
-                    type="file" 
-                    accept="image/png, image/jpeg" 
-                    onChange={(event) => this.uploadSelfie(event)} 
-                  />
-                  <br/>
-                  {
-                    (this.state.rep_selfie.length > 0) && (
-                      <div className="w-100 d-flex">
-                        <img 
-                          src={`data:image/jpeg;base64,${this.state.rep_selfie}`}
-                          style={{ maxWidth: '200px' }} 
-                        />
-                      </div>
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepComprovante && (
-
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Agora precisamos de uma foto do seu comprovante de residência em PNG ou JPG.
-                        </span>
-
-                        <input 
-                          style={{ "display": "block" }}
-                          type="file" 
-                          accept="image/png, image/jpeg" 
-                          onChange={(event) => this.uploadRepComprovante(event)} 
-                        />
-                        <br/>
-                        {
-                          (this.state.rep_comprovante.length > 0) && (
-                            <div className="w-100 d-flex">
-                              <img 
-                                src={`data:image/jpeg;base64,${this.state.rep_comprovante}`}
-                                alt="Comprovante de endereço"
-                                style={{ maxWidth: '200px' }} 
-                              />
-                              <Button
-                                variant="primary"
-                                className="mt-auto ml-auto" 
-                                onClick={ () => {
-                                  this.setState({ 
-                                    cadastro: "9"
-                                  });
-                                  localStorage.setItem("save", "9");
-                                }}
-                              >
-                                Continuar
-                              </Button>
-                            </div>
-                          )
-                        }
+                  <Button 
+                    className="float-right mt-3"
+                    disabled={
+                      this.state.rep_doc == "" ||
+                      this.state.rep_docverso == "" ||
+                      this.state.rep_docnumero == "" ||
+                      this.state.rep_docemissao == "" ||
+                      (
+                        (this.state.rep_tipodoc.value == '1' || this.state.rep_tipodoc.value == '2') ?
+                          (this.state.rep_docorgao == "" || this.state.rep_docestadoStr == "")
                         
-                      </div>
+                        :
 
-                    )
-                  }
-
-                </> )
-              }
-
-              {
-                (this.state.cadastro == "9") && ( <>
-                
-                  <hr className="divisoria" />
-
-                  <span className="ttAgencia">
-                    Informe seu CEP.
-                  </span>
-
-                  <input
-                    maxLength={9} // Limite do formato com máscara
-                    value={Formatar.cep_mask(this.state.rep_cep)}
-                    placeholder="00000-000"
-                    style={{ height: 40, width: "100%" }}
-                    onChange={(e) => {
-                      this.setState({ rep_cep: e.target.value })
-                    }}
-                    onKeyDown={(e) => {
-                      const cep = this.state.rep_cep;
-                      if (cep.length > 0 && e.key === "Enter") {
-                        if (cep.length === 9){
-                          this.consultarRepCEP();
-                        } else {
-                          alert("Por favor, termine de digitar o CEP.");
-                        }
-                      }
-                    }}
-                  />
-
-                  {
-                    this.state.liberarRepEnderecoCompleto && ( 
-
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Endereço completo
-                        </span>
-
-                        <input
-                          value={
-                            this.state.rep_endereco + ' ' + 
-                            this.state.rep_numero + ', ' + 
-                            this.state.rep_complemento + ((this.state.rep_complemento == "") ? '' : ', ') +
-                            this.state.rep_bairro + ', ' + 
-                            this.state.rep_cidade + ' - ' + 
-                            this.state.rep_estado + ' - CEP ' + 
-                            this.state.rep_cep
-                          }
-                          disabled
-                          style={{ height: 40, width: "100%" }}
-                        />
-                      </div>
-
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepProcuracao && (
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Precisamos da procuração do Representante em PDF.
-                        </span>
-
-                        <input 
-                          style={{ "display": "block" }}
-                          type="file" 
-                          accept="image/png, image/jpeg, application/pdf" 
-                          onChange={(event) => this.uploadProcuracao(event)} 
-                        />
-                        <br/>
-                        {
-                          (this.state.rep_procuracao.length > 0) && (
-                            <h6>PROCURAÇÃO CARREGADA COM SUCESSO</h6>
+                        (this.state.rep_tipodoc.value == '3') &&
+                          (
+                            this.state.rep_passpais == "" || 
+                            this.state.rep_passnaci == "" ||
+                            this.state.rep_passnatu == "" ||
+                            this.state.rep_passtipo == "" ||
+                            this.state.rep_passvalidade == ""
                           )
-                        }
-                      </div>
-                    )
-                  }
-
-                  {
-                    this.state.liberarRepPolitico && (
-                      <div className="mt-3">
-                        <span className="ttAgencia">
-                          Você é uma pessoa politicamente exposta? Fique tranquilo, isso não impossibilita sua abertura de conta.
-                        </span>
-
-                        <div className="w-100 d-flex">
-                        <input
-                          type="checkbox"
-                          // value="opcao3"
-                          // checked={selectedValue === 'opcao3'}
-                          onChange={() => {
-                            const rep_politico = !this.state.rep_politico;
-                            this.setState({ rep_politico });
-                            let value;
-                            if (rep_politico) {
-                              value = '1';
-                            } else {
-                              value = '0';
-                            }
-                            this.salvarDormente('politico', value);
-                          }}
-                        />
-                        &nbsp;&nbsp;Sim, eu sou politicamente exposto
-
-                        <Button 
-                          className="ml-auto"
-                          onClick={() => this.concluir()}
-                        >
-                          Concluir cadastro
-                        </Button>
-                        </div>
-
-
-                      </div>
-                    )
-                  }
+                      )
+                    }
+                    onClick={ () => {
+                      this.setState({ concluirModal: true });
+                    }}
+                  >
+                    Continuar
+                  </Button>
 
                 </> )
               }
-
             </div>
           </div>
 
-
           <Modal
+            centered
             size="lg"
             show={this.state.termoModal}
             onHide={() => this.setState({ termoModal: false })}
@@ -2727,9 +2479,9 @@ export default class CadastroPj extends Component {
           </Modal>
 
           <Modal
+            centered
             size="lg"
             show={this.state.cepModal}
-            // backdrop="static"
             onHide={() => this.setState({ cepModal: false, endereco: "", numero: "", complemento: "", bairro: "", cidade: "", estado: "" })}
           >
             <Modal.Header closeButton>
@@ -2842,11 +2594,8 @@ export default class CadastroPj extends Component {
                   if (this.state.numero == '' || this.state.endereco == '' || this.state.numero == '' || this.state.bairro == '' || this.state.cidade == '' || this.state.estado == '') {
                     alert('Por favor, complete o endereço de sua empresa.');
                   } else {
-                    // this.salvarEndereco();
                     this.setState({
                       cepModal: false,
-                      // liberarEnderecoCompleto: true,
-                      // liberarComprovante: true,
                     });
                   }
                 }}
@@ -2857,6 +2606,7 @@ export default class CadastroPj extends Component {
           </Modal>
 
           <Modal
+            centered
             size="lg"
             show={this.state.smsModal}
             onHide={() => this.setState({ smsModal: false })}
@@ -2865,19 +2615,18 @@ export default class CadastroPj extends Component {
               <Modal.Title>Enviamos um código via SMS para seu número. Informe o código.</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <Container>
-
-                  <input
-                    value={this.state.sms}
-                    style={{ height: 40, width: "100%" }}
-                    maxLength={6} // Limite do formato com máscara
-                    onChange={(e) => {
-                      const numericValue = e.target.value.replace(/\D/g, "");
-                      this.setState({ sms: numericValue.length > 0 ? numericValue : "" });
-                    }}
-                  />
-
-              </Container>
+              <div className="d-flex">
+                <input
+                  value={this.state.sms}
+                  style={{ height: 40, width: 100, textAlign: 'center' }}
+                  className="m-auto"
+                  maxLength={6}
+                  onChange={(e) => {
+                    const numericValue = e.target.value.replace(/\D/g, "");
+                    this.setState({ sms: numericValue.length > 0 ? numericValue : "" });
+                  }}
+                />
+              </div>
             </Modal.Body>
             <Modal.Footer>
               <Button
@@ -2892,6 +2641,7 @@ export default class CadastroPj extends Component {
           </Modal>
 
           <Modal
+            centered
             size="lg"
             show={this.state.tokenModal}
             onHide={() => this.setState({ tokenModal: false })}
@@ -2900,19 +2650,18 @@ export default class CadastroPj extends Component {
               <Modal.Title>Enviamos um token para seu e-mail. Informe o token.</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-              <Container>
-
-                  <input
-                    value={this.state.token}
-                    style={{ height: 40, width: "100%" }}
-                    maxLength={6}
-                    onChange={(e) => {
-                      const numericValue = e.target.value.replace(/\D/g, "");
-                      this.setState({ token: numericValue.length > 0 ? numericValue : "" });
-                    }}
-                  />
-
-              </Container>
+              <div className="d-flex">
+                <input
+                  value={this.state.token}
+                  style={{ height: 40, width: 100, textAlign: 'center' }}
+                  className="m-auto"
+                  maxLength={6}
+                  onChange={(e) => {
+                    const numericValue = e.target.value.replace(/\D/g, "");
+                    this.setState({ token: numericValue.length > 0 ? numericValue : "" });
+                  }}
+                />
+              </div>
             </Modal.Body>
             <Modal.Footer>
               <Button
@@ -2925,9 +2674,9 @@ export default class CadastroPj extends Component {
           </Modal>
 
           <Modal
+            centered
             size="lg"
             show={this.state.rep_cepModal}
-            // backdrop="static"
             onHide={() => this.setState({ rep_cepModal: false, rep_endereco: "", rep_numero: "", rep_complemento: "", rep_bairro: "", rep_cidade: "", rep_estado: "" })}
           >
             <Modal.Header closeButton>
@@ -3040,11 +2789,8 @@ export default class CadastroPj extends Component {
                   if (this.state.rep_numero == '' || this.state.rep_endereco == '' || this.state.rep_numero == '' || this.state.rep_bairro == '' || this.state.rep_cidade == '' || this.state.rep_estado == '') {
                     alert('Por favor, complete o endereço do representante.');
                   } else {
-                    // this.salvarRepEndereco();
                     this.setState({
                       rep_cepModal: false,
-                      // liberarRepEnderecoCompleto: true,
-                      // liberarRepProcuracao: true,
                     });
                   }
                 }}
@@ -3055,6 +2801,7 @@ export default class CadastroPj extends Component {
           </Modal>
 
           <Modal
+            centered
             size="md"
             show={this.state.statusModal}
             backdrop="static"
@@ -3085,6 +2832,40 @@ export default class CadastroPj extends Component {
                   this.setState({ statusModal: false, cnpj: "" });
                   localStorage.removeItem("cnpj");
                   localStorage.removeItem("save");
+                }}
+              >
+                Não
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+          <Modal
+            centered
+            size="md"
+            show={this.state.concluirModal}
+            backdrop="static"
+          >
+            <Modal.Body>
+              <Container>
+                Finalizar seu cadastro?
+              </Container>
+            </Modal.Body>
+            <Modal.Footer className="d-flex">
+              <Button
+                className="mr-auto"
+                variant="primary"
+                onClick={() => {
+                  this.concluir();
+                }}
+              >
+                Sim
+              </Button>
+
+              <Button
+                className="ml-auto"
+                variant="primary"
+                onClick={() => {
+                  this.setState({ concluirModal: false });
                 }}
               >
                 Não
