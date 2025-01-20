@@ -241,7 +241,7 @@ export default class CadastroPj extends Component {
       // Verifica se o arquivo é PNG ou JPG
       const validTypes = ["image/png", "image/jpeg"];
       if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
+        alert(i18n.t("cadastroPJ.alertArqFail"));
         this.setState({
           cartao: "", // Limpa a imagem em caso de erro
         });
@@ -303,7 +303,7 @@ export default class CadastroPj extends Component {
         }
       } else {
         // Caso o arquivo seja inválido
-        alert("Arquivo inválido. Apenas arquivos PDF são aceitos.");
+        alert(i18n.t("cadastroPj.alertArqFailType"));
         this.setState({
           contrato: "", // Limpa o estado em caso de erro
         });
@@ -318,7 +318,8 @@ export default class CadastroPj extends Component {
     if (file) {
       const validTypes = ["image/png", "image/jpeg"];
       if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
+        
+        alert(i18n.t("cadastroPJ.alertArqFail"));
         this.setState({
           rep_doc: "",
         });
@@ -347,7 +348,7 @@ export default class CadastroPj extends Component {
     if (file) {
       const validTypes = ["image/png", "image/jpeg"];
       if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
+        alert(i18n.t("cadastroPJ.alertArqFail"));
         this.setState({
           rep_docverso: "",
         });
@@ -376,7 +377,7 @@ export default class CadastroPj extends Component {
     if (file) {
       const validTypes = ["image/png", "image/jpeg"];
       if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
+        alert(i18n.t("cadastroPJ.alertArqFail"));
         this.setState({
           rep_selfie: "",
         });
@@ -405,7 +406,7 @@ export default class CadastroPj extends Component {
     if (file) {
       const validTypes = ["image/png", "image/jpeg"];
       if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
+        alert(i18n.t("cadastroPJ.alertArqFail"));
         this.setState({
           rep_comprovante: "",
         });
@@ -466,7 +467,7 @@ export default class CadastroPj extends Component {
         }
       } else {
         // Caso o arquivo seja inválido
-        alert("Arquivo inválido. Apenas arquivos PDF são aceitos.");
+        alert(i18n.t("cadastroPJ.alertArqFailType"));
         this.setState({
           rep_procuracao: "", // Limpa o estado em caso de erro
         });
@@ -493,7 +494,7 @@ export default class CadastroPj extends Component {
         this.setState({ termoModal: true });
       } else {
         // alert("CNPJ invalido, tente novamente");
-        this.props.alerts("Erro", "CNPJ inválido, tente novamente", "warning");
+        this.props.alerts(i18n.t("cadastroPJ.erro"), i18n.t("cadastroPJ.cpnjFail"), "warning");
       }
     });
   };
@@ -511,7 +512,7 @@ export default class CadastroPj extends Component {
       Funcoes.Geral_API(data).then((res) => {
         if (res) {
           if (res.erro) {
-            alert("CEP inválido, tente novamente");
+            alert(i18n.t("cadastroPJ.cepInvalido"));
             this.setState({ cepLoading: false });
           } else {
             this.setState({
@@ -526,12 +527,12 @@ export default class CadastroPj extends Component {
           }
         } else {
           this.setState({ cepLoading: false });
-          alert("Erro ao consultar CEP, tente novamente");
+          alert(i18n.t("cadastroPJ.cepError"));
         }
       });
     } else {
       this.setState({ cepLoading: false });
-      alert("CEP inválido");
+      alert(i18n.t("cadastroPJ.cepInvalido"));
     }
   };
 
@@ -582,7 +583,7 @@ export default class CadastroPj extends Component {
       Funcoes.Geral_API(data).then((res) => {
         if (res) {
           if (res.erro) {
-            alert("CEP inválido, tente novamente");
+            alert(i18n.t("cadastroPJ.cepInvalido"));
             this.setState({ rep_cepLoading: false });
           } else {
             this.setState({
@@ -597,12 +598,12 @@ export default class CadastroPj extends Component {
           }
         } else {
           this.setState({ rep_cepLoading: false });
-          alert("Erro ao consultar CEP, tente novamente");
+          alert(i18n.t("cadastroPJ.cepError"));
         }
       });
     } else {
       this.setState({ rep_cepLoading: false });
-      alert("CEP inválido");
+      alert(i18n.t("cadastroPJ.cepInvalido"));
     }
   };
 
@@ -619,7 +620,7 @@ export default class CadastroPj extends Component {
       if (res) {
         this.setState({ smsModal: true });
       } else {
-        alert("Erro ao enviar SMS.");
+        alert(i18n.t("cadastroPJ.smsErro"));
       }
       this.setState({ rep_celularLoading: false });
     });
@@ -640,7 +641,7 @@ export default class CadastroPj extends Component {
         this.salvarDormente("representante_celular", this.state.rep_celular);
         this.setState({ smsModal: false, celular_validado: true });
       } else {
-        alert("Código inválido.");
+        alert(i18n.t("cadastroPJ.codInvalido"));
       }
       this.setState({ rep_celularLoading: false });
     });
@@ -659,7 +660,7 @@ export default class CadastroPj extends Component {
       if (res) {
         this.setState({ tokenModal: true });
       } else {
-        alert("Erro ao enviar Token.");
+        alert(i18n.t("cadastroPJ.erroToken"));
       }
       this.setState({ rep_emailLoading: false });
     });
@@ -680,7 +681,7 @@ export default class CadastroPj extends Component {
         this.salvarDormente("representante_email", this.state.rep_celular);
         this.setState({ tokenModal: false, email_validado: true });
       } else {
-        alert("Token inválido.");
+        alert(i18n.t("cadastroPJ.tokenInvalido"));
       }
       this.setState({ rep_emailLoading: false });
     });
@@ -750,7 +751,7 @@ export default class CadastroPj extends Component {
       representante_nome: this.state.rep_nome.trim(),
       representante_cpf: this.state.rep_cpf,
       representante_nomemae: this.state.rep_nomeMae.trim(),
-      representante_data_nascimento: this.state.rep_data + ' 00:00:00',
+      representante_data_nascimento: this.state.rep_data + " 00:00:00",
       representante_sexo: this.state.rep_genero.value,
       representante_estado_civil: this.state.rep_estadocivil.label,
 
@@ -781,12 +782,12 @@ export default class CadastroPj extends Component {
   };
 
   salvarEmailPhone = () => {
-    const { rep_email, rep_celular }  = this.state;
+    const { rep_email, rep_celular } = this.state;
     if (rep_email.length > 0 && rep_celular.length > 0) {
-      this.salvarDormente('representante_email', rep_email);
-      this.salvarDormente('representante_celular', rep_celular);
+      this.salvarDormente("representante_email", rep_email);
+      this.salvarDormente("representante_celular", rep_celular);
     }
-  }
+  };
 
   salvarSenha = () => {
     const { senha1, senha2 } = this.state;
@@ -799,7 +800,7 @@ export default class CadastroPj extends Component {
         alert("As senhas não são iguais. Tente novamente.");
       }
     }
-  }
+  };
 
   salvarDoc = () => {
     const tipo = this.state.rep_tipodoc.value;
@@ -808,52 +809,52 @@ export default class CadastroPj extends Component {
       idoc: this.state.rep_tipodoc.value,
       representante_imagedoc: this.state.rep_doc,
       representante_imagedoc_verso: this.state.rep_docverso,
-    }
+    };
 
-    if (tipo == '1') {
-      dados['representante_numerorg'] = this.state.rep_docnumero;
-      dados['representante_datarg'] = this.state.rep_docemissao;
-      dados['representante_orgaorg'] = this.state.rep_docorgao;
-      dados['representante_ufrg'] = this.state.rep_docestadoStr;
-    } else if (tipo == '2') {
-      dados['representante_numerocnh'] = this.state.rep_docnumero;
-      dados['representante_datacnh'] = this.state.rep_docemissao;
-      dados['representante_orgaocnh'] = this.state.rep_docorgao;
-      dados['representante_ufcnh'] = this.state.rep_docestadoStr;
-    } else if (tipo == '3') {
-      dados['numero_passaporte'] = this.state.rep_docnumero;
-      dados['data_de_emissao_passaporte'] = this.state.rep_docemissao;
-      dados['pais_emissor_passaporte'] = this.state.rep_passpais;
-      dados['nacionalidade_passaporte'] = this.state.rep_passnaci;
-      dados['naturalidade_passaporte'] = this.state.rep_passnatu;
-      dados['tipo_passaporte'] = this.state.rep_passtipo;
-      dados['validade_passaporte'] = this.state.rep_passvalidade;
+    if (tipo == "1") {
+      dados["representante_numerorg"] = this.state.rep_docnumero;
+      dados["representante_datarg"] = this.state.rep_docemissao;
+      dados["representante_orgaorg"] = this.state.rep_docorgao;
+      dados["representante_ufrg"] = this.state.rep_docestadoStr;
+    } else if (tipo == "2") {
+      dados["representante_numerocnh"] = this.state.rep_docnumero;
+      dados["representante_datacnh"] = this.state.rep_docemissao;
+      dados["representante_orgaocnh"] = this.state.rep_docorgao;
+      dados["representante_ufcnh"] = this.state.rep_docestadoStr;
+    } else if (tipo == "3") {
+      dados["numero_passaporte"] = this.state.rep_docnumero;
+      dados["data_de_emissao_passaporte"] = this.state.rep_docemissao;
+      dados["pais_emissor_passaporte"] = this.state.rep_passpais;
+      dados["nacionalidade_passaporte"] = this.state.rep_passnaci;
+      dados["naturalidade_passaporte"] = this.state.rep_passnatu;
+      dados["tipo_passaporte"] = this.state.rep_passtipo;
+      dados["validade_passaporte"] = this.state.rep_passvalidade;
     } else {
-      alert('Erro: tipo de documento não selecionado');
+      alert("Erro: tipo de documento não selecionado");
       return;
     }
 
     Object.entries(dados).forEach(([key, value]) => {
-      if (value !== '' && value !== null && value !== undefined) {
+      if (value !== "" && value !== null && value !== undefined) {
         this.salvarDormente(key, value);
       }
     });
 
     this.concluir();
-  }
+  };
 
   concluir = () => {
     const data = {
       url: "dormente-pj/concluir",
       data: {
-        "documento": this.state.cnpj,
-        "representante": 1,
-        "nome_banco": process.env.NOME_BANCO,
+        documento: this.state.cnpj,
+        representante: 1,
+        nome_banco: process.env.NOME_BANCO,
 
         so: this.state.os,
         brand: this.state.browser,
         model: this.state.cpu,
-        identificador: this.state.identificador
+        identificador: this.state.identificador,
       },
       method: "POST",
     };
@@ -861,11 +862,13 @@ export default class CadastroPj extends Component {
       if (!res) {
         alert("Falha ao cadastrar informações, tente novamente.");
       } else {
-        alert("Cadastro realizado com sucesso, em até 3 dias sua conta sera aprovada");
+        alert(
+          "Cadastro realizado com sucesso, em até 3 dias sua conta sera aprovada"
+        );
         window.location.href = "/";
       }
     });
-  }
+  };
 
   render() {
     if (deviceType == "browser") {
@@ -1521,8 +1524,6 @@ export default class CadastroPj extends Component {
                           </FormGroup>
                         </Col>
 
-                        
-
                         <Col className="m-2">
                           <FormGroup>
                             <label>Nome completo da mãe do Representante</label>
@@ -1532,7 +1533,6 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ rep_nomeMae: e.target.value })
                               }
-                             
                             />
                           </FormGroup>
                         </Col>
@@ -2023,8 +2023,11 @@ export default class CadastroPj extends Component {
                     disabled={
                       !this.state.email_validado || !this.state.celular_validado
                     }
-                    onClick={ () => {
-                      if (this.state.email_validado && this.state.celular_validado) {
+                    onClick={() => {
+                      if (
+                        this.state.email_validado &&
+                        this.state.celular_validado
+                      ) {
                         this.salvarEmailPhone();
                         this.setState({ cadastro: "4" });
                         localStorage.setItem("save", "4");
@@ -2134,13 +2137,11 @@ export default class CadastroPj extends Component {
 
                     <div className="d-flex">
                       <Select
-                        options={
-                          [
-                            { label: "RG", value: "1" },
-                            { label: "CNH", value: "2" },
-                            { label: "Passaporte", value: "3" }
-                          ]
-                        }
+                        options={[
+                          { label: "RG", value: "1" },
+                          { label: "CNH", value: "2" },
+                          { label: "Passaporte", value: "3" },
+                        ]}
                         placeholder="Selecione seu tipo de documento"
                         className="m-auto"
                         value={this.state.rep_tipodoc}
