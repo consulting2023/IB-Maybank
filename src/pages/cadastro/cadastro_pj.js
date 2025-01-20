@@ -705,7 +705,7 @@ export default class CadastroPj extends Component {
     };
     Funcoes.Geral_API(data).then((res) => {
       if (!res) {
-        alert("Falha ao cadastrar informações, tente novamente.");
+        alert(i18n.t("cadastroPJ.tokenInvalido"));
         // alert("Falha ao cadastrar informações, tente novamente." + campo );
       }
     });
