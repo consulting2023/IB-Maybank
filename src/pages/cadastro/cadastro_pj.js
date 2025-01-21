@@ -881,7 +881,7 @@ export default class CadastroPj extends Component {
             <ul className="nav navbar-nav">
               <li>
                 <Button onClick={() => (window.location.href = "/")}>
-                  Retornar
+                {i18n.t("cadastroPj.retornar")}
                 </Button>
               </li>
             </ul>
