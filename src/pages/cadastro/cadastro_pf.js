@@ -627,14 +627,13 @@ export default class CadastroPf extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
-      console.log('res concluir', res);
       if (!res) {
         alert("Falha ao cadastrar informações, tente novamente.");
       } else {
-        // localStorage.removeItem("cpf");
-        // localStorage.removeItem("savepf");
+        localStorage.removeItem("cpf");
+        localStorage.removeItem("savepf");
         alert("Cadastro realizado com sucesso, em até 3 dias sua conta sera aprovada");
-        // window.location.href = "/";
+        window.location.href = "/";
       }
       this.setState({ concluirLoading: false });
     });
