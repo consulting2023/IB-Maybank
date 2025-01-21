@@ -26,16 +26,26 @@ import {
   deviceType,
 } from "react-device-detect";
 import { UAParser } from "ua-parser-js";
+import { browserName } from "react-device-detect";
 import Produtos from "../../constants/Produtos";
 import i18n from "../../tradutor/tradutor";
 import LangButton from "../../components/langButton/LangButton";
 import Select from "react-select";
 import * as Formatar from "../../constants/Formatar";
+import { toHumanSize } from "i18n-js";
 export default class CadastroPj extends Component {
   constructor() {
     super();
     this.state = {
       cadastro: "0",
+
+      os: "",
+      browser: "",
+      cpu: "",
+      identificador: "",
+
+      ipUser: "",
+      tokenApp: "",
 
       agencias: [],
       valueAgencia: {
@@ -44,7 +54,7 @@ export default class CadastroPj extends Component {
         nome: "",
       },
       cnpj: "",
-      termo: "",
+      termo: {},
       termoModal: false,
       celEmpresa: "",
       emailEmpresa: "",
@@ -74,8 +84,10 @@ export default class CadastroPj extends Component {
       rep_cpf: "",
       rep_nomeMae: "",
       rep_data: "",
-      rep_genero: "",
-      rep_estadocivil: "",
+      rep_genero: {},
+      rep_generoStr: "",
+      rep_estadocivil: {},
+      rep_estadocivilStr: "",
 
       rep_cep: "",
       rep_cepLoading: false,
@@ -127,6 +139,9 @@ export default class CadastroPj extends Component {
       statusModal: false,
 
       concluirModal: false,
+      concluirLoading: false,
+
+      geralLoading: false,
     };
 
     this.inputComprovante = React.createRef();
@@ -143,6 +158,14 @@ export default class CadastroPj extends Component {
     this.agCadastro();
     this.buscarTermoUso();
     this.checkStatus();
+
+    Funcoes.getUserIp().then((res) => {
+      this.setState({ ipUser: res });
+    });
+
+    Funcoes.getUniqueToken().then((res) => {
+      this.setState({ tokenApp: res });
+    });
 
     UAParser()
       .withClientHints()
@@ -161,7 +184,7 @@ export default class CadastroPj extends Component {
 
   checkStatus = () => {
     const cnpj = localStorage.getItem("cnpj");
-    const save = localStorage.getItem("save");
+    const save = localStorage.getItem("savepj");
     if (cnpj && save) {
       this.setState({ cnpj: cnpj, statusModal: true });
     }
@@ -192,16 +215,10 @@ export default class CadastroPj extends Component {
     });
   };
 
-  handleFocus = (nextInputRef) => {
-    if (nextInputRef && nextInputRef.current) {
-      nextInputRef.current.focus();
-    }
-  };
-
   uploadComprovante = (e) => {
-    const file = e.target.files[0]; // Pega o arquivo selecionado
+    const file = e.target.files[0];
     if (file) {
-      const validTypes = ["image/png", "image/jpeg", "application/pdf"]; // Tipos válidos
+      const validTypes = ["image/png", "image/jpeg", "application/pdf"];
 
       if (validTypes.includes(file.type)) {
         const reader = new FileReader();
@@ -210,12 +227,10 @@ export default class CadastroPj extends Component {
           let base64String = "";
 
           if (file.type === "application/pdf") {
-            // Para PDFs
             base64String = btoa(
               String.fromCharCode(...new Uint8Array(reader.result))
             );
           } else {
-            // Para imagens (PNG, JPEG)
             base64String = reader.result.replace(
               /^data:image\/(png|jpeg);base64,/,
               ""
@@ -227,7 +242,6 @@ export default class CadastroPj extends Component {
           });
         };
 
-        // Ler o arquivo como uma URL de dados (base64)
         reader.readAsDataURL(file);
       }
     } else {
@@ -236,14 +250,13 @@ export default class CadastroPj extends Component {
   };
 
   uploadCartao = (e) => {
-    const file = e.target.files[0]; // Pega o arquivo selecionado
+    const file = e.target.files[0];
     if (file) {
-      // Verifica se o arquivo é PNG ou JPG
       const validTypes = ["image/png", "image/jpeg"];
       if (!validTypes.includes(file.type)) {
         alert(i18n.t("cadastroPJ.alertArqFail"));
         this.setState({
-          cartao: "", // Limpa a imagem em caso de erro
+          cartao: "",
         });
       } else {
         const reader = new FileReader();
@@ -258,7 +271,6 @@ export default class CadastroPj extends Component {
           });
         };
 
-        // Ler o arquivo como uma URL de dados (base64)
         reader.readAsDataURL(file);
       }
     } else {
@@ -267,7 +279,7 @@ export default class CadastroPj extends Component {
   };
 
   uploadContrato = (e) => {
-    const file = e.target.files[0]; // Pega o arquivo selecionado
+    const file = e.target.files[0];
     if (file) {
       const validTypes = ["application/pdf"];
 
@@ -278,12 +290,10 @@ export default class CadastroPj extends Component {
           let base64String = "";
 
           if (file.type === "application/pdf") {
-            // Para PDFs
             base64String = btoa(
               String.fromCharCode(...new Uint8Array(reader.result))
             );
           } else {
-            // Para imagens (PNG, JPEG)
             base64String = reader.result.replace(
               /^data:image\/(png|jpeg);base64,/,
               ""
@@ -295,21 +305,19 @@ export default class CadastroPj extends Component {
           });
         };
 
-        // Escolhe o método de leitura com base no tipo
         if (file.type === "application/pdf") {
-          reader.readAsArrayBuffer(file); // PDFs precisam de ArrayBuffer
+          reader.readAsArrayBuffer(file);
         } else {
-          reader.readAsDataURL(file); // Imagens podem ser lidas como Data URL
+          reader.readAsDataURL(file);
         }
       } else {
-        // Caso o arquivo seja inválido
         alert(i18n.t("cadastroPj.alertArqFailType"));
         this.setState({
-          contrato: "", // Limpa o estado em caso de erro
+          contrato: "",
         });
       }
     } else {
-      this.setState({ contrato: "" }); // Limpa o estado caso nenhum arquivo seja selecionado
+      this.setState({ contrato: "" });
     }
   };
 
@@ -431,7 +439,7 @@ export default class CadastroPj extends Component {
   };
 
   uploadProcuracao = (e) => {
-    const file = e.target.files[0]; // Pega o arquivo selecionado
+    const file = e.target.files[0];
     if (file) {
       const validTypes = ["application/pdf"];
 
@@ -442,15 +450,8 @@ export default class CadastroPj extends Component {
           let base64String = "";
 
           if (file.type === "application/pdf") {
-            // Para PDFs
             base64String = btoa(
               String.fromCharCode(...new Uint8Array(reader.result))
-            );
-          } else {
-            // Para imagens (PNG, JPEG)
-            base64String = reader.result.replace(
-              /^data:image\/(png|jpeg);base64,/,
-              ""
             );
           }
 
@@ -459,25 +460,22 @@ export default class CadastroPj extends Component {
           });
         };
 
-        // Escolhe o método de leitura com base no tipo
         if (file.type === "application/pdf") {
-          reader.readAsArrayBuffer(file); // PDFs precisam de ArrayBuffer
-        } else {
-          reader.readAsDataURL(file); // Imagens podem ser lidas como Data URL
+          reader.readAsArrayBuffer(file);
         }
       } else {
-        // Caso o arquivo seja inválido
         alert(i18n.t("cadastroPJ.alertArqFailType"));
         this.setState({
-          rep_procuracao: "", // Limpa o estado em caso de erro
+          rep_procuracao: "",
         });
       }
     } else {
-      this.setState({ rep_procuracao: "" }); // Limpa o estado caso nenhum arquivo seja selecionado
+      this.setState({ rep_procuracao: "" });
     }
   };
 
   validarCNPJ = () => {
+    this.setState({ geralLoading: true });
     const data = {
       url: "pessoajuridica/valida-cnpj",
       data: {
@@ -496,6 +494,7 @@ export default class CadastroPj extends Component {
         // alert("CNPJ invalido, tente novamente");
         this.props.alerts(i18n.t("cadastroPJ.erro"), i18n.t("cadastroPJ.cpnjFail"), "warning");
       }
+      this.setState({ geralLoading: false });
     });
   };
 
@@ -538,33 +537,33 @@ export default class CadastroPj extends Component {
 
   nomeParaSigla = (estado) => {
     const estados = {
-      Acre: "AC",
-      Alagoas: "AL",
-      Amapá: "AP",
-      Amazonas: "AM",
-      Bahia: "BA",
-      Ceará: "CE",
+      "Acre": "AC",
+      "Alagoas": "AL",
+      "Amapá": "AP",
+      "Amazonas": "AM",
+      "Bahia": "BA",
+      "Ceará": "CE",
       "Espírito Santo": "ES",
-      Goiás: "GO",
-      Maranhão: "MA",
+      "Goiás": "GO",
+      "Maranhão": "MA",
       "Mato Grosso": "MT",
       "Mato Grosso do Sul": "MS",
       "Minas Gerais": "MG",
-      Pará: "PA",
-      Paraíba: "PB",
-      Paraná: "PR",
-      Pernambuco: "PE",
-      Piauí: "PI",
+      "Pará": "PA",
+      "Paraíba": "PB",
+      "Paraná": "PR",
+      "Pernambuco": "PE",
+      "Piauí": "PI",
       "Rio de Janeiro": "RJ",
       "Rio Grande do Norte": "RN",
       "Rio Grande do Sul": "RS",
-      Rondônia: "RO",
-      Roraima: "RR",
+      "Rondônia": "RO",
+      "Roraima": "RR",
       "São Paulo": "SP",
       "Santa Catarina": "SC",
       "São João do Sul": "SE",
-      Sergipe: "SE",
-      Tocantins: "TO",
+      "Sergipe": "SE",
+      "Tocantins": "TO",
     };
 
     return estados[estado] || "Estado não encontrado";
@@ -696,6 +695,12 @@ export default class CadastroPj extends Component {
         valor: valor,
         representante: 1,
 
+        termoId: this.state.termo.id,
+        ip: this.state.ipUser,
+        token: this.state.tokenApp,
+        aparelho: "IB: " + browserName,
+        chave: this.state.termo.chave,
+
         so: this.state.os,
         brand: this.state.browser,
         model: this.state.cpu,
@@ -712,6 +717,7 @@ export default class CadastroPj extends Component {
   };
 
   salvarEmpresaInfo = () => {
+    this.setState({ geralLoading: true });
     const dados = {
       telefone: this.state.celEmpresa.replace(/\s+/g, ""),
       email: this.state.emailEmpresa,
@@ -742,18 +748,22 @@ export default class CadastroPj extends Component {
       }
     });
 
-    this.setState({ cadastro: "2" });
-    localStorage.setItem("save", "2");
+    localStorage.setItem("savepj", "2");
+    this.setState({ 
+      cadastro: "2",
+      geralLoading: false,
+    });
   };
 
   salvarRepresentanteInfo = () => {
+    this.setState({ geralLoading: true });
     const dados = {
       representante_nome: this.state.rep_nome.trim(),
       representante_cpf: this.state.rep_cpf,
       representante_nomemae: this.state.rep_nomeMae.trim(),
-      representante_data_nascimento: this.state.rep_data + " 00:00:00",
-      representante_sexo: this.state.rep_genero.value,
-      representante_estado_civil: this.state.rep_estadocivil.label,
+      representante_data_nascimento: this.state.rep_data + ' 00:00:00',
+      representante_sexo: this.state.rep_generoStr,
+      representante_estado_civil: this.state.rep_estadocivilStr,
 
       representante_cep: this.state.rep_cep,
       representante_endereco: this.state.rep_endereco,
@@ -769,40 +779,46 @@ export default class CadastroPj extends Component {
       politico: this.state.rep_politico,
     };
 
-    console.log(dados);
-
     Object.entries(dados).forEach(([key, value]) => {
       if (value !== "" && value !== null && value !== undefined) {
         this.salvarDormente(key, value);
       }
     });
 
-    this.setState({ cadastro: "3" });
-    localStorage.setItem("save", "3");
+    localStorage.setItem("savepj", "3");
+    this.setState({ 
+      cadastro: "3",
+      geralLoading: false
+    });
   };
 
   salvarEmailPhone = () => {
+    this.setState({ geralLoading: true });
     const { rep_email, rep_celular } = this.state;
     if (rep_email.length > 0 && rep_celular.length > 0) {
       this.salvarDormente("representante_email", rep_email);
       this.salvarDormente("representante_celular", rep_celular);
     }
+    this.setState({ geralLoading: false });
   };
 
   salvarSenha = () => {
+    this.setState({ geralLoading: true });
     const { senha1, senha2 } = this.state;
     if (senha1.length == 6 && senha2.length == 6) {
       if (senha1 === senha2) {
         this.salvarDormente("senha", senha1);
         this.setState({ cadastro: "5" });
-        localStorage.setItem("save", "5");
+        localStorage.setItem("savepj", "5");
       } else {
         alert("As senhas não são iguais. Tente novamente.");
       }
     }
+    this.setState({ geralLoading: false });
   };
 
   salvarDoc = () => {
+    this.setState({ geralLoading: true });
     const tipo = this.state.rep_tipodoc.value;
 
     const dados = {
@@ -840,16 +856,26 @@ export default class CadastroPj extends Component {
       }
     });
 
-    this.concluir();
+    this.setState({
+      concluirModal: true,
+      geralLoading: false
+    })
   };
 
   concluir = () => {
+    this.setState({ concluirLoading: true });
     const data = {
       url: "dormente-pj/concluir",
       data: {
         documento: this.state.cnpj,
         representante: 1,
         nome_banco: process.env.NOME_BANCO,
+
+        termoId: this.state.termo.id,
+        ip: this.state.ipUser,
+        token: this.state.tokenApp,
+        aparelho: "IB: " + browserName,
+        chave: this.state.termo.chave,
 
         so: this.state.os,
         brand: this.state.browser,
@@ -862,9 +888,9 @@ export default class CadastroPj extends Component {
       if (!res) {
         alert("Falha ao cadastrar informações, tente novamente.");
       } else {
-        alert(
-          "Cadastro realizado com sucesso, em até 3 dias sua conta sera aprovada"
-        );
+        localStorage.removeItem("cnpj");
+        localStorage.removeItem("savepj");
+        alert("Cadastro realizado com sucesso, em até 3 dias sua conta sera aprovada");
         window.location.href = "/";
       }
     });
@@ -912,6 +938,7 @@ export default class CadastroPj extends Component {
                         });
                       }}
                       isSearchable
+                      isDisabled={this.state.geralLoading}
                     />
                   </FormGroup>
 
@@ -926,22 +953,40 @@ export default class CadastroPj extends Component {
                         const cnpj = e.target.value.replace(/\D/g, "");
                         this.setState({ cnpj });
                       }}
+                      disabled={this.state.geralLoading}
                     />
                   </FormGroup>
 
-                  <Button
-                    className="float-right mt-3"
-                    disabled={
-                      this.state.cnpj.length < 14 ||
-                      this.state.valueAgencia.numero == "" ||
-                      this.state.valueAgencia.id == ""
-                    }
-                    onClick={() => {
-                      this.validarCNPJ();
-                    }}
-                  >
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button
+                        className="float-right mt-3"
+                        disabled={
+                          this.state.cnpj.length < 14 ||
+                          this.state.valueAgencia.numero == "" ||
+                          this.state.valueAgencia.id == ""
+                        }
+                        onClick={() => {
+                          this.validarCNPJ();
+                        }}
+                      >
                     Continuar
                   </Button>
+
+                    </> )
+                  }
+                  
                 </>
               )}
 
@@ -978,6 +1023,7 @@ export default class CadastroPj extends Component {
                                       : "",
                                 });
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -993,6 +1039,7 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ emailEmpresa: e.target.value })
                               }
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1008,6 +1055,7 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ razaoSocial: e.target.value })
                               }
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1023,6 +1071,7 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ nomeFantasia: e.target.value })
                               }
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1042,6 +1091,7 @@ export default class CadastroPj extends Component {
                                   inscricaoEstadual: e.target.value,
                                 })
                               }
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1075,6 +1125,7 @@ export default class CadastroPj extends Component {
                                 // Atualiza o estado com o valor formatado
                                 this.setState({ faturamento: formattedValue });
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1186,6 +1237,7 @@ export default class CadastroPj extends Component {
                                   height: 40,
                                 }),
                               }}
+                              isDisabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1201,6 +1253,7 @@ export default class CadastroPj extends Component {
                               onChange={(e) => {
                                 this.setState({ dataAbertura: e.target.value });
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1217,6 +1270,7 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ cnae: e.target.value })
                               }
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1234,6 +1288,7 @@ export default class CadastroPj extends Component {
                                 onChange={(e) => {
                                   this.setState({ cep: e.target.value });
                                 }}
+                                disabled={this.state.geralLoading}
                               />
 
                               {this.state.cepLoading ? (
@@ -1250,7 +1305,10 @@ export default class CadastroPj extends Component {
                                 <>
                                   <Button
                                     className="ml-2"
-                                    disabled={this.state.cep.length < 9}
+                                    disabled={
+                                      this.state.cep.length < 9 ||
+                                      this.state.geralLoading
+                                    }
                                     onClick={() => {
                                       if (this.state.cep.length == 9) {
                                         this.setState({ cepLoading: true });
@@ -1304,6 +1362,7 @@ export default class CadastroPj extends Component {
                                 onClick={() => {
                                   this.inputComprovante.current.click();
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Escolher arquivo
                               </Button>
@@ -1313,6 +1372,7 @@ export default class CadastroPj extends Component {
                                 onClick={() => {
                                   this.setState({ comprovante: "" });
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Não tenho
                               </Button>
@@ -1353,6 +1413,7 @@ export default class CadastroPj extends Component {
                                 onClick={() => {
                                   this.inputCartao.current.click();
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Escolher arquivo
                               </Button>
@@ -1360,10 +1421,9 @@ export default class CadastroPj extends Component {
                                 active={this.state.cartao == ""}
                                 className="mx-1"
                                 onClick={() => {
-                                  // this.setState({ cadastro: "3" });
-                                  // localStorage.setItem("save", "3");
                                   this.setState({ cartao: "" });
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Não tenho
                               </Button>
@@ -1403,6 +1463,7 @@ export default class CadastroPj extends Component {
                                 onClick={() => {
                                   this.inputContrato.current.click();
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Escolher arquivo
                               </Button>
@@ -1429,32 +1490,49 @@ export default class CadastroPj extends Component {
                     </Container>
                   </div>
 
-                  <Button
-                    className="float-right mt-3"
-                    disabled={
-                      this.state.celEmpresa.length < 14 ||
-                      this.state.emailEmpresa == "" ||
-                      this.state.razaoSocial.trim() == "" ||
-                      this.state.nomeFantasia.trim() == "" ||
-                      this.state.inscricaoEstadual.trim() == "" ||
-                      this.state.faturamento.trim.length == "R$ 0,00" ||
-                      this.state.contribuicao == "" ||
-                      this.state.dataAbertura == "" ||
-                      this.state.cnae == "" ||
-                      this.state.cep == "" ||
-                      this.state.endereco == "" ||
-                      this.state.numero == "" ||
-                      this.state.bairro == "" ||
-                      this.state.cidade == "" ||
-                      this.state.estado == "" ||
-                      this.state.contrato == ""
-                    }
-                    onClick={() => {
-                      this.salvarEmpresaInfo();
-                    }}
-                  >
-                    Continuar
-                  </Button>
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button
+                        className="float-right mt-3"
+                        disabled={
+                          this.state.celEmpresa.length < 14 ||
+                          this.state.emailEmpresa == "" ||
+                          this.state.razaoSocial.trim() == "" ||
+                          this.state.nomeFantasia.trim() == "" ||
+                          this.state.inscricaoEstadual.trim() == "" ||
+                          this.state.faturamento.trim.length == "R$ 0,00" ||
+                          this.state.contribuicao == "" ||
+                          this.state.dataAbertura == "" ||
+                          this.state.cnae == "" ||
+                          this.state.cep == "" ||
+                          this.state.endereco == "" ||
+                          this.state.numero == "" ||
+                          this.state.bairro == "" ||
+                          this.state.cidade == "" ||
+                          this.state.estado == "" ||
+                          this.state.contrato == ""
+                        }
+                        onClick={() => {
+                          this.salvarEmpresaInfo();
+                        }}
+                      >
+                        Continuar
+                      </Button>
+
+                    </> )
+                  }
+
                 </>
               )}
 
@@ -1478,15 +1556,7 @@ export default class CadastroPj extends Component {
                               onChange={(e) => {
                                 this.setState({ rep_nome: e.target.value });
                               }}
-                              // onKeyDown={(e) => {
-                              //   const rep_nome = this.state.rep_nome.trim();
-                              //   if (rep_nome.length > 0 && e.key === "Enter") {
-                              //     this.salvarDormente('representante_nome', rep_nome)
-                              //     this.setState({ liberarRepCpf: true }, () => {
-                              //       this.handleFocus(this.inputRepCpf);
-                              //     });
-                              //   }
-                              // }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1507,19 +1577,7 @@ export default class CadastroPj extends Component {
                                 );
                                 this.setState({ rep_cpf });
                               }}
-                              // onKeyDown={(e) => {
-                              //   const rep_cpf = this.state.rep_cpf;
-                              //   if (rep_cpf.length > 0 && e.key === "Enter") {
-                              //     if(rep_cpf.length === 11) {
-                              //       this.salvarDormente('representante_cpf', rep_cpf);
-                              //       this.setState({ liberarRepCelular: true }, () => {
-                              //         this.handleFocus(this.inputRepCelular);
-                              //       });
-                              //     } else {
-                              //       alert("Por favor, termine de digitar o CPF.");
-                              //     }
-                              //   }
-                              // }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1533,6 +1591,7 @@ export default class CadastroPj extends Component {
                               onChange={(e) =>
                                 this.setState({ rep_nomeMae: e.target.value })
                               }
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1546,14 +1605,11 @@ export default class CadastroPj extends Component {
                               value={this.state.rep_data}
                               style={{ height: 40, width: 300 }}
                               onChange={(e) => {
-                                // this.salvarDormente('representante_data_nascimento', e.target.value + ' 00:00:00')
                                 this.setState({
                                   rep_data: e.target.value,
-                                  //   liberarRepGenero: true
-                                  // }, () => {
-                                  //   this.handleFocus(this.inputRepGenero);
                                 });
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1573,8 +1629,11 @@ export default class CadastroPj extends Component {
                               onChange={(selectedOption) => {
                                 this.setState({
                                   rep_genero: selectedOption,
+                                  rep_generoStr: selectedOption.value,
                                 });
                               }}
+                              isDisabled={this.state.geralLoading}
+
                               styles={{
                                 control: (base) => ({
                                   ...base,
@@ -1591,23 +1650,26 @@ export default class CadastroPj extends Component {
                             <label>Estado civil do Representante</label>
 
                             <Select
-                              options={[
-                                { label: "Solteiro" },
-                                { label: "Casado" },
-                                { label: "Separado" },
-                                { label: "Divorciado" },
-                                { label: "Viúvo" },
-                                { label: "União Estável" },
-                              ]}
+                              options={
+                                [
+                                  { label: "Solteiro", value: "Solteiro" },
+                                  { label: "Casado", value: "Casado" },
+                                  { label: "Separado", value: "Separado" },
+                                  { label: "Divorciado", value: "Divorciado" },
+                                  { label: "Viúvo", value: "Viúvo" },
+                                  { label: "União Estável", value: "União Estável" },
+                                ]
+                              }
                               placeholder="Selecione seu estado civil"
                               value={this.state.rep_estadocivil}
                               onChange={(selectedOption) => {
-                                // this.salvarDormente('representante_estado_civil', selectedOption.label);
                                 this.setState({
                                   rep_estadocivil: selectedOption,
-                                  //   liberarRepTipodoc: true
+                                  rep_estadocivilStr: selectedOption.value,
                                 });
                               }}
+                              isDisabled={this.state.geralLoading}
+
                               styles={{
                                 control: (base) => ({
                                   ...base,
@@ -1625,23 +1687,14 @@ export default class CadastroPj extends Component {
 
                             <div className="d-flex flex-row">
                               <FormControl
-                                maxLength={9} // Limite do formato com máscara
+                                maxLength={9}
                                 value={Formatar.cep_mask(this.state.rep_cep)}
                                 placeholder="00000-000"
                                 style={{ height: 40, width: 300 }}
                                 onChange={(e) => {
                                   this.setState({ rep_cep: e.target.value });
                                 }}
-                                // onKeyDown={(e) => {
-                                //   const cep = this.state.cep;
-                                //   if (cep.length > 0 && e.key === "Enter") {
-                                //     if (cep.length === 9){
-                                //       this.consultarCEP();
-                                //     } else {
-                                //       alert("Por favor, termine de digitar o CEP.");
-                                //     }
-                                //   }
-                                // }}
+                                disabled={this.state.geralLoading}
                               />
 
                               {this.state.rep_cepLoading ? (
@@ -1658,7 +1711,10 @@ export default class CadastroPj extends Component {
                                 <>
                                   <Button
                                     className="ml-2"
-                                    disabled={this.state.rep_cep.length < 9}
+                                    disabled={
+                                      this.state.rep_cep.length < 9 ||
+                                      this.state.geralLoading
+                                    }
                                     onClick={() => {
                                       if (this.state.rep_cep.length == 9) {
                                         this.setState({ rep_cepLoading: true });
@@ -1712,6 +1768,7 @@ export default class CadastroPj extends Component {
                                 onClick={() => {
                                   this.inputRepSelfie.current.click();
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Escolher arquivo
                               </Button>
@@ -1719,7 +1776,6 @@ export default class CadastroPj extends Component {
 
                             <input
                               ref={this.inputRepSelfie}
-                              // className="d-block"
                               type="file"
                               accept="image/png, image/jpeg"
                               onChange={(event) => this.uploadSelfie(event)}
@@ -1751,6 +1807,7 @@ export default class CadastroPj extends Component {
                                 onClick={() => {
                                   this.inputRepComprovante.current.click();
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Escolher arquivo
                               </Button>
@@ -1760,6 +1817,7 @@ export default class CadastroPj extends Component {
                                 onClick={() => {
                                   this.setState({ rep_comprovante: "" });
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Não tenho
                               </Button>
@@ -1767,7 +1825,6 @@ export default class CadastroPj extends Component {
 
                             <input
                               ref={this.inputRepComprovante}
-                              // className="d-block"
                               type="file"
                               accept="image/png, image/jpeg"
                               onChange={(event) =>
@@ -1801,6 +1858,7 @@ export default class CadastroPj extends Component {
                                 onClick={() => {
                                   this.inputRepProcuracao.current.click();
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Escolher arquivo
                               </Button>
@@ -1810,6 +1868,7 @@ export default class CadastroPj extends Component {
                                 onClick={() => {
                                   this.setState({ rep_procuracao: "" });
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Não tenho
                               </Button>
@@ -1817,7 +1876,6 @@ export default class CadastroPj extends Component {
 
                             <input
                               ref={this.inputRepProcuracao}
-                              // className="d-block"
                               type="file"
                               accept="application/pdf"
                               onChange={(event) => this.uploadProcuracao(event)}
@@ -1848,6 +1906,7 @@ export default class CadastroPj extends Component {
                                   this.setState({ rep_politico: "0" });
                                 }
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1855,29 +1914,47 @@ export default class CadastroPj extends Component {
                     </Container>
                   </div>
 
-                  <Button
-                    className="float-right mt-3"
-                    disabled={
-                      this.state.rep_nome.trim() == "" ||
-                      this.state.rep_cpf.length != 11 ||
-                      this.state.rep_nomeMae.trim() == "" ||
-                      this.state.rep_data == "" ||
-                      this.state.rep_genero == "" ||
-                      this.state.rep_estadocivil == "" ||
-                      this.state.rep_cep == "" ||
-                      this.state.rep_endereco == "" ||
-                      this.state.rep_numero == "" ||
-                      this.state.rep_bairro == "" ||
-                      this.state.rep_cidade == "" ||
-                      this.state.rep_estado == "" ||
-                      this.state.rep_selfie == ""
-                    }
-                    onClick={() => {
-                      this.salvarRepresentanteInfo();
-                    }}
-                  >
-                    Continuar
-                  </Button>
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button
+                        className="float-right mt-3"
+                        disabled={
+                          this.state.rep_nome.trim() == "" ||
+                          this.state.rep_cpf.length != 11 ||
+                          this.state.rep_nomeMae.trim() == "" ||
+                          this.state.rep_data == "" ||
+                          this.state.rep_generoStr == "" ||
+                          this.state.rep_estadocivilStr == "" ||
+                          this.state.rep_cep == "" ||
+                          this.state.rep_endereco == "" ||
+                          this.state.rep_numero == "" ||
+                          this.state.rep_bairro == "" ||
+                          this.state.rep_cidade == "" ||
+                          this.state.rep_estado == "" ||
+                          this.state.rep_selfie == ""
+                        }
+                        onClick={() => {
+                          this.salvarRepresentanteInfo();
+                        }}
+                      >
+                        Continuar
+                      </Button>
+
+                    </> )
+                  }
+
+
                 </>
               )}
 
@@ -1903,6 +1980,7 @@ export default class CadastroPj extends Component {
                                 onChange={(e) =>
                                   this.setState({ rep_email: e.target.value })
                                 }
+                                disabled={this.state.geralLoading}
                               />
 
                               {this.state.rep_emailLoading ? (
@@ -1973,6 +2051,7 @@ export default class CadastroPj extends Component {
                                         : "",
                                   });
                                 }}
+                                disabled={this.state.geralLoading}
                               />
 
                               {this.state.rep_celularLoading ? (
@@ -2018,24 +2097,42 @@ export default class CadastroPj extends Component {
                     </Container>
                   </div>
 
-                  <Button
-                    className="float-right mt-3"
-                    disabled={
-                      !this.state.email_validado || !this.state.celular_validado
-                    }
-                    onClick={() => {
-                      if (
-                        this.state.email_validado &&
-                        this.state.celular_validado
-                      ) {
-                        this.salvarEmailPhone();
-                        this.setState({ cadastro: "4" });
-                        localStorage.setItem("save", "4");
-                      }
-                    }}
-                  >
-                    Continuar
-                  </Button>
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button
+                        className="float-right mt-3"
+                        disabled={
+                          !this.state.email_validado || 
+                          !this.state.celular_validado
+                        }
+                        onClick={() => {
+                          if (
+                            this.state.email_validado &&
+                            this.state.celular_validado
+                          ) {
+                            this.salvarEmailPhone();
+                            this.setState({ cadastro: "4" });
+                            localStorage.setItem("savepj", "4");
+                          }
+                        }}
+                      >
+                        Continuar
+                      </Button>
+
+                    </> )
+                  }
+
                 </>
               )}
 
@@ -2078,6 +2175,7 @@ export default class CadastroPj extends Component {
                                 );
                                 this.setState({ senha1: numericValue });
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -2103,6 +2201,7 @@ export default class CadastroPj extends Component {
                                 );
                                 this.setState({ senha2: numericValue });
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -2110,18 +2209,35 @@ export default class CadastroPj extends Component {
                     </Container>
                   </div>
 
-                  <Button
-                    className="float-right mt-3"
-                    disabled={
-                      this.state.senha1.length < 6 ||
-                      this.state.senha2.length < 6
-                    }
-                    onClick={() => {
-                      this.salvarSenha();
-                    }}
-                  >
-                    Continuar
-                  </Button>
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button 
+                        className="float-right mt-3"
+                        disabled={
+                          this.state.senha1.length < 6 || 
+                          this.state.senha2.length < 6
+                        }
+                        onClick={ () => {
+                          this.salvarSenha()
+                        }}
+                      >
+                        Continuar
+                      </Button>
+
+                    </> )
+                  }
+
                 </>
               )}
 
@@ -2140,7 +2256,7 @@ export default class CadastroPj extends Component {
                         options={[
                           { label: "RG", value: "1" },
                           { label: "CNH", value: "2" },
-                          { label: "Passaporte", value: "3" },
+                          // { label: "Passaporte", value: "3" },
                         ]}
                         placeholder="Selecione seu tipo de documento"
                         className="m-auto"
@@ -2163,7 +2279,9 @@ export default class CadastroPj extends Component {
 
                   <Button
                     className="float-right mt-3"
-                    disabled={this.state.rep_tipodoc == ""}
+                    disabled={
+                      this.state.rep_tipodoc == ""
+                    }
                     onClick={() => {
                       this.setState({ cadastro: "6" });
                     }}
@@ -2173,8 +2291,9 @@ export default class CadastroPj extends Component {
                 </>
               )}
 
-              {this.state.cadastro == "6" && (
-                <>
+              {
+                this.state.cadastro == "6" && ( <>
+
                   <div>
                     <h1 className="mb-2">
                       {this.state.rep_tipodoc.value == "1" ? (
@@ -2211,6 +2330,7 @@ export default class CadastroPj extends Component {
                                   onClick={() => {
                                     this.inputRepDoc.current.click();
                                   }}
+                                  disabled={this.state.geralLoading}
                                 >
                                   Escolher arquivo
                                 </Button>
@@ -2258,6 +2378,7 @@ export default class CadastroPj extends Component {
                                   onClick={() => {
                                     this.inputRepDocVerso.current.click();
                                   }}
+                                  disabled={this.state.geralLoading}
                                 >
                                   Escolher arquivo
                                 </Button>
@@ -2307,6 +2428,7 @@ export default class CadastroPj extends Component {
                                     rep_docnumero: e.target.value,
                                   });
                                 }}
+                                disabled={this.state.geralLoading}
                               />
                             </FormGroup>
                           </Col>
@@ -2324,211 +2446,133 @@ export default class CadastroPj extends Component {
                                     rep_docemissao: e.target.value,
                                   });
                                 }}
+                                disabled={this.state.geralLoading}
                               />
                             </FormGroup>
                           </Col>
 
-                          {this.state.rep_tipodoc.value == "1" ||
-                          this.state.rep_tipodoc.value == "2" ? (
-                            <>
-                              <Col className="m-2">
-                                <FormGroup>
-                                  <label>Órgão emissor</label>
+                          <Col className="m-2">
+                            <FormGroup>
+                              <label>Órgão emissor</label>
 
-                                  <FormControl
-                                    value={this.state.rep_docorgao}
-                                    style={{ height: 40, width: 300 }}
-                                    onChange={(e) => {
-                                      this.setState({
-                                        rep_docorgao: e.target.value,
-                                      });
-                                    }}
-                                  />
-                                </FormGroup>
-                              </Col>
+                              <FormControl
+                                value={this.state.rep_docorgao}
+                                style={{ height: 40, width: 300 }}
+                                onChange={(e) => {
+                                  this.setState({
+                                    rep_docorgao: e.target.value,
+                                  });
+                                }}
+                                disabled={this.state.geralLoading}
+                              />
+                            </FormGroup>
+                          </Col>
 
-                              <Col className="m-2">
-                                <FormGroup>
-                                  <label>Estado emissor</label>
+                          <Col className="m-2">
+                            <FormGroup>
+                              <label>Estado emissor</label>
 
-                                  <Select
-                                    options={[
-                                      { label: "Acre", value: "AC" },
-                                      { label: "Alagoas", value: "AL" },
-                                      { label: "Amazonas", value: "AM" },
-                                      { label: "Bahia", value: "BA" },
-                                      { label: "Ceará", value: "CE" },
-                                      {
-                                        label: "Distrito Federal",
-                                        value: "DF",
-                                      },
-                                      { label: "Espírito Santo", value: "ES" },
-                                      { label: "Goiás", value: "GO" },
-                                      { label: "Maranhão", value: "MA" },
-                                      { label: "Mato Grosso", value: "MT" },
-                                      {
-                                        label: "Mato Grosso do Sul",
-                                        value: "MS",
-                                      },
-                                      { label: "Minas Gerais", value: "MG" },
-                                      { label: "Pará", value: "PA" },
-                                      { label: "Paraíba", value: "PB" },
-                                      { label: "Paraná", value: "PR" },
-                                      { label: "Pernambuco", value: "PE" },
-                                      { label: "Piauí", value: "PI" },
-                                      { label: "Rio de Janeiro", value: "RJ" },
-                                      {
-                                        label: "Rio Grande do Norte",
-                                        value: "RN",
-                                      },
-                                      {
-                                        label: "Rio Grande do Sul",
-                                        value: "RS",
-                                      },
-                                      { label: "Rondônia", value: "RO" },
-                                      { label: "Roraima", value: "RR" },
-                                      { label: "Santa Catarina", value: "SC" },
-                                      { label: "São Paulo", value: "SP" },
-                                      { label: "Sergipe", value: "SE" },
-                                      { label: "Tocantins", value: "TO" },
-                                    ]}
-                                    placeholder="Selecione o estado emissor"
-                                    className="m-auto"
-                                    value={this.state.rep_docestado}
-                                    onChange={(selectedOption) => {
-                                      this.setState({
-                                        rep_docestado: selectedOption,
-                                        rep_docestadoStr: selectedOption.value,
-                                      });
-                                    }}
-                                    styles={{
-                                      control: (base) => ({
-                                        ...base,
-                                        width: 300,
-                                        height: 40,
-                                      }),
-                                    }}
-                                  />
-                                </FormGroup>
-                              </Col>
-                            </>
-                          ) : (
-                            this.state.rep_tipodoc.value == "3" && (
-                              <>
-                                <Col className="m-2">
-                                  <FormGroup>
-                                    <label>País emissor</label>
+                              <Select
+                                options={
+                                  [
+                                    { label: "Acre", value: "AC" },
+                                    { label: "Alagoas", value: "AL" },
+                                    { label: "Amazonas", value: "AM" },
+                                    { label: "Bahia", value: "BA" },
+                                    { label: "Ceará", value: "CE" },
+                                    { label: "Distrito Federal", value: "DF" },
+                                    { label: "Espírito Santo", value: "ES" },
+                                    { label: "Goiás", value: "GO" },
+                                    { label: "Maranhão", value: "MA" },
+                                    { label: "Mato Grosso", value: "MT" },
+                                    { label: "Mato Grosso do Sul", value: "MS" },
+                                    { label: "Minas Gerais", value: "MG" },
+                                    { label: "Pará", value: "PA" },
+                                    { label: "Paraíba", value: "PB" },
+                                    { label: "Paraná", value: "PR" },
+                                    { label: "Pernambuco", value: "PE" },
+                                    { label: "Piauí", value: "PI" },
+                                    { label: "Rio de Janeiro", value: "RJ" },
+                                    { label: "Rio Grande do Norte", value: "RN" },
+                                    { label: "Rio Grande do Sul", value: "RS" },
+                                    { label: "Rondônia", value: "RO" },
+                                    { label: "Roraima", value: "RR" },
+                                    { label: "Santa Catarina", value: "SC" },
+                                    { label: "São Paulo", value: "SP" },
+                                    { label: "Sergipe", value: "SE" },
+                                    { label: "Tocantins", value: "TO" },
+                                  ]
+                                }
+                                placeholder="Selecione o estado emissor"
+                                className="m-auto"
+                                value={this.state.rep_docestado}
+                                onChange={(selectedOption) => {
+                                  this.setState({
+                                    rep_docestado: selectedOption,
+                                    rep_docestadoStr: selectedOption.value,
+                                  });
+                                }}
+                                isDisabled={this.state.geralLoading}
 
-                                    <FormControl
-                                      value={this.state.rep_passpais}
-                                      style={{ height: 40, width: 300 }}
-                                      onChange={(e) => {
-                                        this.setState({
-                                          rep_passpais: e.target.value,
-                                        });
-                                      }}
-                                    />
-                                  </FormGroup>
-                                </Col>
-
-                                <Col className="m-2">
-                                  <FormGroup>
-                                    <label>Nacionalidade</label>
-
-                                    <FormControl
-                                      value={this.state.rep_passnaci}
-                                      style={{ height: 40, width: 300 }}
-                                      onChange={(e) => {
-                                        this.setState({
-                                          rep_passnaci: e.target.value,
-                                        });
-                                      }}
-                                    />
-                                  </FormGroup>
-                                </Col>
-
-                                <Col className="m-2">
-                                  <FormGroup>
-                                    <label>Naturalidade</label>
-
-                                    <FormControl
-                                      value={this.state.rep_passnatu}
-                                      style={{ height: 40, width: 300 }}
-                                      onChange={(e) => {
-                                        this.setState({
-                                          rep_passnatu: e.target.value,
-                                        });
-                                      }}
-                                    />
-                                  </FormGroup>
-                                </Col>
-
-                                <Col className="m-2">
-                                  <FormGroup>
-                                    <label>Tipo de Passaporte</label>
-
-                                    <FormControl
-                                      value={this.state.rep_passtipo}
-                                      style={{ height: 40, width: 300 }}
-                                      onChange={(e) => {
-                                        this.setState({
-                                          rep_passtipo: e.target.value,
-                                        });
-                                      }}
-                                    />
-                                  </FormGroup>
-                                </Col>
-
-                                <Col className="m-2">
-                                  <FormGroup>
-                                    <label>Data de validade</label>
-
-                                    <FormControl
-                                      type="date"
-                                      value={this.state.rep_passvalidade}
-                                      style={{ height: 40, width: 300 }}
-                                      onChange={(e) => {
-                                        this.setState({
-                                          rep_passvalidade: e.target.value,
-                                        });
-                                      }}
-                                    />
-                                  </FormGroup>
-                                </Col>
-                              </>
-                            )
-                          )}
+                                styles={{
+                                  control: (base) => ({
+                                    ...base,
+                                    width: 300,
+                                    height: 40,
+                                  }),
+                                }}
+                              />
+                            </FormGroup>
+                          </Col>
                         </Row>
                       </Container>
                     </div>
                   </div>
 
-                  <Button
-                    className="float-right mt-3"
-                    disabled={
-                      this.state.rep_doc == "" ||
-                      this.state.rep_docverso == "" ||
-                      this.state.rep_docnumero == "" ||
-                      this.state.rep_docemissao == "" ||
-                      (this.state.rep_tipodoc.value == "1" ||
-                      this.state.rep_tipodoc.value == "2"
-                        ? this.state.rep_docorgao == "" ||
-                          this.state.rep_docestadoStr == ""
-                        : this.state.rep_tipodoc.value == "3" &&
-                          (this.state.rep_passpais == "" ||
-                            this.state.rep_passnaci == "" ||
-                            this.state.rep_passnatu == "" ||
-                            this.state.rep_passtipo == "" ||
-                            this.state.rep_passvalidade == ""))
-                    }
-                    onClick={() => {
-                      this.setState({ concluirModal: true });
-                    }}
-                  >
-                    Continuar
-                  </Button>
-                </>
-              )}
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button
+                        className="float-right mt-3"
+                        disabled={
+                          this.state.rep_doc == "" ||
+                          this.state.rep_docverso == "" ||
+                          this.state.rep_docnumero == "" ||
+                          this.state.rep_docemissao == "" ||
+                          (this.state.rep_tipodoc.value == "1" ||
+                          this.state.rep_tipodoc.value == "2"
+                            ? this.state.rep_docorgao == "" ||
+                              this.state.rep_docestadoStr == ""
+                            : this.state.rep_tipodoc.value == "3" &&
+                              (this.state.rep_passpais == "" ||
+                                this.state.rep_passnaci == "" ||
+                                this.state.rep_passnatu == "" ||
+                                this.state.rep_passtipo == "" ||
+                                this.state.rep_passvalidade == ""))
+                        }
+                        onClick={() => {
+                          // this.setState({ concluirModal: true });
+                          this.salvarDoc();
+                        }}
+                      >
+                        Continuar
+                      </Button>                     
+
+                    </> )
+                  }
+                  
+                </> )
+              }
             </div>
           </div>
 
@@ -2555,7 +2599,7 @@ export default class CadastroPj extends Component {
                     textAlign: "justify", // Alinha o texto de forma justificada (opcional)
                     fontSize: "16px", // Define a cor do texto como preto
                   }}
-                  dangerouslySetInnerHTML={{ __html: this.state.termo }}
+                  dangerouslySetInnerHTML={{ __html: this.state.termo.texto }}
                 ></div>
                 <Button
                   variant="primary"
@@ -2564,7 +2608,7 @@ export default class CadastroPj extends Component {
                       cadastro: "1",
                       termoModal: false,
                     });
-                    localStorage.setItem("save", "1");
+                    localStorage.setItem("savepj", "1");
                   }}
                 >
                   Declaro que li e aceito os termos de uso e de privacidade{" "}
@@ -2947,6 +2991,54 @@ export default class CadastroPj extends Component {
           <Modal
             centered
             size="md"
+            show={this.state.concluirModal}
+            backdrop="static"
+          >
+            <Modal.Body>
+              <Container>Finalizar seu cadastro?</Container>
+            </Modal.Body>
+            <Modal.Footer className="d-flex">
+              {
+                this.state.concluirLoading ? ( <>
+
+                  <ReactLoading
+                    className="m-auto"
+                    type={"spin"}
+                    color={"#00000"}
+                    width={"38px"}
+                    height={"40px"}
+                  />
+
+                </> ) : ( <> 
+
+                  <Button
+                    className="mr-auto"
+                    variant="primary"
+                    onClick={() => {
+                      this.concluir();
+                    }}
+                  >
+                    Sim
+                  </Button>
+
+                  <Button
+                    className="ml-auto"
+                    variant="primary"
+                    onClick={() => {
+                      this.setState({ concluirModal: false });
+                    }}
+                  >
+                    Não
+                  </Button>
+
+                </> )
+              }
+            </Modal.Footer>
+          </Modal>
+
+          <Modal
+            centered
+            size="md"
             show={this.state.statusModal}
             backdrop="static"
           >
@@ -2962,7 +3054,7 @@ export default class CadastroPj extends Component {
                 variant="primary"
                 onClick={() => {
                   this.setState({
-                    cadastro: localStorage.getItem("save"),
+                    cadastro: localStorage.getItem("savepj"),
                     statusModal: false,
                   });
                 }}
@@ -2976,7 +3068,7 @@ export default class CadastroPj extends Component {
                 onClick={() => {
                   this.setState({ statusModal: false, cnpj: "" });
                   localStorage.removeItem("cnpj");
-                  localStorage.removeItem("save");
+                  localStorage.removeItem("savepj");
                 }}
               >
                 Não
@@ -2984,37 +3076,7 @@ export default class CadastroPj extends Component {
             </Modal.Footer>
           </Modal>
 
-          <Modal
-            centered
-            size="md"
-            show={this.state.concluirModal}
-            backdrop="static"
-          >
-            <Modal.Body>
-              <Container>Finalizar seu cadastro?</Container>
-            </Modal.Body>
-            <Modal.Footer className="d-flex">
-              <Button
-                className="mr-auto"
-                variant="primary"
-                onClick={() => {
-                  this.salvarDoc();
-                }}
-              >
-                Sim
-              </Button>
 
-              <Button
-                className="ml-auto"
-                variant="primary"
-                onClick={() => {
-                  this.setState({ concluirModal: false });
-                }}
-              >
-                Não
-              </Button>
-            </Modal.Footer>
-          </Modal>
         </div>
       );
     } else {

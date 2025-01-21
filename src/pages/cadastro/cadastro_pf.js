@@ -26,6 +26,7 @@ import {
   deviceType,
 } from "react-device-detect";
 import { UAParser } from 'ua-parser-js';
+import { browserName } from "react-device-detect";
 import Produtos from "../../constants/Produtos";
 import i18n from "../../tradutor/tradutor"; import LangButton from "../../components/langButton/LangButton";
 import Select from "react-select";
@@ -34,7 +35,15 @@ export default class CadastroPf extends Component {
   constructor() {
     super();
     this.state = {
-      cadastro: '1',
+      cadastro: '0',
+
+      os: "",
+      browser: "",
+      cpu: "",
+      identificador: "",
+
+      ipUser: "",
+      tokenApp: "",
 
       agencias: [],
       valueAgencia: {
@@ -42,16 +51,18 @@ export default class CadastroPf extends Component {
         numero: "",
         nome: ""
       },
-      cpf: "",
-      termo: "",
+      cpfCadastro: "",
+      termo: {},
       termoModal: false,
 
       nome:"",
       cpf: "",
       nomeMae: "",
       data: "",
-      genero: "",
-      estadocivil: "",
+      genero: {},
+      generoStr: "",
+      estadocivil: {},
+      estadocivilStr: "",
 
       cep: "",
       cepLoading: false,
@@ -102,7 +113,10 @@ export default class CadastroPf extends Component {
 
       statusModal: false,
 
-      concluirModal: false
+      concluirModal: false,
+      concluirLoading: false,
+
+      geralLoading: false
     };
 
     this.inputComprovante = React.createRef();
@@ -120,6 +134,14 @@ export default class CadastroPf extends Component {
     this.buscarTermoUso();
     this.checkStatus();
 
+    Funcoes.getUserIp().then((res) => {
+      this.setState({ ipUser: res });
+    });
+
+    Funcoes.getUniqueToken().then((res) => {
+      this.setState({ tokenApp: res });
+    });
+
     UAParser().withClientHints().then(result => {
       this.setState({ 
         os: result.os.name + ' ' + result.os.version,
@@ -135,9 +157,9 @@ export default class CadastroPf extends Component {
 
   checkStatus = () => {
     const cpf = localStorage.getItem("cpf");
-    const save = localStorage.getItem("save");
+    const save = localStorage.getItem("savepf");
     if (cpf && save) {
-      this.setState({ cpf: cpf, statusModal: true });
+      this.setState({ cpfCadastro: cpf, statusModal: true });
     }
   };
 
@@ -162,120 +184,11 @@ export default class CadastroPf extends Component {
     };
 
     Funcoes.Geral_API(data).then((res) => {
-      this.setState({ termo: res.texto });
+      // this.setState({ termo: res.texto });
+      this.setState({ termo: res });
     });
   };
 
-  handleFocus = (nextInputRef) => {
-    if (nextInputRef && nextInputRef.current) {
-      nextInputRef.current.focus();
-    }
-  };
-
-  uploadComprovante = (e) => {
-    const file = e.target.files[0]; // Pega o arquivo selecionado
-    if (file) {
-      const validTypes = ['image/png', 'image/jpeg', 'application/pdf']; // Tipos válidos
-  
-      if (validTypes.includes(file.type)) {
-        const reader = new FileReader();
-  
-        reader.onloadend = () => {
-          let base64String = '';
-  
-          if (file.type === 'application/pdf') {
-            // Para PDFs
-            base64String = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
-          } else {
-            // Para imagens (PNG, JPEG)
-            base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
-          }
-  
-          this.setState({
-            comprovante: base64String,
-          });
-        };
-
-        // Ler o arquivo como uma URL de dados (base64)
-        reader.readAsDataURL(file);
-      }
-    } else {
-      this.setState({ comprovante: '' });
-    }
-  };
-
-  uploadCartao = (e) => {
-    const file = e.target.files[0]; // Pega o arquivo selecionado
-    if (file) {
-      // Verifica se o arquivo é PNG ou JPG
-      const validTypes = ['image/png', 'image/jpeg'];
-      if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
-        this.setState({
-          cartao: '', // Limpa a imagem em caso de erro
-        });
-      } else {
-        const reader = new FileReader();
-
-
-        reader.onloadend = () => {
-          const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
-          this.setState({
-            cartao: base64String,
-          });
-        };
-
-        // Ler o arquivo como uma URL de dados (base64)
-        reader.readAsDataURL(file);
-      }
-    } else {
-      this.setState({ cartao: '' });
-    }
-  };
-
-  uploadContrato = (e) => {
-    const file = e.target.files[0]; // Pega o arquivo selecionado
-    if (file) {
-      const validTypes = ['application/pdf'];
-  
-      if (validTypes.includes(file.type)) {
-        const reader = new FileReader();
-  
-        reader.onloadend = () => {
-          let base64String = '';
-  
-          if (file.type === 'application/pdf') {
-            // Para PDFs
-            base64String = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
-          } else {
-            // Para imagens (PNG, JPEG)
-            base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
-          }
-
-          this.setState({
-            contrato: base64String,
-          });
-  
-        };
-  
-        // Escolhe o método de leitura com base no tipo
-        if (file.type === 'application/pdf') {
-          reader.readAsArrayBuffer(file); // PDFs precisam de ArrayBuffer
-        } else {
-          reader.readAsDataURL(file); // Imagens podem ser lidas como Data URL
-        }
-      } else {
-        // Caso o arquivo seja inválido
-        alert('Arquivo inválido. Apenas arquivos PDF são aceitos.');
-        this.setState({
-          contrato: '', // Limpa o estado em caso de erro
-        });
-      }
-    } else {
-      this.setState({ contrato: '' }); // Limpa o estado caso nenhum arquivo seja selecionado
-    }
-  };
-  
   uploadDoc = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -354,7 +267,7 @@ export default class CadastroPf extends Component {
     }
   };
 
-  uploadRepComprovante = (e) => {
+  uploadComprovante = (e) => {
     const file = e.target.files[0];
     if (file) {
       const validTypes = ['image/png', 'image/jpeg'];
@@ -380,54 +293,12 @@ export default class CadastroPf extends Component {
     }
   };
 
-  uploadProcuracao = (e) => {
-    const file = e.target.files[0]; // Pega o arquivo selecionado
-    if (file) {
-      const validTypes = ['application/pdf'];
-  
-      if (validTypes.includes(file.type)) {
-        const reader = new FileReader();
-  
-        reader.onloadend = () => {
-          let base64String = '';
-  
-          if (file.type === 'application/pdf') {
-            // Para PDFs
-            base64String = btoa(String.fromCharCode(...new Uint8Array(reader.result)));
-          } else {
-            // Para imagens (PNG, JPEG)
-            base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
-          }
-
-          this.setState({
-            procuracao: base64String,
-          });
-  
-        };
-  
-        // Escolhe o método de leitura com base no tipo
-        if (file.type === 'application/pdf') {
-          reader.readAsArrayBuffer(file); // PDFs precisam de ArrayBuffer
-        } else {
-          reader.readAsDataURL(file); // Imagens podem ser lidas como Data URL
-        }
-      } else {
-        // Caso o arquivo seja inválido
-        alert('Arquivo inválido. Apenas arquivos PDF são aceitos.');
-        this.setState({
-          procuracao: '', // Limpa o estado em caso de erro
-        });
-      }
-    } else {
-      this.setState({ procuracao: '' }); // Limpa o estado caso nenhum arquivo seja selecionado
-    }
-  };
-
-  validarCPF = () => {
+  validarCPF = async () => {
+    this.setState({ geralLoading: true });
     const data = {
       url: "usuario/valida-cpf",
       data: {
-        cpf: this.state.cpf,
+        cpf: this.state.cpfCadastro,
         agencia: this.state.valueAgencia.value,
         tipo: "pf",
       },
@@ -436,13 +307,14 @@ export default class CadastroPf extends Component {
     Funcoes.Geral_API(data).then((res) => {
       if (res.a == '0') {
         this.salvarDormente('agencia', this.state.valueAgencia.numero);
-        localStorage.setItem("cpf", this.state.cpf);
+        localStorage.setItem("cpf", this.state.cpfCadastro);
         this.setState({ termoModal: true });
       } else if (res.a == '1') {
         this.props.alerts("Erro", "CPF inválido, tente novamente", "warning");
       } else if (res.a == '2') {
         this.props.alerts("Erro", "CPF já cadastrado", "warning");
       }
+      this.setState({ geralLoading: false });
     });
   };
 
@@ -515,43 +387,6 @@ export default class CadastroPf extends Component {
     };
 
     return estados[estado] || "Estado não encontrado";
-  };
-
-  consultarRepCEP = () => {
-    const regex = /^\d{5}-\d{3}$/;
-    if (regex.test(this.state.cep)) {
-      const data = {
-        url: 'utilitarios/cep',
-        data: {
-          cep: this.state.cep,
-        },
-        method: "POST",
-      };
-      Funcoes.Geral_API(data).then((res) => {
-        if (res) {
-          if (res.erro) {
-            alert("CEP inválido, tente novamente");
-            this.setState({ cepLoading: false });
-          } else {
-            this.setState({ 
-              endereco: res.logradouro,
-              complemento: res.complemento,
-              bairro: res.bairro,
-              cidade: res.localidade,
-              estado: this.nomeParaSigla(res.estado),
-              cepModal: true,
-              cepLoading: false
-            });
-          }
-        } else {
-          this.setState({ cepLoading: false });
-          alert("Erro ao consultar CEP, tente novamente");
-        }
-      });
-    } else {
-      this.setState({ cepLoading: false });
-      alert("CEP inválido");
-    }
   };
 
   sms_envia = () => {
@@ -638,10 +473,16 @@ export default class CadastroPf extends Component {
     const data = {
       url: "dormente-pf/previa",
       data: {
-        documento: this.state.cpf,
+        documento: this.state.cpfCadastro,
         campo: campo,
         valor: valor,
         aparelho: "",
+
+        termoId: this.state.termo.id,
+        ip: this.state.ipUser,
+        token: this.state.tokenApp,
+        aparelho: "IB: " + browserName,
+        chave: this.state.termo.chave,
 
         so: this.state.os,
         brand: this.state.browser,
@@ -650,23 +491,23 @@ export default class CadastroPf extends Component {
       },
       method: "POST",
     };
-    console.log(data);
     Funcoes.Geral_API(data).then((res) => {
       if (!res) {
-        // alert("Falha ao cadastrar informações, tente novamente.");
-        alert("Falha ao cadastrar informações, tente novamente." + campo );
+        alert("Falha ao cadastrar informações, tente novamente.");
+        // alert("Falha ao cadastrar informações, tente novamente." + campo );
       }
     });
   }
 
   salvarInfo = () => {
+    this.setState({ geralLoading: true });
     const dados = {
       nome: this.state.nome.trim(),
       cpf: this.state.cpf,
       nome_mae: this.state.nomeMae.trim(),
       data_nascimento: this.state.data + ' 00:00:00',
-      sexo: this.state.genero.value,
-      estado_civil: this.state.estadocivil.label,
+      sexo: this.state.generoStr,
+      estado_civil: this.state.estadocivilStr,
 
       cep: this.state.cep,
       endereco: this.state.endereco,
@@ -681,40 +522,46 @@ export default class CadastroPf extends Component {
       politico: this.state.politico
     };
 
-    console.log(dados);
-
     Object.entries(dados).forEach(([key, value]) => {
       if (value !== '' && value !== null && value !== undefined) {
         this.salvarDormente(key, value);
       }
     });
 
-    this.setState({ cadastro: "3" });
-    localStorage.setItem("save", "3");
+    localStorage.setItem("savepf", "2");
+    this.setState({ 
+      cadastro: "2",
+      geralLoading: false,
+     });
   }
 
   salvarEmailPhone = () => {
+    this.setState({ geralLoading: true });
     const { email, celular }  = this.state;
     if (email.length > 0 && celular.length > 0) {
       this.salvarDormente('email', email);
       this.salvarDormente('celular', celular);
     }
+    this.setState({ geralLoading: false });
   }
 
   salvarSenha = () => {
+    this.setState({ geralLoading: true });
     const { senha1, senha2 }  = this.state;
     if (senha1.length == 6 && senha2.length == 6) {
       if (senha1 === senha2) {
         this.salvarDormente('senha', senha1);
-        this.setState({ cadastro: "5" });
-        localStorage.setItem("save", "5");
+        this.setState({ cadastro: "4" });
+        localStorage.setItem("savepf", "4");
       } else {
         alert("As senhas não são iguais. Tente novamente.");
       }
     }
+    this.setState({ geralLoading: false });
   }
 
   salvarDoc = () => {
+    this.setState({ geralLoading: true });
     const tipo = this.state.tipodoc.value;
 
     const dados = {
@@ -752,15 +599,25 @@ export default class CadastroPf extends Component {
       }
     });
 
-    this.concluir();
+    this.setState({ 
+      concluirModal: true,
+      geralLoading: false
+     })
   }
 
   concluir = () => {
+    this.setState({ concluirLoading: true });
     const data = {
       url: "dormente-pf/concluir",
       data: {
         "documento": this.state.cpf,
         "nome_banco": process.env.NOME_BANCO,
+
+        termoId: this.state.termo.id,
+        ip: this.state.ipUser,
+        token: this.state.tokenApp,
+        aparelho: "IB: " + browserName,
+        chave: this.state.termo.chave,
 
         so: this.state.os,
         brand: this.state.browser,
@@ -770,12 +627,16 @@ export default class CadastroPf extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
+      console.log('res concluir', res);
       if (!res) {
         alert("Falha ao cadastrar informações, tente novamente.");
       } else {
+        // localStorage.removeItem("cpf");
+        // localStorage.removeItem("savepf");
         alert("Cadastro realizado com sucesso, em até 3 dias sua conta sera aprovada");
-        window.location.href = "/";
+        // window.location.href = "/";
       }
+      this.setState({ concluirLoading: false });
     });
   }
 
@@ -801,10 +662,10 @@ export default class CadastroPf extends Component {
 
             <div className="cadastropj">
               { 
-                (this.state.cadastro == "1") && ( <>
+                (this.state.cadastro == "0") && ( <>
 
                   <h1 className="mb-2">
-                    Iremos começar o cadastro da sua conta PJ
+                    Iremos começar o cadastro da sua conta PF
                   </h1>
                   <hr className="divisoria" />
 
@@ -824,6 +685,7 @@ export default class CadastroPf extends Component {
                         });
                       }}
                       isSearchable
+                      isDisabled={this.state.geralLoading}
                     />
                   </FormGroup>
 
@@ -831,37 +693,56 @@ export default class CadastroPf extends Component {
                     <label>Informe seu CPF ou passaporte</label>
                     <FormControl
                       // value={Formatar.cpf_mask(this.state.cpf)}
-                      value={this.state.cpf}
-                      placeholder="000.000.000-00"
+                      value={this.state.cpfCadastro}
+                      // placeholder="000.000.000-00"
                       style={{ height: 40, width: "100%" }}
                       maxLength={11}
                       onChange={(e) => {
                         // const cpf = e.target.value.replace(/\D/g, "");
-                        const cpf = e.target.value;
-                        this.setState({ cpf });
+                        const cpfCadastro = e.target.value;
+                        this.setState({ cpfCadastro });
                       }}
+                      disabled={this.state.geralLoading}
                     />
                   </FormGroup>
 
-                  <Button 
-                    className="float-right mt-3"
-                    disabled={
-                      (this.state.cpf.length < 10) ||
-                      (this.state.valueAgencia.numero == "") ||
-                      (this.state.valueAgencia.id == "")
-                    }
-                    onClick={ () => {
-                      this.validarCPF();
-                    }}
-                  >
-                    Continuar
-                  </Button>
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button 
+                        className="float-right mt-3"
+                        disabled={
+                          this.state.cpfCadastro.length < 11 ||
+                          this.state.valueAgencia.numero == "" ||
+                          this.state.valueAgencia.id == ""
+                        }
+                        onClick={ () => {
+                          this.validarCPF();
+                        }}
+                      >
+                        Continuar
+                      </Button>
+
+                    </> )
+                  }
+
+
 
                 </> )
               }
 
               {
-                (this.state.cadastro == "2") && ( <>
+                (this.state.cadastro == "1") && ( <>
 
                   <div>
                     <h1 className="mb-2">
@@ -882,6 +763,7 @@ export default class CadastroPf extends Component {
                               onChange={(e) => {
                                 this.setState({ nome: e.target.value });
                               }}
+                              disabled={this.state.geralLoading}
                             />
 
                           </FormGroup>
@@ -892,8 +774,9 @@ export default class CadastroPf extends Component {
                             <label>CPF ou passaporte</label>
 
                             <FormControl
-                              value={Formatar.cpf_mask(this.state.cpf)}
-                              placeholder="000.000.000-00"
+                              // value={Formatar.cpf_mask(this.state.cpf)}
+                              value={this.state.cpf}
+                              // placeholder="000.000.000-00"
                               style={{ height: 40, width: 300 }}
                               maxLength={14}
                               onChange={(e) => {
@@ -901,6 +784,7 @@ export default class CadastroPf extends Component {
                                 const cpf = e.target.value;
                                 this.setState({ cpf });
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -914,6 +798,7 @@ export default class CadastroPf extends Component {
                               onChange={(e) =>
                                 this.setState({ nomeMae: e.target.value })
                               }
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -931,6 +816,7 @@ export default class CadastroPf extends Component {
                                   data: e.target.value, 
                                 })
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -952,8 +838,10 @@ export default class CadastroPf extends Component {
                               onChange={(selectedOption) => {
                                 this.setState({
                                   genero: selectedOption,
+                                  generoStr: selectedOption.value
                                 });
                               }}
+                              isDisabled={this.state.geralLoading}
 
                               styles={{
                                 control: (base) => ({
@@ -973,26 +861,28 @@ export default class CadastroPf extends Component {
                             <Select
                               options={
                                 [
-                                  { label: "Solteiro" },
-                                  { label: "Casado" },
-                                  { label: "Separado" },
-                                  { label: "Divorciado" },
-                                  { label: "Viúvo" },
-                                  { label: "União Estável" },
+                                  { label: "Solteiro", value: "Solteiro" },
+                                  { label: "Casado", value: "Casado" },
+                                  { label: "Separado", value: "Separado" },
+                                  { label: "Divorciado", value: "Divorciado" },
+                                  { label: "Viúvo", value: "Viúvo" },
+                                  { label: "União Estável", value: "União Estável" },
                                 ]
                               }
                               placeholder="Selecione seu estado civil"
                               value={this.state.estadocivil}
                               onChange={(selectedOption) => {
                                 this.setState({
-                                  estadocivil: selectedOption
+                                  estadocivil: selectedOption,
+                                  estadocivilStr: selectedOption.value
                                 });
                               }}
+                              isDisabled={this.state.geralLoading}
                               styles={{
                                 control: (base) => ({
                                   ...base,
                                   width: 300,
-                                  height: 40
+                                  height: 40,
                                 })
                               }}
                             />
@@ -1012,6 +902,7 @@ export default class CadastroPf extends Component {
                                 onChange={(e) => {
                                   this.setState({ cep: e.target.value })
                                 }}
+                                disabled={this.state.geralLoading}
                               />
 
                               {
@@ -1029,11 +920,14 @@ export default class CadastroPf extends Component {
 
                                   <Button
                                     className="ml-2"
-                                    disabled={ this.state.cep.length < 9 }
+                                    disabled={ 
+                                      this.state.cep.length < 9 ||
+                                      this.state.geralLoading
+                                    }
                                     onClick={ () => {
                                       if (this.state.cep.length == 9) {
                                         this.setState({ cepLoading: true });
-                                        this.consultarRepCEP();
+                                        this.consultarCEP();
                                       }
                                     }}
                                   >
@@ -1079,6 +973,7 @@ export default class CadastroPf extends Component {
                                 onClick={ () => {
                                   this.inputRepSelfie.current.click() 
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Escolher arquivo
                               </Button>
@@ -1115,6 +1010,7 @@ export default class CadastroPf extends Component {
                                 onClick={ () => {
                                   this.inputRepComprovante.current.click() 
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Escolher arquivo
                               </Button>
@@ -1124,6 +1020,7 @@ export default class CadastroPf extends Component {
                                 onClick={ () => {
                                   this.setState({ comprovante: '' });
                                 }}
+                                disabled={this.state.geralLoading}
                               >
                                 Não tenho
                               </Button>
@@ -1134,7 +1031,7 @@ export default class CadastroPf extends Component {
                               // className="d-block"
                               type="file" 
                               accept="image/png, image/jpeg" 
-                              onChange={ (event) => this.uploadRepComprovante(event) } 
+                              onChange={ (event) => this.uploadComprovante(event) } 
                             />
 
                             <div className="d-flex p-2" style={{ height: 50, width: 300 }}>
@@ -1165,6 +1062,7 @@ export default class CadastroPf extends Component {
                                   this.setState({ politico: '0' });
                                 }
                               }}
+                              disabled={this.state.geralLoading}
                             />
                             
                           </FormGroup>
@@ -1175,35 +1073,51 @@ export default class CadastroPf extends Component {
                     
                   </div>
 
-                  <Button 
-                    className="float-right mt-3"
-                    disabled={
-                      (this.state.nome.trim() == "") ||
-                      (this.state.cpf.length != 11) ||
-                      (this.state.nomeMae.trim() == "") ||
-                      (this.state.data == "") ||
-                      (this.state.genero == "") ||
-                      (this.state.estadocivil == "") ||
-                      (this.state.cep == "") ||
-                      (this.state.endereco == "") ||
-                      (this.state.numero == "") ||
-                      (this.state.bairro == "") ||
-                      (this.state.cidade == "") ||
-                      (this.state.estado == "") ||
-                      (this.state.selfie == "")
-                    }
-                    onClick={ () => {
-                      this.salvarInfo();
-                    }}
-                  >
-                    Continuar
-                  </Button>
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button 
+                        className="float-right mt-3"
+                        disabled={
+                          this.state.nome.trim() == "" ||
+                          this.state.cpf.length < 11 ||
+                          this.state.nomeMae.trim() == "" ||
+                          this.state.data == "" ||
+                          this.state.generoStr == "" ||
+                          this.state.estadocivilStr == "" ||
+                          this.state.cep == "" ||
+                          this.state.endereco == "" ||
+                          this.state.numero == "" ||
+                          this.state.bairro == "" ||
+                          this.state.cidade == "" ||
+                          this.state.estado == "" ||
+                          this.state.selfie == ""
+                        }
+                        onClick={ () => {
+                          this.salvarInfo();
+                        }}
+                      >
+                        Continuar
+                      </Button>
+
+                    </> )
+                  }
 
                 </> )
               }
 
               {
-                (this.state.cadastro == "3") && ( <>
+                (this.state.cadastro == "2") && ( <>
 
                   <div>
                     <h1 className="mb-2">
@@ -1226,6 +1140,7 @@ export default class CadastroPf extends Component {
                                 onChange={(e) =>
                                   this.setState({ email: e.target.value })
                                 }
+                                disabled={this.state.geralLoading}
                               />
 
                               {
@@ -1246,7 +1161,9 @@ export default class CadastroPf extends Component {
 
                                     <Button
                                       className="ml-2"
-                                      disabled={!this.state.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)}
+                                      disabled={
+                                        !this.state.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+                                      }
                                       onClick={ () => {
                                         this.email_envia();
                                       }}
@@ -1287,6 +1204,7 @@ export default class CadastroPf extends Component {
                                     celular: numericValue.length > 0 ? formattedValue : "",
                                   });
                                 }}
+                                disabled={this.state.geralLoading}
                               />
 
                               {
@@ -1307,7 +1225,9 @@ export default class CadastroPf extends Component {
 
                                     <Button
                                       className="ml-2"
-                                      disabled={this.state.celular.length < 14}
+                                      disabled={
+                                        this.state.celular.length < 14
+                                      }
                                       onClick={ () => {
                                         this.sms_envia();
                                       }}
@@ -1332,28 +1252,44 @@ export default class CadastroPf extends Component {
                     </Container>
                   </div>
 
-                  <Button 
-                    className="float-right mt-3"
-                    disabled={
-                      !this.state.email_validado ||
-                      !this.state.celular_validado
-                    }
-                    onClick={ () => {
-                      if (this.state.email_validado && this.state.celular_validado) {
-                        this.salvarEmailPhone();
-                        this.setState({ cadastro: "4" });
-                        localStorage.setItem("save", "4");
-                      }
-                    }}
-                  >
-                    Continuar
-                  </Button>
-                    
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button 
+                        className="float-right mt-3"
+                        disabled={
+                          !this.state.email_validado ||
+                          !this.state.celular_validado
+                        }
+                        onClick={ () => {
+                          if (this.state.email_validado && this.state.celular_validado) {
+                            this.salvarEmailPhone();
+                            this.setState({ cadastro: "3" });
+                            localStorage.setItem("savepf", "3");
+                          }
+                        }}
+                      >
+                        Continuar
+                      </Button>
+
+                    </> )
+                  }
+
                 </> )
               }
 
               {
-                (this.state.cadastro == "4") && ( <>
+                (this.state.cadastro == "3") && ( <>
 
                   <div>
                     <h1 className="mb-2">
@@ -1389,6 +1325,7 @@ export default class CadastroPf extends Component {
                                 const numericValue = rawValue.replace(/\D/g, "");
                                 this.setState({ senha1: numericValue });
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1407,6 +1344,7 @@ export default class CadastroPf extends Component {
                                 const numericValue = rawValue.replace(/\D/g, "");
                                 this.setState({ senha2: numericValue });
                               }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1414,24 +1352,40 @@ export default class CadastroPf extends Component {
                     </Container>
                   </div>
 
-                  <Button 
-                    className="float-right mt-3"
-                    disabled={
-                      this.state.senha1.length < 6 || 
-                      this.state.senha2.length < 6 
-                    }
-                    onClick={ () => {
-                      this.salvarSenha()
-                    }}
-                  >
-                    Continuar
-                  </Button>
+                  {
+                    this.state.geralLoading ? ( <>
+
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button 
+                        className="float-right mt-3"
+                        disabled={
+                          this.state.senha1.length < 6 || 
+                          this.state.senha2.length < 6
+                        }
+                        onClick={ () => {
+                          this.salvarSenha()
+                        }}
+                      >
+                        Continuar
+                      </Button>
+
+                    </> )
+                  }
 
                 </> )
               }
 
               {
-                (this.state.cadastro == "5") && ( <>
+                (this.state.cadastro == "4") && ( <>
 
                   <div>
                     <h1 className="mb-2">
@@ -1472,9 +1426,11 @@ export default class CadastroPf extends Component {
 
                   <Button 
                     className="float-right mt-3"
-                    disabled={this.state.tipodoc == ""}
+                    disabled={
+                      this.state.tipodoc == ""
+                    }
                     onClick={ () => {
-                      this.setState({ cadastro: "6" });
+                      this.setState({ cadastro: "5" });
                     }}
                   >
                     Continuar
@@ -1483,7 +1439,7 @@ export default class CadastroPf extends Component {
               }
 
               {
-                (this.state.cadastro == "6") && ( <>
+                (this.state.cadastro == "5") && ( <>
 
                   <div>
                     <h1 className="mb-2">
@@ -1532,6 +1488,7 @@ export default class CadastroPf extends Component {
                                   onClick={ () => {
                                     this.inputRepDoc.current.click();
                                   }}
+                                  disabled={this.state.geralLoading}
                                 >
                                   Escolher arquivo
                                 </Button>
@@ -1583,6 +1540,7 @@ export default class CadastroPf extends Component {
                                   onClick={ () => {
                                     this.inputRepDocVerso.current.click();
                                   }}
+                                  disabled={this.state.geralLoading}
                                 >
                                   Escolher arquivo
                                 </Button>
@@ -1634,6 +1592,7 @@ export default class CadastroPf extends Component {
                                 onChange={(e) => {
                                   this.setState({ docnumero: e.target.value });
                                 }}
+                                disabled={this.state.geralLoading}
                               />
                             </FormGroup>
                           </Col>
@@ -1649,6 +1608,7 @@ export default class CadastroPf extends Component {
                                 onChange={(e) => {
                                   this.setState({ docemissao: e.target.value });
                                 }}
+                                disabled={this.state.geralLoading}
                               />
                             </FormGroup>
                           </Col>
@@ -1668,6 +1628,7 @@ export default class CadastroPf extends Component {
                                       onChange={(e) => {
                                         this.setState({ docorgao: e.target.value });
                                       }}
+                                      disabled={this.state.geralLoading}
                                     />
                                   </FormGroup>
                                 </Col>
@@ -1717,6 +1678,7 @@ export default class CadastroPf extends Component {
                                           docestadoStr: selectedOption.value
                                         });
                                       }}
+                                      isDisabled={this.state.geralLoading}
 
                                       styles={{
                                         control: (base) => ({
@@ -1745,6 +1707,7 @@ export default class CadastroPf extends Component {
                                       onChange={(e) => {
                                         this.setState({ passpais: e.target.value });
                                       }}
+                                      disabled={this.state.geralLoading}
                                     />
                                   </FormGroup>
                                 </Col>
@@ -1759,6 +1722,7 @@ export default class CadastroPf extends Component {
                                       onChange={(e) => {
                                         this.setState({ passnaci: e.target.value });
                                       }}
+                                      disabled={this.state.geralLoading}
                                     />
                                   </FormGroup>
                                 </Col>
@@ -1773,6 +1737,7 @@ export default class CadastroPf extends Component {
                                       onChange={(e) => {
                                         this.setState({ passnatu: e.target.value });
                                       }}
+                                      disabled={this.state.geralLoading}
                                     />
                                   </FormGroup>
                                 </Col>
@@ -1787,6 +1752,7 @@ export default class CadastroPf extends Component {
                                       onChange={(e) => {
                                         this.setState({ passtipo: e.target.value });
                                       }}
+                                      disabled={this.state.geralLoading}
                                     />
                                   </FormGroup>
                                 </Col>
@@ -1802,6 +1768,7 @@ export default class CadastroPf extends Component {
                                       onChange={(e) => {
                                         this.setState({ passvalidade: e.target.value });
                                       }}
+                                      disabled={this.state.geralLoading}
                                     />
                                   </FormGroup>
                                 </Col>
@@ -1813,35 +1780,52 @@ export default class CadastroPf extends Component {
                     </div>
                   </div>
 
-                  <Button 
-                    className="float-right mt-3"
-                    disabled={
-                      this.state.doc == "" ||
-                      this.state.docverso == "" ||
-                      this.state.docnumero == "" ||
-                      this.state.docemissao == "" ||
-                      (
-                        (this.state.tipodoc.value == '1' || this.state.tipodoc.value == '2') ?
-                          (this.state.docorgao == "" || this.state.docestadoStr == "")
-                        
-                        :
+                  {
+                    this.state.geralLoading ? ( <>
 
-                        (this.state.tipodoc.value == '3') &&
+                      <ReactLoading
+                        className="float-right mt-3"
+                        type={"spin"}
+                        color={"#00000"}
+                        width={"38px"}
+                        height={"40px"}
+                      />
+
+                    </> ) : ( <>
+
+                      <Button 
+                        className="float-right mt-3"
+                        disabled={
+                          this.state.doc == "" ||
+                          this.state.docverso == "" ||
+                          this.state.docnumero == "" ||
+                          this.state.docemissao == "" ||
                           (
-                            this.state.passpais == "" || 
-                            this.state.passnaci == "" ||
-                            this.state.passnatu == "" ||
-                            this.state.passtipo == "" ||
-                            this.state.passvalidade == ""
+                            (this.state.tipodoc.value == '1' || this.state.tipodoc.value == '2') ?
+                              (this.state.docorgao == "" || this.state.docestadoStr == "")
+
+                            :
+
+                            (this.state.tipodoc.value == '3') &&
+                              (
+                                this.state.passpais == "" || 
+                                this.state.passnaci == "" ||
+                                this.state.passnatu == "" ||
+                                this.state.passtipo == "" ||
+                                this.state.passvalidade == ""
+                              )
                           )
-                      )
-                    }
-                    onClick={ () => {
-                      this.setState({ concluirModal: true });
-                    }}
-                  >
-                    Continuar
-                  </Button>
+                        }
+                        onClick={ () => {
+                          // this.setState({ concluirModal: true });
+                          this.salvarDoc();
+                        }}
+                      >
+                        Continuar
+                      </Button>
+
+                    </> )
+                  }
 
                 </> )
               }
@@ -1871,16 +1855,16 @@ export default class CadastroPf extends Component {
                     textAlign: "justify", // Alinha o texto de forma justificada (opcional)
                     fontSize: "16px", // Define a cor do texto como preto
                   }}
-                  dangerouslySetInnerHTML={{ __html: this.state.termo }}
+                  dangerouslySetInnerHTML={{ __html: this.state.termo.texto }}
                 ></div>
               <Button
                 variant="primary"
                 onClick={() => {
                   this.setState({
-                    cadastro: "2",
+                    cadastro: "1",
                     termoModal: false,
                   });
-                  localStorage.setItem("save", "2");
+                  localStorage.setItem("savepf", "1");
                 }}
               >
                 Declaro que li e aceito os termos de uso e de privacidade {process.env.NOME_BANCO}
@@ -2089,128 +2073,53 @@ export default class CadastroPf extends Component {
 
           <Modal
             centered
-            size="lg"
-            show={this.state.cepModal}
-            onHide={() => this.setState({ cepModal: false, endereco: "", numero: "", complemento: "", bairro: "", cidade: "", estado: "" })}
+            size="md"
+            show={this.state.concluirModal}
+            backdrop="static"
           >
-            <Modal.Header closeButton>
-              <Modal.Title>Confirme se as informações de endereço estão corretas. Você pode editá-las se precisar.</Modal.Title>
-            </Modal.Header>
             <Modal.Body>
               <Container>
-                <Row>
-                  <Col>
-                    <FormGroup>
-                      <label>CEP</label>
-                      <FormControl
-                        value={this.state.cep}
-                        style={{ height: 40, width: 300 }}
-                        disabled                     
-                      />
-                    </FormGroup>
-                  </Col>
-
-                  <Col>
-                    <FormGroup>
-                      <label>Endereço</label>
-                      <FormControl 
-                        value={this.state.endereco}
-                        style={{ height: 40, width: 300 }}
-                        onChange={(e) => {
-                          const endereco = e.target.value.trim();
-                          this.setState({ endereco });
-                        }}
-                      />
-                    </FormGroup>
-                  </Col>
-
-                  <Col>
-                    <FormGroup>
-                      <label>Número</label>
-                      <FormControl
-                        value={this.state.numero}
-                        style={{ height: 40, width: 300 }}
-                        onChange={(e) => {
-                          const numero = e.target.value.trim();
-                          this.setState({ numero });
-                        }}
-                      />
-                    </FormGroup>
-                  </Col>
-
-                  <Col>
-                    <FormGroup>
-                      <label>Complemento</label>
-                      <FormControl 
-                        value={this.state.complemento}
-                        style={{ height: 40, width: 300 }}
-                        onChange={(e) => {
-                          const complemento = e.target.value.trim();
-                          this.setState({ complemento });
-                        }}
-                      />
-                    </FormGroup>
-                  </Col>
-
-                  <Col>
-                    <FormGroup>
-                      <label>Bairro</label>
-                      <FormControl
-                        value={this.state.bairro}
-                        style={{ height: 40, width: 300 }}
-                        onChange={(e) => {
-                          const bairro = e.target.value.trim();
-                          this.setState({ bairro });
-                        }}
-                      />
-                    </FormGroup>
-                  </Col>
-
-                  <Col>
-                    <FormGroup>
-                      <label>Cidade</label>
-                      <FormControl
-                        value={this.state.cidade}
-                        style={{ height: 40, width: 300 }}
-                        onChange={(e) => {
-                          const cidade = e.target.value.trim();
-                          this.setState({ cidade });
-                        }}
-                      />
-                    </FormGroup>
-                  </Col>
-
-                  <Col>
-                    <FormGroup>
-                      <label>Estado</label>
-                      <FormControl
-                        value={this.state.estado}
-                        style={{ height: 40, width: 300 }}
-                        onChange={(e) => {
-                          const estado = e.target.value.trim();
-                          this.setState({ estado });
-                        }}
-                      />
-                    </FormGroup>
-                  </Col>
-                </Row>
+                Finalizar seu cadastro?
               </Container>
             </Modal.Body>
-            <Modal.Footer>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  if (this.state.numero == '' || this.state.endereco == '' || this.state.numero == '' || this.state.bairro == '' || this.state.cidade == '' || this.state.estado == '') {
-                    alert('Por favor, complete o endereço.');
-                  } else {
-                    this.setState({
-                      cepModal: false,
-                    });
-                  }
-                }}
-              >
-                Confirmar
-              </Button>
+            <Modal.Footer className="d-flex">
+
+              {
+                this.state.concluirLoading ? ( <>
+
+                  <ReactLoading
+                    className="m-auto"
+                    type={"spin"}
+                    color={"#00000"}
+                    width={"38px"}
+                    height={"40px"}
+                  />
+
+                </> ) : ( <> 
+
+                  <Button
+                    className="mr-auto"
+                    variant="primary"
+                    onClick={() => {
+                      this.concluir();
+                    }}
+                  >
+                    Sim
+                  </Button>
+
+                  <Button
+                    className="ml-auto"
+                    variant="primary"
+                    onClick={() => {
+                      this.setState({ concluirModal: false });
+                    }}
+                  >
+                    Não
+                  </Button>
+
+                </> )
+              }
+
             </Modal.Footer>
           </Modal>
 
@@ -2222,7 +2131,8 @@ export default class CadastroPf extends Component {
           >
             <Modal.Body>
               <Container>
-                Deseja continuar o cadastro da conta do CPF {Formatar.cpf_mask(this.state.cpf)}?
+                {/* Deseja continuar o cadastro da conta do CPFe {Formatar.cpf_mask(this.state.cpf)}? */}
+                Deseja continuar o cadastro da conta do CPF/Passaporte {this.state.cpfCadastro}?
               </Container>
             </Modal.Body>
             <Modal.Footer className="d-flex">
@@ -2231,7 +2141,7 @@ export default class CadastroPf extends Component {
                 variant="primary"
                 onClick={() => {
                   this.setState({ 
-                    cadastro: localStorage.getItem("save"),
+                    cadastro: localStorage.getItem("savepf"),
                     statusModal: false
                   });
                 }}
@@ -2243,43 +2153,9 @@ export default class CadastroPf extends Component {
                 className="ml-auto"
                 variant="primary"
                 onClick={() => {
-                  this.setState({ statusModal: false, cpf: "" });
+                  this.setState({ statusModal: false, cpfCadastro: "" });
                   localStorage.removeItem("cpf");
-                  localStorage.removeItem("save");
-                }}
-              >
-                Não
-              </Button>
-            </Modal.Footer>
-          </Modal>
-
-          <Modal
-            centered
-            size="md"
-            show={this.state.concluirModal}
-            backdrop="static"
-          >
-            <Modal.Body>
-              <Container>
-                Finalizar seu cadastro?
-              </Container>
-            </Modal.Body>
-            <Modal.Footer className="d-flex">
-              <Button
-                className="mr-auto"
-                variant="primary"
-                onClick={() => {
-                  this.salvarDoc();
-                }}
-              >
-                Sim
-              </Button>
-
-              <Button
-                className="ml-auto"
-                variant="primary"
-                onClick={() => {
-                  this.setState({ concluirModal: false });
+                  localStorage.removeItem("savepf");
                 }}
               >
                 Não
