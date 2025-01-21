@@ -2,7 +2,7 @@
 export default {
   langInfo: {
     key: 3,
-    titulo: "Espanhol",
+    titulo: "Español",
     pais: "Espanha",
     sigla: "esPN",
     bandeira: require("../assets/paises/espanha.png").default,

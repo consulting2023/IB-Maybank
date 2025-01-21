@@ -2,7 +2,7 @@
 export default {
   langInfo: {
     key: 2,
-    titulo: "Ingles",
+    titulo: "English",
     pais: "Estados Unidos",
     sigla: "enUSD",
     bandeira: require("../assets/paises/america.png").default,
