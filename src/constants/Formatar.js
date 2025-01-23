@@ -106,6 +106,7 @@ export function formatarDateMesInterpolacao($data1, $data2) {
 }
 
 export function cpf_mask(cpf) {
+  cpf = cpf.substring(0, 14);
   cpf = cpf.replace(/\D/g, "");
   cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
   cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
@@ -173,6 +174,25 @@ export function cep_mask(cep) {
         cep = cep.replace(/^(\d{5})(\d{1})(\d{0,3})$/, '$1-$2$3');
     }
     return cep;
+}
+
+export function passaporte_mask(passaporte) {
+  passaporte = passaporte.substring(0, 10);
+  passaporte = passaporte.replace(/\W/g, "");
+  passaporte = passaporte.toUpperCase();
+  passaporte = passaporte.replace(/^([A-Za-z]{2})(\d{1,6})$/, "$1$2");
+
+  return passaporte;
+}
+
+export function cpf_passaporte_mask(input) {
+  if (/[A-Za-z]/.test(input[0])) {
+    return passaporte_mask(input);
+  } else if (/\d/.test(input[0])) {
+    return cpf_mask(input);
+  }
+
+  return input;
 }
 
 export function formatarTelefone(value) {

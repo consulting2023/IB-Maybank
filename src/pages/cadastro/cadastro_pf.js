@@ -43,26 +43,21 @@ export default class CadastroPf extends Component {
       identificador: "",
 
       ipUser: "",
-      tokenApp: "",
 
       agencias: [],
-      valueAgencia: {
-        id: "",
-        numero: "",
-        nome: ""
-      },
-      cpfCadastro: "",
+      valueAgencia: {},
+      cpf: "",
       termo: {},
       termoModal: false,
 
       nome:"",
-      cpf: "",
       nomeMae: "",
       data: "",
       genero: {},
       generoStr: "",
       estadocivil: {},
       estadocivilStr: "",
+      renda: "",
 
       cep: "",
       cepLoading: false,
@@ -138,10 +133,6 @@ export default class CadastroPf extends Component {
       this.setState({ ipUser: res });
     });
 
-    Funcoes.getUniqueToken().then((res) => {
-      this.setState({ tokenApp: res });
-    });
-
     UAParser().withClientHints().then(result => {
       this.setState({ 
         os: result.os.name + ' ' + result.os.version,
@@ -156,10 +147,15 @@ export default class CadastroPf extends Component {
   };
 
   checkStatus = () => {
-    const cpf = localStorage.getItem("cpf");
+    const cpfSalvo = localStorage.getItem("cpf");
     const save = localStorage.getItem("savepf");
-    if (cpf && save) {
-      this.setState({ cpfCadastro: cpf, statusModal: true });
+    const termoObj = localStorage.getItem("savepftermo");
+    if (cpfSalvo && save && termoObj) {
+      this.setState({ 
+        cpf: cpfSalvo,
+        statusModal: true,
+        termo: JSON.parse(termoObj),
+      });
     }
   };
 
@@ -184,112 +180,112 @@ export default class CadastroPf extends Component {
     };
 
     Funcoes.Geral_API(data).then((res) => {
-      // this.setState({ termo: res.texto });
       this.setState({ termo: res });
     });
   };
 
+  aceitaTermos = () => {
+    this.setState({
+      cadastro: "1",
+      termoModal: false,
+    });
+    localStorage.setItem("savepftermo", JSON.stringify(this.state.termo));
+    localStorage.setItem("savepf", "1");
+  }
+
   uploadDoc = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ['image/png', 'image/jpeg'];
-      if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
-        this.setState({
-          doc: '',
-        });
-      } else {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-          const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
-          this.setState({
-            doc: base64String,
-          });
+          const base64String = reader.result.replace(
+            /^data:image\/(png|jpeg);base64,/,
+            ""
+          );
+          this.setState({ doc: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ doc: "" });
       }
     } else {
-      this.setState({doc: ''});
+      this.setState({ doc: "" });
     }
   };
 
   uploadDocVerso = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ['image/png', 'image/jpeg'];
-      if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
-        this.setState({
-          docverso: '',
-        });
-      } else {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-          const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
-          this.setState({
-            docverso: base64String,
-          });
+          const base64String = reader.result.replace(
+            /^data:image\/(png|jpeg);base64,/,
+            ""
+          );
+          this.setState({ docverso: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ docverso: "" });
       }
     } else {
-      this.setState({docverso: ''});
+      this.setState({ docverso: "" });
     }
   };
 
   uploadSelfie = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ['image/png', 'image/jpeg'];
-      if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
-        this.setState({
-          selfie: '',
-        });
-      } else {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-          const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
-          this.setState({
-            selfie: base64String,
-          });
+          const base64String = reader.result.replace(
+            /^data:image\/(png|jpeg);base64,/,
+            ""
+          );
+          this.setState({ selfie: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ selfie: "" });
       }
     } else {
-      this.setState({selfie: ''});
+      this.setState({ selfie: "" });
     }
   };
 
   uploadComprovante = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ['image/png', 'image/jpeg'];
-      if (!validTypes.includes(file.type)) {
-        alert("Arquivo inválido");
-        this.setState({
-          comprovante: '',
-        });
-      } else {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-          const base64String = reader.result.replace(/^data:image\/(png|jpeg);base64,/, '');
-          this.setState({
-            comprovante: base64String,
-          });
+          const base64String = reader.result.replace(
+            /^data:image\/(png|jpeg);base64,/,
+            ""
+          );
+          this.setState({ comprovante: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ comprovante: "" });
       }
     } else {
-      this.setState({comprovante: ''});
+      this.setState({ comprovante: "" });
     }
   };
 
@@ -298,7 +294,7 @@ export default class CadastroPf extends Component {
     const data = {
       url: "usuario/valida-cpf",
       data: {
-        cpf: this.state.cpfCadastro,
+        cpf: this.state.cpf,
         agencia: this.state.valueAgencia.value,
         tipo: "pf",
       },
@@ -307,7 +303,7 @@ export default class CadastroPf extends Component {
     Funcoes.Geral_API(data).then((res) => {
       if (res.a == '0') {
         this.salvarDormente('agencia', this.state.valueAgencia.numero);
-        localStorage.setItem("cpf", this.state.cpfCadastro);
+        localStorage.setItem("cpf", this.state.cpf);
         this.setState({ termoModal: true });
       } else if (res.a == '1') {
         this.props.alerts("Erro", "CPF inválido, tente novamente", "warning");
@@ -473,14 +469,14 @@ export default class CadastroPf extends Component {
     const data = {
       url: "dormente-pf/previa",
       data: {
-        documento: this.state.cpfCadastro,
+        documento: this.state.cpf,
         campo: campo,
         valor: valor,
         aparelho: "",
 
         termoId: this.state.termo.id,
         ip: this.state.ipUser,
-        token: this.state.tokenApp,
+        token: this.state.identificador,
         aparelho: "IB: " + browserName,
         chave: this.state.termo.chave,
 
@@ -502,12 +498,13 @@ export default class CadastroPf extends Component {
   salvarInfo = () => {
     this.setState({ geralLoading: true });
     const dados = {
-      nome: this.state.nome.trim(),
       cpf: this.state.cpf,
+      nome: this.state.nome.trim(),
       nome_mae: this.state.nomeMae.trim(),
       data_nascimento: this.state.data + ' 00:00:00',
       sexo: this.state.generoStr,
       estado_civil: this.state.estadocivilStr,
+      renda: this.state.renda,
 
       cep: this.state.cep,
       endereco: this.state.endereco,
@@ -532,7 +529,7 @@ export default class CadastroPf extends Component {
     this.setState({ 
       cadastro: "2",
       geralLoading: false,
-     });
+    });
   }
 
   salvarEmailPhone = () => {
@@ -615,7 +612,7 @@ export default class CadastroPf extends Component {
 
         termoId: this.state.termo.id,
         ip: this.state.ipUser,
-        token: this.state.tokenApp,
+        token: this.state.identificador,
         aparelho: "IB: " + browserName,
         chave: this.state.termo.chave,
 
@@ -691,15 +688,12 @@ export default class CadastroPf extends Component {
                   <FormGroup>
                     <label>Informe seu CPF ou passaporte</label>
                     <FormControl
-                      // value={Formatar.cpf_mask(this.state.cpf)}
-                      value={this.state.cpfCadastro}
-                      // placeholder="000.000.000-00"
+                      value={Formatar.cpf_passaporte_mask(this.state.cpf)}
+                      placeholder="CPF ou Passaporte"
                       style={{ height: 40, width: "100%" }}
-                      maxLength={11}
+                      maxLength={14}
                       onChange={(e) => {
-                        // const cpf = e.target.value.replace(/\D/g, "");
-                        const cpfCadastro = e.target.value;
-                        this.setState({ cpfCadastro });
+                        this.setState({ cpf: (e.target.value).replace(/[^a-zA-Z0-9]/g, '') });
                       }}
                       disabled={this.state.geralLoading}
                     />
@@ -721,7 +715,7 @@ export default class CadastroPf extends Component {
                       <Button 
                         className="float-right mt-3"
                         disabled={
-                          this.state.cpfCadastro.length < 11 ||
+                          this.state.cpf.length < 11 ||
                           this.state.valueAgencia.numero == "" ||
                           this.state.valueAgencia.id == ""
                         }
@@ -768,7 +762,7 @@ export default class CadastroPf extends Component {
                           </FormGroup>
                         </Col>
 
-                        <Col className="m-2">
+                        {/* <Col className="m-2">
                           <FormGroup>
                             <label>CPF ou passaporte</label>
 
@@ -786,7 +780,7 @@ export default class CadastroPf extends Component {
                               disabled={this.state.geralLoading}
                             />
                           </FormGroup>
-                        </Col>
+                        </Col> */}
 
                         <Col className="m-2">
                           <FormGroup>
@@ -884,6 +878,36 @@ export default class CadastroPf extends Component {
                                   height: 40,
                                 })
                               }}
+                            />
+                          </FormGroup>
+                        </Col>
+
+                        <Col className="m-2">
+                          <FormGroup>
+                            <label>Sua renda</label>
+
+                            <FormControl
+                              value={this.state.renda}
+                              style={{ height: 40, width: 300 }}
+                              onChange={(e) => {
+                                const value = e.target.value;
+
+                                const numericValue = value.replace(
+                                  /[^0-9]/g,
+                                  ""
+                                );
+
+                                const formattedValue = new Intl.NumberFormat(
+                                  "pt-BR",
+                                  {
+                                    style: "currency",
+                                    currency: "BRL",
+                                  }
+                                ).format(numericValue / 100);
+
+                                this.setState({ renda: formattedValue });
+                              }}
+                              disabled={this.state.geralLoading}
                             />
                           </FormGroup>
                         </Col>
@@ -1018,6 +1042,7 @@ export default class CadastroPf extends Component {
                                 className="mx-1"
                                 onClick={ () => {
                                   this.setState({ comprovante: '' });
+                                  this.inputComprovante.current.value = "";
                                 }}
                                 disabled={this.state.geralLoading}
                               >
@@ -1855,19 +1880,15 @@ export default class CadastroPf extends Component {
                     fontSize: "16px", // Define a cor do texto como preto
                   }}
                   dangerouslySetInnerHTML={{ __html: this.state.termo.texto }}
-                ></div>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  this.setState({
-                    cadastro: "1",
-                    termoModal: false,
-                  });
-                  localStorage.setItem("savepf", "1");
-                }}
-              >
-                Declaro que li e aceito os termos de uso e de privacidade {process.env.NOME_BANCO}
-              </Button>
+                >
+                </div>
+
+                <Button
+                  variant="primary"
+                  onClick={ () => this.aceitaTermos() }
+                >
+                  Declaro que li e aceito os termos de uso e de privacidade {process.env.NOME_BANCO}
+                </Button>
               </Container>
             </Modal.Body>
             <Modal.Footer>
@@ -2130,8 +2151,8 @@ export default class CadastroPf extends Component {
           >
             <Modal.Body>
               <Container>
-                {/* Deseja continuar o cadastro da conta do CPFe {Formatar.cpf_mask(this.state.cpf)}? */}
-                Deseja continuar o cadastro da conta do CPF/Passaporte {this.state.cpfCadastro}?
+                {/* Deseja continuar o cadastro da conta do CPF {Formatar.cpf_mask(this.state.cpf)}? */}
+                Deseja continuar o cadastro da conta do CPF/Passaporte {Formatar.cpf_passaporte_mask(this.state.cpf)}?
               </Container>
             </Modal.Body>
             <Modal.Footer className="d-flex">
@@ -2152,7 +2173,7 @@ export default class CadastroPf extends Component {
                 className="ml-auto"
                 variant="primary"
                 onClick={() => {
-                  this.setState({ statusModal: false, cpfCadastro: "" });
+                  this.setState({ statusModal: false, cpf: "" });
                   localStorage.removeItem("cpf");
                   localStorage.removeItem("savepf");
                 }}

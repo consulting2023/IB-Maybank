@@ -45,14 +45,9 @@ export default class CadastroPj extends Component {
       identificador: "",
 
       ipUser: "",
-      tokenApp: "",
 
       agencias: [],
-      valueAgencia: {
-        id: "",
-        numero: "",
-        nome: "",
-      },
+      valueAgencia: {},
       cnpj: "",
       termo: {},
       termoModal: false,
@@ -163,10 +158,6 @@ export default class CadastroPj extends Component {
       this.setState({ ipUser: res });
     });
 
-    Funcoes.getUniqueToken().then((res) => {
-      this.setState({ tokenApp: res });
-    });
-
     UAParser()
       .withClientHints()
       .then((result) => {
@@ -183,10 +174,15 @@ export default class CadastroPj extends Component {
   };
 
   checkStatus = () => {
-    const cnpj = localStorage.getItem("cnpj");
+    const cnpjSalvo = localStorage.getItem("cnpj");
     const save = localStorage.getItem("savepj");
-    if (cnpj && save) {
-      this.setState({ cnpj: cnpj, statusModal: true });
+    const termoObj = localStorage.getItem("savepjtermo");
+    if (cnpjSalvo && save && termoObj) {
+      this.setState({ 
+        cnpj: cnpjSalvo,
+        statusModal: true,
+        termo: JSON.parse(termoObj),
+      });
     }
   };
 
@@ -211,38 +207,37 @@ export default class CadastroPj extends Component {
     };
 
     Funcoes.Geral_API(data).then((res) => {
-      this.setState({ termo: res.texto });
+      this.setState({ termo: res });
     });
   };
+
+  aceitaTermos = () => {
+    this.setState({
+      cadastro: "1",
+      termoModal: false,
+    });
+    localStorage.setItem("savepjtermo", JSON.stringify(this.state.termo));
+    localStorage.setItem("savepj", "1");
+  }
 
   uploadComprovante = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ["image/png", "image/jpeg", "application/pdf"];
-
-      if (validTypes.includes(file.type)) {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-          let base64String = "";
-
-          if (file.type === "application/pdf") {
-            base64String = btoa(
-              String.fromCharCode(...new Uint8Array(reader.result))
-            );
-          } else {
-            base64String = reader.result.replace(
-              /^data:image\/(png|jpeg);base64,/,
-              ""
-            );
-          }
-
-          this.setState({
-            comprovante: base64String,
-          });
+          const base64String = reader.result.replace(
+            /^data:image\/(png|jpeg);base64,/,
+            ""
+          );
+          this.setState({ comprovante: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ comprovante: "" });
       }
     } else {
       this.setState({ comprovante: "" });
@@ -252,13 +247,7 @@ export default class CadastroPj extends Component {
   uploadCartao = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ["image/png", "image/jpeg"];
-      if (!validTypes.includes(file.type)) {
-        alert(i18n.t("cadastroPJ.alertArqFail"));
-        this.setState({
-          cartao: "",
-        });
-      } else {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
@@ -266,12 +255,13 @@ export default class CadastroPj extends Component {
             /^data:image\/(png|jpeg);base64,/,
             ""
           );
-          this.setState({
-            cartao: base64String,
-          });
+          this.setState({ cartao: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ cartao: "" });
       }
     } else {
       this.setState({ cartao: "" });
@@ -281,40 +271,21 @@ export default class CadastroPj extends Component {
   uploadContrato = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ["application/pdf"];
-
-      if (validTypes.includes(file.type)) {
+      if (file.type === "application/pdf") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-          let base64String = "";
-
-          if (file.type === "application/pdf") {
-            base64String = btoa(
-              String.fromCharCode(...new Uint8Array(reader.result))
-            );
-          } else {
-            base64String = reader.result.replace(
-              /^data:image\/(png|jpeg);base64,/,
-              ""
-            );
-          }
-
-          this.setState({
-            contrato: base64String,
-          });
+          const base64String = reader.result.replace(
+            /^data:application\/pdf;base64,/,
+            ""
+          );
+          this.setState({ contrato: base64String });
         };
 
-        if (file.type === "application/pdf") {
-          reader.readAsArrayBuffer(file);
-        } else {
-          reader.readAsDataURL(file);
-        }
+        reader.readAsDataURL(file);
       } else {
         alert(i18n.t("cadastroPj.alertArqFailType"));
-        this.setState({
-          contrato: "",
-        });
+        this.setState({ contrato: "" });
       }
     } else {
       this.setState({ contrato: "" });
@@ -324,14 +295,7 @@ export default class CadastroPj extends Component {
   uploadDoc = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ["image/png", "image/jpeg"];
-      if (!validTypes.includes(file.type)) {
-        
-        alert(i18n.t("cadastroPJ.alertArqFail"));
-        this.setState({
-          rep_doc: "",
-        });
-      } else {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
@@ -339,12 +303,13 @@ export default class CadastroPj extends Component {
             /^data:image\/(png|jpeg);base64,/,
             ""
           );
-          this.setState({
-            rep_doc: base64String,
-          });
+          this.setState({ rep_doc: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ rep_doc: "" });
       }
     } else {
       this.setState({ rep_doc: "" });
@@ -354,13 +319,7 @@ export default class CadastroPj extends Component {
   uploadDocVerso = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ["image/png", "image/jpeg"];
-      if (!validTypes.includes(file.type)) {
-        alert(i18n.t("cadastroPJ.alertArqFail"));
-        this.setState({
-          rep_docverso: "",
-        });
-      } else {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
@@ -368,12 +327,13 @@ export default class CadastroPj extends Component {
             /^data:image\/(png|jpeg);base64,/,
             ""
           );
-          this.setState({
-            rep_docverso: base64String,
-          });
+          this.setState({ rep_docverso: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ rep_docverso: "" });
       }
     } else {
       this.setState({ rep_docverso: "" });
@@ -383,13 +343,7 @@ export default class CadastroPj extends Component {
   uploadSelfie = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ["image/png", "image/jpeg"];
-      if (!validTypes.includes(file.type)) {
-        alert(i18n.t("cadastroPJ.alertArqFail"));
-        this.setState({
-          rep_selfie: "",
-        });
-      } else {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
@@ -397,12 +351,13 @@ export default class CadastroPj extends Component {
             /^data:image\/(png|jpeg);base64,/,
             ""
           );
-          this.setState({
-            rep_selfie: base64String,
-          });
+          this.setState({ rep_selfie: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ rep_selfie: "" });
       }
     } else {
       this.setState({ rep_selfie: "" });
@@ -412,13 +367,7 @@ export default class CadastroPj extends Component {
   uploadRepComprovante = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ["image/png", "image/jpeg"];
-      if (!validTypes.includes(file.type)) {
-        alert(i18n.t("cadastroPJ.alertArqFail"));
-        this.setState({
-          rep_comprovante: "",
-        });
-      } else {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
@@ -426,12 +375,13 @@ export default class CadastroPj extends Component {
             /^data:image\/(png|jpeg);base64,/,
             ""
           );
-          this.setState({
-            rep_comprovante: base64String,
-          });
+          this.setState({ rep_comprovante: base64String });
         };
 
         reader.readAsDataURL(file);
+      } else {
+        alert(i18n.t("cadastroPj.alertArqFail"));
+        this.setState({ rep_comprovante: "" });
       }
     } else {
       this.setState({ rep_comprovante: "" });
@@ -441,33 +391,18 @@ export default class CadastroPj extends Component {
   uploadProcuracao = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const validTypes = ["application/pdf"];
-
-      if (validTypes.includes(file.type)) {
+      if (file.type === "application/pdf") {
         const reader = new FileReader();
 
         reader.onloadend = () => {
-          let base64String = "";
-
-          if (file.type === "application/pdf") {
-            base64String = btoa(
-              String.fromCharCode(...new Uint8Array(reader.result))
-            );
-          }
-
-          this.setState({
-            rep_procuracao: base64String,
-          });
+          const base64String = reader.result;
+          this.setState({ rep_procuracao: base64String });
         };
 
-        if (file.type === "application/pdf") {
-          reader.readAsArrayBuffer(file);
-        }
+        reader.readAsDataURL(file);
       } else {
-        alert(i18n.t("cadastroPJ.alertArqFailType"));
-        this.setState({
-          rep_procuracao: "",
-        });
+        alert(i18n.t("cadastroPj.alertArqFailType"));
+        this.setState({ rep_procuracao: "" });
       }
     } else {
       this.setState({ rep_procuracao: "" });
@@ -491,7 +426,6 @@ export default class CadastroPj extends Component {
         localStorage.setItem("cnpj", this.state.cnpj);
         this.setState({ termoModal: true });
       } else {
-        // alert("CNPJ invalido, tente novamente");
         this.props.alerts(i18n.t("cadastroPJ.erro"), i18n.t("cadastroPJ.cpnjFail"), "warning");
       }
       this.setState({ geralLoading: false });
@@ -697,7 +631,7 @@ export default class CadastroPj extends Component {
 
         termoId: this.state.termo.id,
         ip: this.state.ipUser,
-        token: this.state.tokenApp,
+        token: this.state.identificador,
         aparelho: "IB: " + browserName,
         chave: this.state.termo.chave,
 
@@ -744,7 +678,8 @@ export default class CadastroPj extends Component {
 
     Object.entries(dados).forEach(([key, value]) => {
       if (value !== "" && value !== null && value !== undefined) {
-        this.salvarDormente(key, value);
+        console.log(key, value);
+        // this.salvarDormente(key, value);
       }
     });
 
@@ -873,7 +808,7 @@ export default class CadastroPj extends Component {
 
         termoId: this.state.termo.id,
         ip: this.state.ipUser,
-        token: this.state.tokenApp,
+        token: this.state.identificador,
         aparelho: "IB: " + browserName,
         chave: this.state.termo.chave,
 
@@ -950,8 +885,7 @@ export default class CadastroPj extends Component {
                       style={{ height: 40, width: "100%" }}
                       maxLength={18}
                       onChange={(e) => {
-                        const cnpj = e.target.value.replace(/\D/g, "");
-                        this.setState({ cnpj });
+                        this.setState({ cnpj: (e.target.value).replace(/\D/g, '') });
                       }}
                       disabled={this.state.geralLoading}
                     />
@@ -975,7 +909,7 @@ export default class CadastroPj extends Component {
                         disabled={
                           this.state.cnpj.length < 14 ||
                           this.state.valueAgencia.numero == "" ||
-                          this.state.valueAgencia.id == ""
+                          this.state.valueAgencia.value == ""
                         }
                         onClick={() => {
                           this.validarCNPJ();
@@ -1003,25 +937,12 @@ export default class CadastroPj extends Component {
                             <label>Informe o Telefone da empresa</label>
 
                             <FormControl
-                              value={this.state.celEmpresa}
+                              value={Formatar.formatarTelefone(this.state.celEmpresa)}
                               style={{ height: 40, width: 300 }}
                               placeholder="(00) 00000-0000"
                               maxLength={15}
                               onChange={(e) => {
-                                const rawValue = e.target.value;
-                                const numericValue = rawValue.replace(
-                                  /\D/g,
-                                  ""
-                                );
-                                const formattedValue =
-                                  Formatar.formatarTelefone(numericValue);
-
-                                this.setState({
-                                  celEmpresa:
-                                    numericValue.length > 0
-                                      ? formattedValue
-                                      : "",
-                                });
+                                this.setState({ celEmpresa: e.target.value });
                               }}
                               disabled={this.state.geralLoading}
                             />
@@ -1079,7 +1000,7 @@ export default class CadastroPj extends Component {
                         <Col className="m-2">
                           <FormGroup>
                             <label>
-                              Informe a Inscrição Estadual da empresa
+                              Informe a Inscrição Estadual da empresa ou municipal
                             </label>
 
                             <FormControl
@@ -1087,9 +1008,7 @@ export default class CadastroPj extends Component {
                               placeholder="Digite a Inscrição Estadual"
                               style={{ height: 40, width: 300 }}
                               onChange={(e) =>
-                                this.setState({
-                                  inscricaoEstadual: e.target.value,
-                                })
+                                this.setState({ inscricaoEstadual: e.target.value })
                               }
                               disabled={this.state.geralLoading}
                             />
@@ -1107,22 +1026,19 @@ export default class CadastroPj extends Component {
                               onChange={(e) => {
                                 const value = e.target.value;
 
-                                // Remove tudo que não for número ou ponto
                                 const numericValue = value.replace(
                                   /[^0-9]/g,
                                   ""
-                                ); // Permite apenas números
+                                );
 
-                                // Aplica a máscara de R$ (usando Intl.NumberFormat)
                                 const formattedValue = new Intl.NumberFormat(
                                   "pt-BR",
                                   {
                                     style: "currency",
                                     currency: "BRL",
                                   }
-                                ).format(numericValue / 100); // Aqui dividimos por 100 apenas quando formatamos para exibir centavos
+                                ).format(numericValue / 100);
 
-                                // Atualiza o estado com o valor formatado
                                 this.setState({ faturamento: formattedValue });
                               }}
                               disabled={this.state.geralLoading}
@@ -1371,6 +1287,7 @@ export default class CadastroPj extends Component {
                                 className="mx-1"
                                 onClick={() => {
                                   this.setState({ comprovante: "" });
+                                  this.inputComprovante.current.value = "";
                                 }}
                                 disabled={this.state.geralLoading}
                               >
@@ -1380,7 +1297,6 @@ export default class CadastroPj extends Component {
 
                             <input
                               ref={this.inputComprovante}
-                              // className="d-block"
                               type="file"
                               accept="image/png, image/jpeg"
                               onChange={(event) =>
@@ -1422,6 +1338,7 @@ export default class CadastroPj extends Component {
                                 className="mx-1"
                                 onClick={() => {
                                   this.setState({ cartao: "" });
+                                  this.inputCartao.current.value = "";
                                 }}
                                 disabled={this.state.geralLoading}
                               >
@@ -1816,6 +1733,7 @@ export default class CadastroPj extends Component {
                                 className="mx-1"
                                 onClick={() => {
                                   this.setState({ rep_comprovante: "" });
+                                  this.inputRepComprovante.current.value = "";
                                 }}
                                 disabled={this.state.geralLoading}
                               >
@@ -1867,6 +1785,7 @@ export default class CadastroPj extends Component {
                                 className="mx-1"
                                 onClick={() => {
                                   this.setState({ rep_procuracao: "" });
+                                  this.inputRepProcuracao.current.value = "";
                                 }}
                                 disabled={this.state.geralLoading}
                               >
@@ -2338,7 +2257,6 @@ export default class CadastroPj extends Component {
 
                               <input
                                 ref={this.inputRepDoc}
-                                // className="d-block"
                                 type="file"
                                 accept="image/png, image/jpeg"
                                 onChange={(event) => this.uploadDoc(event)}
@@ -2600,19 +2518,14 @@ export default class CadastroPj extends Component {
                     fontSize: "16px", // Define a cor do texto como preto
                   }}
                   dangerouslySetInnerHTML={{ __html: this.state.termo.texto }}
-                ></div>
+                >
+                </div>
+
                 <Button
                   variant="primary"
-                  onClick={() => {
-                    this.setState({
-                      cadastro: "1",
-                      termoModal: false,
-                    });
-                    localStorage.setItem("savepj", "1");
-                  }}
+                  onClick={ () => this.aceitaTermos() }
                 >
-                  Declaro que li e aceito os termos de uso e de privacidade{" "}
-                  {process.env.NOME_BANCO}
+                  Declaro que li e aceito os termos de uso e de privacidade {process.env.NOME_BANCO}
                 </Button>
               </Container>
             </Modal.Body>
