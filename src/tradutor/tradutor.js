@@ -16,6 +16,7 @@ const setLanguageToI18n = async () => {
   let langCode = localStorage.getItem("lang");
   langArr.filter((e) => e.langInfo.sigla === langCode).length < 1 &&
     (langCode = langArr[0].langInfo.sigla);
+
   localStorage.setItem("lang", langCode);
   i18n.locale = langCode;
 };
