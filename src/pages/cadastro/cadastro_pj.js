@@ -842,7 +842,7 @@ export default class CadastroPj extends Component {
             <ul className="nav navbar-nav">
               <li>
                 <Button onClick={() => (window.location.href = "/")}>
-                  Retornar
+                {i18n.t("cadastroPj.retornar")}
                 </Button>
               </li>
             </ul>
@@ -853,12 +853,12 @@ export default class CadastroPj extends Component {
               {this.state.cadastro == "0" && (
                 <>
                   <h1 className="mb-2">
-                    Iremos começar o cadastro da sua conta PJ
+                  {i18n.t("cadastroPj.Iremos começar o cadastro da sua conta PJ")}
                   </h1>
                   <hr className="divisoria" />
 
                   <FormGroup>
-                    <label>Escolha a Agencia</label>
+                    <label>{i18n.t("cadastroPj.escolhaAg")}</label>
 
                     <Select
                       options={this.state.agencias.map((agencia) => ({
@@ -878,7 +878,7 @@ export default class CadastroPj extends Component {
                   </FormGroup>
 
                   <FormGroup>
-                    <label>Informe o CNPJ da empresa</label>
+                    <label>{i18n.t("cadastroPj.Informe o CNPJ da empresa")}</label>
                     <FormControl
                       value={Formatar.cnpj_mask(this.state.cnpj)}
                       placeholder="00.000.000/0000-00"
@@ -915,7 +915,7 @@ export default class CadastroPj extends Component {
                           this.validarCNPJ();
                         }}
                       >
-                    Continuar
+                        {i18n.t("cadastroPj.btnContinuar")}
                   </Button>
 
                     </> )
@@ -927,14 +927,14 @@ export default class CadastroPj extends Component {
               {this.state.cadastro == "1" && (
                 <>
                   <div>
-                    <h1 className="mb-2">Insira os dados da empresa</h1>
+                    <h1 className="mb-2">{i18n.t("cadastroPj.dadosEmpresa")}</h1>
                     <hr className="divisoria" />
 
                     <Container>
                       <Row>
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Informe o Telefone da empresa</label>
+                            <label>{i18n.t("cadastroPj.informTel")}</label>
 
                             <FormControl
                               value={Formatar.formatarTelefone(this.state.celEmpresa)}
@@ -951,7 +951,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Informe o Email da empresa</label>
+                            <label>{i18n.t("cadastroPj.informeEmail")}</label>
 
                             <FormControl
                               value={this.state.emailEmpresa}
@@ -967,11 +967,11 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Informe a Razão Social da empresa</label>
+                            <label>{i18n.t("cadastroPj.informeRazao")}</label>
 
                             <FormControl
                               value={this.state.razaoSocial}
-                              placeholder="Digite a Razão Social"
+                              placeholder={i18n.t("cadastroPj.placeholderRaz")}
                               style={{ height: 40, width: 300 }}
                               onChange={(e) =>
                                 this.setState({ razaoSocial: e.target.value })
@@ -983,11 +983,11 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Informe o Nome Fantasia da empresa</label>
+                            <label>{i18n.t("cadastroPj.informNomeFan")}</label>
 
                             <FormControl
                               value={this.state.nomeFantasia}
-                              placeholder="Digite o Nome Fantasia"
+                              placeholder={i18n.t("cadastroPj.placeholderNomeFa")}
                               style={{ height: 40, width: 300 }}
                               onChange={(e) =>
                                 this.setState({ nomeFantasia: e.target.value })
@@ -1000,12 +1000,12 @@ export default class CadastroPj extends Component {
                         <Col className="m-2">
                           <FormGroup>
                             <label>
-                              Informe a Inscrição Estadual da empresa ou municipal
+                            {i18n.t("cadastroPj.informInscricao")}
                             </label>
 
                             <FormControl
                               value={this.state.inscricaoEstadual}
-                              placeholder="Digite a Inscrição Estadual"
+                              placeholder={i18n.t("cadastroPj.placeholderInscri")}
                               style={{ height: 40, width: 300 }}
                               onChange={(e) =>
                                 this.setState({ inscricaoEstadual: e.target.value })
@@ -1017,11 +1017,11 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Informe o Faturamento da empresa</label>
+                            <label>{i18n.t("cadastroPj.informeFaturamento")}</label>
 
                             <FormControl
                               value={this.state.faturamento}
-                              placeholder="Digite o Faturamento"
+                              placeholder={i18n.t("cadastroPj.placeholderFatu")}
                               style={{ height: 40, width: 300 }}
                               onChange={(e) => {
                                 const value = e.target.value;
@@ -1048,7 +1048,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Informe a Contribuição da empresa</label>
+                            <label>{i18n.t("cadastroPj.informeContri")}</label>
 
                             <Select
                               options={[
@@ -1140,7 +1140,7 @@ export default class CadastroPj extends Component {
                                   value: "ENTIDADE SINDICAL",
                                 },
                               ]}
-                              placeholder="Selecione a Contribuição"
+                              placeholder={i18n.t("cadastroPj.placeholderContri")}
                               onChange={(selectedOption) => {
                                 this.setState({
                                   contribuicao: selectedOption.value,
@@ -1160,7 +1160,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Informe a data de abertura da empresa</label>
+                            <label>{i18n.t("cadastroPj.informDataAbertura")}</label>
 
                             <FormControl
                               type="date"
@@ -1176,7 +1176,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Informe a CNAE da empresa</label>
+                            <label>{i18n.t("cadastroPj.informCNAE")}</label>
 
                             <FormControl
                               value={Formatar.cnae_mask(this.state.cnae)}
@@ -1193,7 +1193,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Informe a CEP da empresa</label>
+                            <label>{i18n.t("cadastroPj.informeCEPEmpresa")}</label>
 
                             <div className="d-flex flex-row">
                               <FormControl
@@ -1232,7 +1232,7 @@ export default class CadastroPj extends Component {
                                       }
                                     }}
                                   >
-                                    Pesquisar
+                                    {i18n.t("cadastroPj.btnPesquisar")}
                                   </Button>
                                 </>
                               )}
@@ -1242,7 +1242,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="my-2 mx-4">
                           <FormGroup>
-                            <label>Endereço</label>
+                            <label>{i18n.t("cadastroPj.retornar")}</label>
 
                             <FormControl
                               value={
@@ -1270,7 +1270,7 @@ export default class CadastroPj extends Component {
                         <Col className="m-2 border rounded">
                           <FormGroup>
                             <label>
-                              Foto do Comprovante de endereço (PNG ou JPG)
+                            {i18n.t("cadastroPj.fotoComproEndereco")}
                             </label>
                             <div className="d-flex">
                               <Button
@@ -1321,7 +1321,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2 border rounded">
                           <FormGroup>
-                            <label>Foto do cartão CNPJ (PNG ou JPG)</label>
+                            <label>{i18n.t("cadastroPj.fotoCNPJ")}</label>
 
                             <div className="d-flex">
                               <Button
@@ -1331,7 +1331,7 @@ export default class CadastroPj extends Component {
                                 }}
                                 disabled={this.state.geralLoading}
                               >
-                                Escolher arquivo
+                                {i18n.t("cadastroPj.escolherArquivo")}
                               </Button>
                               <Button
                                 active={this.state.cartao == ""}
@@ -1342,7 +1342,7 @@ export default class CadastroPj extends Component {
                                 }}
                                 disabled={this.state.geralLoading}
                               >
-                                Não tenho
+                                {i18n.t("cadastroPj.btnNaoTenho")}
                               </Button>
                             </div>
 
@@ -1371,7 +1371,7 @@ export default class CadastroPj extends Component {
                         <Col className="m-2 border rounded">
                           <FormGroup>
                             <label>
-                              Contrato social ou sua ultima alteração (PDF)
+                            {i18n.t("cadastroPj.contratoSocial")}
                             </label>
 
                             <div className="d-flex">
@@ -1398,7 +1398,7 @@ export default class CadastroPj extends Component {
                               style={{ height: 50, width: 300 }}
                             >
                               {this.state.contrato.length > 0 && (
-                                <h6>CONTRATO CARREGADO COM SUCESSO</h6>
+                                <h6>{i18n.t("cadastroPj.contratoCarregado")}</h6>
                               )}
                             </div>
                           </FormGroup>
@@ -1444,7 +1444,7 @@ export default class CadastroPj extends Component {
                           this.salvarEmpresaInfo();
                         }}
                       >
-                        Continuar
+                        {i18n.t("cadastroPj.btnContinuar")}
                       </Button>
 
                     </> )
@@ -1457,7 +1457,7 @@ export default class CadastroPj extends Component {
                 <>
                   <div>
                     <h1 className="mb-2">
-                      Agora insira os dados do Representante
+                    {i18n.t("cadastroPj.dadosRepresentante")}
                     </h1>
                     <hr className="divisoria" />
 
@@ -1465,7 +1465,7 @@ export default class CadastroPj extends Component {
                       <Row>
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Nome completo do Representante</label>
+                            <label>{i18n.t("cadastroPj.nomeCompletoRepre")}</label>
 
                             <FormControl
                               value={this.state.rep_nome}
@@ -1480,7 +1480,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>CPF do Representante</label>
+                            <label>{i18n.t("cadastroPj.cpfRepre")}</label>
 
                             <FormControl
                               value={Formatar.cpf_mask(this.state.rep_cpf)}
@@ -1501,7 +1501,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Nome completo da mãe do Representante</label>
+                            <label>{i18n.t("cadastroPj.nomeMaeRepre")}</label>
                             <FormControl
                               value={this.state.rep_nomeMae}
                               style={{ height: 40, width: 300 }}
@@ -1515,7 +1515,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Data de nascimento do Representante</label>
+                            <label>{i18n.t("cadastroPj.dataNascimentoRepre")}</label>
 
                             <FormControl
                               type="date"
@@ -1533,7 +1533,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Gênero do Representante</label>
+                            <label>{i18n.t("cadastroPj.generoRepre")}</label>
 
                             <Select
                               options={[
@@ -1564,7 +1564,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Estado civil do Representante</label>
+                            <label>{i18n.t("cadastroPj.estadoCivilRepre")}</label>
 
                             <Select
                               options={
@@ -1577,7 +1577,7 @@ export default class CadastroPj extends Component {
                                   { label: "União Estável", value: "União Estável" },
                                 ]
                               }
-                              placeholder="Selecione seu estado civil"
+                              placeholder={i18n.t("cadastroPj.placeholderEstadoCivil")}
                               value={this.state.rep_estadocivil}
                               onChange={(selectedOption) => {
                                 this.setState({
@@ -1600,7 +1600,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>CEP do Representante</label>
+                            <label>{i18n.t("cadastroPj.cepRepresentante")}</label>
 
                             <div className="d-flex flex-row">
                               <FormControl
@@ -1639,7 +1639,7 @@ export default class CadastroPj extends Component {
                                       }
                                     }}
                                   >
-                                    Pesquisar
+                                    {i18n.t("cadastroPj.btnPesquisar")}
                                   </Button>
                                 </>
                               )}
@@ -1649,7 +1649,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="my-2 mx-4">
                           <FormGroup>
-                            <label>Endereço do Representante</label>
+                            <label>{i18n.t("cadastroPj.enderecoRepresentante")}</label>
 
                             <FormControl
                               value={
@@ -1678,7 +1678,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2 border rounded">
                           <FormGroup>
-                            <label>Selfie do Representate (PNG ou JPG)</label>
+                            <label>{i18n.t("cadastroPj.selfieRepre")}</label>
                             <div className="d-flex">
                               <Button
                                 className="mx-1"
@@ -1768,7 +1768,7 @@ export default class CadastroPj extends Component {
                         <Col className="m-2 border rounded">
                           <FormGroup>
                             <label>
-                              Foto da procuração do Representante (PDF)
+                            {i18n.t("cadastroPj.fotoProcuracaoRepre")}
                             </label>
                             <div className="d-flex">
                               <Button
@@ -1805,7 +1805,7 @@ export default class CadastroPj extends Component {
                               style={{ height: 50, width: 300 }}
                             >
                               {this.state.rep_procuracao.length > 0 && (
-                                <h6>PROCURAÇÃO CARREGADA COM SUCESSO</h6>
+                                <h6>{i18n.t("cadastroPj.procuraCarregada")}</h6>
                               )}
                             </div>
                           </FormGroup>
@@ -1867,7 +1867,7 @@ export default class CadastroPj extends Component {
                           this.salvarRepresentanteInfo();
                         }}
                       >
-                        Continuar
+                        {i18n.t("cadastroPj.btnContinuar")}
                       </Button>
 
                     </> )
@@ -1881,7 +1881,7 @@ export default class CadastroPj extends Component {
                 <>
                   <div>
                     <h1 className="mb-2">
-                      Validação de E-mail e celular do representante
+                    {i18n.t("cadastroPj.validacaoEmailECell")}
                     </h1>
                     <hr className="divisoria" />
 
@@ -1889,7 +1889,7 @@ export default class CadastroPj extends Component {
                       <Row>
                         <Col className="m-2">
                           <FormGroup>
-                            <label>E-mail do Representante</label>
+                            <label>{i18n.t("cadastroPj.emailRepre")}</label>
 
                             <div className="d-flex flex-row">
                               <FormControl
@@ -1927,7 +1927,7 @@ export default class CadastroPj extends Component {
                                           this.email_envia();
                                         }}
                                       >
-                                        Validar
+                                        {i18n.t("cadastroPj.btnValidar")}
                                       </Button>
                                     </>
                                   ) : (
@@ -1946,7 +1946,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Celular do Representante</label>
+                            <label>{i18n.t("cadastroPj.cellRepre")}</label>
 
                             <div className="d-flex flex-row">
                               <FormControl
@@ -1996,7 +1996,7 @@ export default class CadastroPj extends Component {
                                           this.sms_envia();
                                         }}
                                       >
-                                        Validar
+                                        {i18n.t("cadastroPj.btnValidar")}
                                       </Button>
                                     </>
                                   ) : (
@@ -2046,7 +2046,7 @@ export default class CadastroPj extends Component {
                           }
                         }}
                       >
-                        Continuar
+                        {i18n.t("cadastroPj.btnContinuar")}
                       </Button>
 
                     </> )
@@ -2058,15 +2058,15 @@ export default class CadastroPj extends Component {
               {this.state.cadastro == "4" && (
                 <>
                   <div>
-                    <h1 className="mb-2">Agora cadastre sua senha</h1>
+                    <h1 className="mb-2">{i18n.t("cadastroPj.cadastreSenha")}</h1>
                     <div>
-                      <span>Dicas:</span>
+                      <span>dicaSenha:</span>
 
                       <ul className="ml-2">
-                        <li>-a senha deve conter 6 números</li>
-                        <li>-não use números sequenciais</li>
-                        <li>-utilize, no máximo, 3 números repetidos</li>
-                        <li>-evite usar seus dados pessoas</li>
+                        <li>-{i18n.t("cadastroPj.dica1")}</li>
+                        <li>-{i18n.t("cadastroPj.dica2")}</li>
+                        <li>-{i18n.t("cadastroPj.dica3")}</li>
+                        <li>-{i18n.t("cadastroPj.dica4")}</li>
                       </ul>
                     </div>
                     <hr className="divisoria" />
@@ -2075,7 +2075,7 @@ export default class CadastroPj extends Component {
                       <Row>
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Insira aqui sua senha</label>
+                            <label>{i18n.t("cadastroPj.insiraAqSenha")}</label>
 
                             <FormControl
                               type="password"
@@ -2101,7 +2101,7 @@ export default class CadastroPj extends Component {
 
                         <Col className="m-2">
                           <FormGroup>
-                            <label>Repita aqui sua senha</label>
+                            <label>{i18n.t("cadastroPj.repitaAqSenha")}</label>
 
                             <FormControl
                               type="password"
@@ -2151,7 +2151,7 @@ export default class CadastroPj extends Component {
                           this.salvarSenha()
                         }}
                       >
-                        Continuar
+                        {i18n.t("cadastroPj.btnContinuar")}
                       </Button>
 
                     </> )
@@ -2164,9 +2164,9 @@ export default class CadastroPj extends Component {
                 <>
                   <div>
                     <h1 className="mb-2">
-                      Precisamos de fotos de um documento do representante
+                    {i18n.t("cadastroPj.precisaFotoDocumento")}
                       <br />
-                      Qual documento você usará para abrir sua conta?
+                      {i18n.t("cadastroPj.escolhaDocumento")}
                     </h1>
                     <hr className="divisoria" />
 
@@ -2205,7 +2205,7 @@ export default class CadastroPj extends Component {
                       this.setState({ cadastro: "6" });
                     }}
                   >
-                    Continuar
+                    {i18n.t("cadastroPj.btnContinuar")}
                   </Button>
                 </>
               )}
@@ -2216,12 +2216,12 @@ export default class CadastroPj extends Component {
                   <div>
                     <h1 className="mb-2">
                       {this.state.rep_tipodoc.value == "1" ? (
-                        <>Preencha os dados de seu RG</>
+                        <>{i18n.t("cadastroPj.preenchaRG")}</>
                       ) : this.state.rep_tipodoc.value == "2" ? (
-                        <>Preencha os dados de sua CNH</>
+                        <>{i18n.t("cadastroPj.preenchaCNH")}</>
                       ) : (
                         this.state.rep_tipodoc.value == "3" && (
-                          <>Preencha os dados de seu Passaporte</>
+                          <>{i18n.t("cadastroPj.fotoPagVisto")}</>
                         )
                       )}
                     </h1>
@@ -2328,12 +2328,12 @@ export default class CadastroPj extends Component {
                             <FormGroup>
                               <label>
                                 {this.state.rep_tipodoc.value == "1" ? (
-                                  <>Número de seu RG</>
+                                  <>{i18n.t("cadastroPj.numeroEnd")} de seu RG</>
                                 ) : this.state.rep_tipodoc.value == "2" ? (
-                                  <>Número de sua CNH</>
+                                  <>{i18n.t("cadastroPj.numeroEnd")} de sua CNH</>
                                 ) : (
                                   this.state.rep_tipodoc.value == "3" && (
-                                    <>Número de seu Passaporte</>
+                                    <>{i18n.t("cadastroPj.numeroEnd")} de seu Passaporte</>
                                   )
                                 )}
                               </label>
@@ -2353,7 +2353,7 @@ export default class CadastroPj extends Component {
 
                           <Col className="m-2">
                             <FormGroup>
-                              <label>Data de emissão</label>
+                              <label>{i18n.t("cadastroPj.dataEmissao")}</label>
 
                               <FormControl
                                 type="date"
@@ -2371,7 +2371,7 @@ export default class CadastroPj extends Component {
 
                           <Col className="m-2">
                             <FormGroup>
-                              <label>Órgão emissor</label>
+                              <label>{i18n.t("cadastroPj.orgaoEmissor")}</label>
 
                               <FormControl
                                 value={this.state.rep_docorgao}
@@ -2467,23 +2467,15 @@ export default class CadastroPj extends Component {
                           this.state.rep_docverso == "" ||
                           this.state.rep_docnumero == "" ||
                           this.state.rep_docemissao == "" ||
-                          (this.state.rep_tipodoc.value == "1" ||
-                          this.state.rep_tipodoc.value == "2"
-                            ? this.state.rep_docorgao == "" ||
-                              this.state.rep_docestadoStr == ""
-                            : this.state.rep_tipodoc.value == "3" &&
-                              (this.state.rep_passpais == "" ||
-                                this.state.rep_passnaci == "" ||
-                                this.state.rep_passnatu == "" ||
-                                this.state.rep_passtipo == "" ||
-                                this.state.rep_passvalidade == ""))
+                          this.state.rep_docorgao == "" ||
+                          this.state.rep_docestadoStr == ""
                         }
                         onClick={() => {
                           // this.setState({ concluirModal: true });
                           this.salvarDoc();
                         }}
                       >
-                        Continuar
+                        {i18n.t("cadastroPj.btnContinuar")}
                       </Button>                     
 
                     </> )
@@ -2501,7 +2493,7 @@ export default class CadastroPj extends Component {
             onHide={() => this.setState({ termoModal: false })}
           >
             <Modal.Header closeButton>
-              <Modal.Title>Aceite o termo para continuar</Modal.Title>
+              <Modal.Title>{i18n.t("cadastroPj.aceiteTermo")}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Container
@@ -2525,12 +2517,13 @@ export default class CadastroPj extends Component {
                   variant="primary"
                   onClick={ () => this.aceitaTermos() }
                 >
-                  Declaro que li e aceito os termos de uso e de privacidade {process.env.NOME_BANCO}
+                  {i18n.t("cadastroPj.btnAceiteTermo")}{" "}
+                  {process.env.NOME_BANCO}
                 </Button>
               </Container>
             </Modal.Body>
             <Modal.Footer>
-              (O botão de aceitar está no final dos termos.)
+              ({i18n.t("cadastroPj.btnAceite")}.)
             </Modal.Footer>
           </Modal>
 
@@ -2561,7 +2554,7 @@ export default class CadastroPj extends Component {
                 <Row>
                   <Col>
                     <FormGroup>
-                      <label>CEP</label>
+                      <label>{i18n.t("cadastroPj.cepModal")}</label>
                       <FormControl
                         value={this.state.cep}
                         style={{ height: 40, width: 300 }}
@@ -2572,7 +2565,7 @@ export default class CadastroPj extends Component {
 
                   <Col>
                     <FormGroup>
-                      <label>Endereço</label>
+                      <label>{i18n.t("cadastroPj.endereco")}</label>
                       <FormControl
                         value={this.state.endereco}
                         style={{ height: 40, width: 300 }}
@@ -2586,7 +2579,7 @@ export default class CadastroPj extends Component {
 
                   <Col>
                     <FormGroup>
-                      <label>Número</label>
+                      <label>{i18n.t("cadastroPj.numeroDoc")}</label>
                       <FormControl
                         value={this.state.numero}
                         style={{ height: 40, width: 300 }}
@@ -2614,7 +2607,7 @@ export default class CadastroPj extends Component {
 
                   <Col>
                     <FormGroup>
-                      <label>Bairro</label>
+                      <label>{i18n.t("cadastroPj.bairroEnd")}</label>
                       <FormControl
                         value={this.state.bairro}
                         style={{ height: 40, width: 300 }}
@@ -2642,7 +2635,7 @@ export default class CadastroPj extends Component {
 
                   <Col>
                     <FormGroup>
-                      <label>Estado</label>
+                      <label>{i18n.t("cadastroPj.estadoEnd")}</label>
                       <FormControl
                         value={this.state.estado}
                         style={{ height: 40, width: 300 }}
@@ -2689,7 +2682,7 @@ export default class CadastroPj extends Component {
           >
             <Modal.Header closeButton>
               <Modal.Title>
-                Enviamos um código via SMS para seu número. Informe o código.
+              {i18n.t("cadastroPj.smsConfirm")}.
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -2715,7 +2708,7 @@ export default class CadastroPj extends Component {
                   this.sms_valida();
                 }}
               >
-                Validar código
+                {i18n.t("cadastroPj.btnValidarCod")}
               </Button>
             </Modal.Footer>
           </Modal>
@@ -2728,7 +2721,7 @@ export default class CadastroPj extends Component {
           >
             <Modal.Header closeButton>
               <Modal.Title>
-                Enviamos um token para seu e-mail. Informe o token.
+              {i18n.t("cadastroPj.emailConfirm")}.
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -2749,7 +2742,7 @@ export default class CadastroPj extends Component {
             </Modal.Body>
             <Modal.Footer>
               <Button variant="primary" onClick={() => this.email_valida()}>
-                Validar token
+              {i18n.t("cadastroPj.btnValidarToken")}
               </Button>
             </Modal.Footer>
           </Modal>
@@ -2781,7 +2774,7 @@ export default class CadastroPj extends Component {
                 <Row>
                   <Col>
                     <FormGroup>
-                      <label>CEP</label>
+                      <label>{i18n.t("cadastroPj.cepModal")}</label>
                       <FormControl
                         value={this.state.rep_cep}
                         style={{ height: 40, width: 300 }}
@@ -2792,7 +2785,7 @@ export default class CadastroPj extends Component {
 
                   <Col>
                     <FormGroup>
-                      <label>Endereço</label>
+                      <label>{i18n.t("cadastroPj.endereco")}</label>
                       <FormControl
                         value={this.state.rep_endereco}
                         style={{ height: 40, width: 300 }}
@@ -2806,7 +2799,7 @@ export default class CadastroPj extends Component {
 
                   <Col>
                     <FormGroup>
-                      <label>Número</label>
+                      <label>{i18n.t("cadastroPj.numeroDoc")}</label>
                       <FormControl
                         value={this.state.rep_numero}
                         style={{ height: 40, width: 300 }}
@@ -2834,7 +2827,7 @@ export default class CadastroPj extends Component {
 
                   <Col>
                     <FormGroup>
-                      <label>Bairro</label>
+                      <label>{i18n.t("cadastroPj.bairroEnd")}</label>
                       <FormControl
                         value={this.state.rep_bairro}
                         style={{ height: 40, width: 300 }}
@@ -2848,7 +2841,7 @@ export default class CadastroPj extends Component {
 
                   <Col>
                     <FormGroup>
-                      <label>Cidade</label>
+                      <label>{i18n.t("cadastroPj.cidadeEnd")}</label>
                       <FormControl
                         value={this.state.rep_cidade}
                         style={{ height: 40, width: 300 }}
@@ -2862,7 +2855,7 @@ export default class CadastroPj extends Component {
 
                   <Col>
                     <FormGroup>
-                      <label>Estado</label>
+                      <label>{i18n.t("cadastroPj.estadoEnd")}</label>
                       <FormControl
                         value={this.state.rep_estado}
                         style={{ height: 40, width: 300 }}
@@ -2908,7 +2901,7 @@ export default class CadastroPj extends Component {
             backdrop="static"
           >
             <Modal.Body>
-              <Container>Finalizar seu cadastro?</Container>
+              <Container>{i18n.t("cadastroPj.finalizarCadastro")}</Container>
             </Modal.Body>
             <Modal.Footer className="d-flex">
               {
@@ -2931,7 +2924,7 @@ export default class CadastroPj extends Component {
                       this.concluir();
                     }}
                   >
-                    Sim
+                    {i18n.t("cadastroPj.sim")}
                   </Button>
 
                   <Button
@@ -2941,7 +2934,7 @@ export default class CadastroPj extends Component {
                       this.setState({ concluirModal: false });
                     }}
                   >
-                    Não
+                    {i18n.t("cadastroPj.nao")}
                   </Button>
 
                 </> )
@@ -2957,7 +2950,7 @@ export default class CadastroPj extends Component {
           >
             <Modal.Body>
               <Container>
-                Deseja continuar o cadastro da conta de CNPJ{" "}
+              {i18n.t("cadastroPj.ctnCadastro")}{" "}
                 {Formatar.cnpj_mask(this.state.cnpj)}?
               </Container>
             </Modal.Body>
@@ -2972,7 +2965,7 @@ export default class CadastroPj extends Component {
                   });
                 }}
               >
-                Sim
+                {i18n.t("cadastroPj.sim")}
               </Button>
 
               <Button
@@ -2984,11 +2977,10 @@ export default class CadastroPj extends Component {
                   localStorage.removeItem("savepj");
                 }}
               >
-                Não
+                {i18n.t("cadastroPj.nao")}
               </Button>
             </Modal.Footer>
           </Modal>
-
 
         </div>
       );
