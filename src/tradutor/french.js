@@ -1,8 +1,8 @@
 // pt-BR.js
 export default {
     langInfo: {
-      key: 3,
-      titulo: "Francês",
+      key: 5,
+      titulo: "Français",
       pais: "França",
       sigla: "frFR",
       bandeira: require("../assets/paises/franca.png").default,
