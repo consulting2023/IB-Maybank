@@ -41,52 +41,18 @@ export default class ExtratoConta extends Component {
       disabledCsv: false,
       saldos: {},
 
-      show: '0'
+      show: '0',
       // 0 = extrato
       // 1 = bloqueados
+
+      bloqueados: [],
+      mostrarBloqueados: false,
     };
     this.handleScroll = this.handleScroll.bind(this);
   }
 
   componentDidMount() {
     const pessoa = Funcoes.pessoa;
-
-    // const data = {
-    //   url: 'pix-bloqueados/extrato-pix-bloqueados',
-    //   data: {
-    //       "conta_id": global.pessoa.conta_id
-    //   },
-    //   method: 'POST',
-    //   console: false,
-    //   tipo_aparelho: global.tipoaparelho,
-    //   funcao: 'lancamentos_bloqueados',
-    //   tela: 'extrato'
-    // };
-    // Geral.Geral_API_Logado(data).then((responseJson) => {
-    //     var keys = Object.keys(responseJson);
-    //     var num = keys.length;
-    //     if (num !== 0) {
-    //         this.setState({ progress: false })
-    //         this.setState({ movimentacoes_bloqueadas: responseJson })
-    //     }
-    //     else if (responseJson == '') {
-    //         this.setState({ progress: false })
-    //         Alert.alert(i18n.t('alt_tela_extrato_nenhumlancamento'));
-    //     }
-    // });
-
-    const data = {
-      url: 'pix-bloqueados/extrato-pix-bloqueados',
-      data: {
-        conta_id: pessoa.conta_id,
-      },
-      method: "POST",
-    };
-
-    Funcoes.Geral_API(data, true).then((res) => {
-      console.log(res);
-    });
-
     this.setState({ pessoa: pessoa });
     window.addEventListener("scroll", this.handleScroll);
     this.SaldoConta();
@@ -470,6 +436,53 @@ export default class ExtratoConta extends Component {
     });
   };
 
+  getBloqueados = () => {
+    this.setState({ loading: true });
+
+    const data = {
+      url: 'pix-bloqueados/extrato-pix-bloqueados',
+      data: {
+        conta_id: this.state.pessoa.conta_id,
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      console.log(res);
+      if (res.length > 0) {
+        this.setState({ bloqueados: res, mostrarBloqueados: true });
+      } else {
+        this.props.alerts("Sem PIX bloqueados", "", "warning");
+      }
+      this.setState({ loading: false });
+    });
+
+    // const data = {
+    //   url: 'pix-bloqueados/extrato-pix-bloqueados',
+    //   data: {
+    //       "conta_id": global.pessoa.conta_id
+    //   },
+    //   method: 'POST',
+    //   console: false,
+    //   tipo_aparelho: global.tipoaparelho,
+    //   funcao: 'lancamentos_bloqueados',
+    //   tela: 'extrato'
+    // };
+    // Geral.Geral_API_Logado(data).then((responseJson) => {
+    //   var keys = Object.keys(responseJson);
+    //   var num = keys.length;
+    //   if (num !== 0) {
+    //     this.setState({ progress: false })
+    //     this.setState({ movimentacoes_bloqueadas: responseJson })
+    //   }
+    //   else if (responseJson == '') {
+    //     this.setState({ progress: false })
+    //     Alert.alert(i18n.t('alt_tela_extrato_nenhumlancamento'));
+    //   }
+    // });
+
+  };
+
   render() {
     const {
       extrato,
@@ -479,6 +492,9 @@ export default class ExtratoConta extends Component {
       mostrarExtrato,
       soma,
       disabled,
+      show,
+      bloqueados,
+      mostrarBloqueados
     } = this.state;
 
     return (
@@ -495,24 +511,31 @@ export default class ExtratoConta extends Component {
                 <Button 
                   className="m-auto" 
                   style={{ width: 150 }}
-                  onClick={ () => this.setState({ show: '0' })}
-                  active={this.state.show == '0'}
+                  onClick={ () => {
+                    this.setState({ show: '0' });
+                  }}
+                  active={show == '0'}
                 >
                   Extrato
                 </Button>
 
-                <Button 
+                <Button
                   className="m-auto" 
                   style={{ width: 150 }}
-                  onClick={ () => this.setState({ show: '1' })}
-                  active={this.state.show == '1'}
+                  onClick={ () => {
+                    if (show != '1') {
+                      this.setState({ show: '1' });
+                      this.getBloqueados();
+                    }
+                  }}
+                  active={show == '1'}
                 >
                   Bloqueado
                 </Button>
               </Row>
 
               {
-                this.state.show == '0' ? ( <>
+                (show == '0') ? ( <>
 
                   <Row>
                     <p className="mb-4 mx-auto" style={{ fontSize: "1.30em" }}>
@@ -579,10 +602,12 @@ export default class ExtratoConta extends Component {
 
                 </> )
 
-                : this.state.show == '1' && ( <>
+                : (show == '1') && ( <>
 
+                  <p className="mb-4 mx-auto text-center" style={{ fontSize: "1.30em" }}>
+                    <strong>Movimentações bloqueadas</strong>
+                  </p>
                   
-                
                 </> )
               }
 
@@ -591,91 +616,138 @@ export default class ExtratoConta extends Component {
         </Container>
 
         <Container className="p-3 col-md-10">
-          {loading && (
-            <ReactLoading
-              className="d-block m-auto"
-              type={"spin"}
-              color={"#000"}
-              height={"5%"}
-            />
-          )}
+          
+          {
+            loading && ( <>
+              <ReactLoading
+                className="d-block m-auto"
+                type={"spin"}
+                color={"#000"}
+                height={"5%"}
+              />
+            </> )
+          }
 
-          {mostrarExtrato && (
-            <Col className="baseWindow px-5 py-4">
-              <Row>
-                <ButtonGroup className="buttonGroup flex-row justify-content-between">
-                  <Button className="mr-1" onClick={this.extrato_pdf}>
-                    {i18n.t("extrato.downloadPdf")}
-                  </Button>
+          { 
+            (show == '0' && mostrarExtrato) ? ( <>
 
-                  <div>
-                    {/* Indicador de loading */}
-                    {this.state.loadingCsv && (
-                      <div className="loading-overlay">
-                        <div className="spinner"></div>
-                        <p>Gerando arquivo CSV, por favor, aguarde...</p>
-                      </div>
-                    )}
-
-                    {/* Botão para gerar o CSV */}
-
-                    <Button
-                      className="mr-1"
-                      onClick={this.extrato_csv}
-                      disabled={this.state.loadingCsv || this.state.disabledCsv}
-                    >
-                      {this.state.loading
-                        ? "Gerando..."
-                        : "Download Extrato CSV"}
+              <Col className="baseWindow px-5 py-4">
+                <Row>
+                  <ButtonGroup className="buttonGroup flex-row justify-content-between">
+                    <Button className="mr-1" onClick={this.extrato_pdf}>
+                      {i18n.t("extrato.downloadPdf")}
                     </Button>
-                  </div>
-                </ButtonGroup>
-                {soma !== 0 && (
-                  <div className="d-flex flex-grow-1">
-                    <p className="my-auto ml-auto texto-saldos-Extrato">
-                      Total no período:
-                      <span className={soma < 0 ? "redText" : "greenText"}>
-                        {" "}
-                        R$ {Formatar.formatReal(soma)}
-                      </span>
-                    </p>
+
+                    <div>
+                      {/* Indicador de loading */}
+                      {this.state.loadingCsv && (
+                        <div className="loading-overlay">
+                          <div className="spinner"></div>
+                          <p>Gerando arquivo CSV, por favor, aguarde...</p>
+                        </div>
+                      )}
+
+                      {/* Botão para gerar o CSV */}
+
+                      <Button
+                        className="mr-1"
+                        onClick={this.extrato_csv}
+                        disabled={this.state.loadingCsv || this.state.disabledCsv}
+                      >
+                        {this.state.loading
+                          ? "Gerando..."
+                          : "Download Extrato CSV"}
+                      </Button>
+                    </div>
+                  </ButtonGroup>
+                  {soma !== 0 && (
+                    <div className="d-flex flex-grow-1">
+                      <p className="my-auto ml-auto texto-saldos-Extrato">
+                        Total no período:
+                        <span className={soma < 0 ? "redText" : "greenText"}>
+                          {" "}
+                          R$ {Formatar.formatReal(soma)}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                </Row>
+                <Table responsive bordered>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Data</th>
+                      <th>Descrição</th>
+                      <th>Valor</th>
+                      <th>Conta</th>
+
+                      <th>Custom ID</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {extrato.map((row, index) => (
+                      <tr key={`${row.id}-${index}`}>
+                        <td>{row.id}</td>
+                        <td>{Formatar.formatarDate(row.dataHora)}</td>
+                        <td>{row.descricao}</td>
+                        <td>{Formatar.formatReal(row.valor)}</td>
+                        <td>{row.conta_id}</td>
+
+                        <td>{row.custom_id}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+                {loading && (
+                  <div className="text-center mt-3">
+                    <ReactLoading type={"spin"} color={"#000"} height={50} />
                   </div>
                 )}
-              </Row>
+              </Col>
+
+            </> )
+
+            : (show == '1' && mostrarBloqueados) && ( <>
+
               <Table responsive bordered>
                 <thead>
                   <tr>
                     <th>ID</th>
                     <th>Data</th>
-                    <th>Descrição</th>
-                    <th>Valor</th>
-                    <th>Conta</th>
-                    
-                    <th>Custom ID</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {extrato.map((row, index) => (
+                  {
+                    bloqueados.map((row, index) => (
+                      <tr key={`${row.id}-${index}`}>
+                        <td>{row.id}</td>
+                        <td>{Formatar.formatarDate(row.data_criacao)}</td>
+                        <td>{row.descricao}</td>
+                        <td>{Formatar.formatReal(row.valor)}</td>
+                        {/* <td>{row.conta_id}</td> */}
+
+                        {/* <td>{row.custom_id}</td> */}
+                      </tr>                     
+                    ))
+                  }
+                  {/* {extrato.map((row, index) => (
                     <tr key={`${row.id}-${index}`}>
                       <td>{row.id}</td>
                       <td>{Formatar.formatarDate(row.dataHora)}</td>
                       <td>{row.descricao}</td>
                       <td>{Formatar.formatReal(row.valor)}</td>
                       <td>{row.conta_id}</td>
-                      
+
                       <td>{row.custom_id}</td>
                     </tr>
-                  ))}
+                  ))} */}
                 </tbody>
-              </Table>
-              {loading && (
-                <div className="text-center mt-3">
-                  <ReactLoading type={"spin"} color={"#000"} height={50} />
-                </div>
-              )}
-            </Col>
-          )}
+              </Table>             
+
+            </> )
+          }
         </Container>
       </div>
     );
