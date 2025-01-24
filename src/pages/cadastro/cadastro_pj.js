@@ -2661,7 +2661,7 @@ export default class CadastroPj extends Component {
                     this.state.cidade == "" ||
                     this.state.estado == ""
                   ) {
-                    alert("Por favor, complete o endereço de sua empresa.");
+                    alert(i18n.t("cadastroPj.completeEnd"));
                   } else {
                     this.setState({
                       cepModal: false,
@@ -2881,7 +2881,7 @@ export default class CadastroPj extends Component {
                     this.state.rep_cidade == "" ||
                     this.state.rep_estado == ""
                   ) {
-                    alert("Por favor, complete o endereço do representante.");
+                    alert(i18n.t("cadastroPj.estadoEndRep"));
                   } else {
                     this.setState({
                       rep_cepModal: false,
