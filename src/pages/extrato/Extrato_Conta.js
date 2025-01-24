@@ -9,6 +9,8 @@ import {
   Button,
   ButtonGroup,
   Table,
+  FormGroup,
+  FormControl
 } from "react-bootstrap";
 import * as Formatar from "../../constants/Formatar";
 import { addDays } from "date-fns";
@@ -39,13 +41,52 @@ export default class ExtratoConta extends Component {
       disabledCsv: false,
       saldos: {},
 
-      continue: true,
+      show: '0'
+      // 0 = extrato
+      // 1 = bloqueados
     };
     this.handleScroll = this.handleScroll.bind(this);
   }
 
   componentDidMount() {
     const pessoa = Funcoes.pessoa;
+
+    // const data = {
+    //   url: 'pix-bloqueados/extrato-pix-bloqueados',
+    //   data: {
+    //       "conta_id": global.pessoa.conta_id
+    //   },
+    //   method: 'POST',
+    //   console: false,
+    //   tipo_aparelho: global.tipoaparelho,
+    //   funcao: 'lancamentos_bloqueados',
+    //   tela: 'extrato'
+    // };
+    // Geral.Geral_API_Logado(data).then((responseJson) => {
+    //     var keys = Object.keys(responseJson);
+    //     var num = keys.length;
+    //     if (num !== 0) {
+    //         this.setState({ progress: false })
+    //         this.setState({ movimentacoes_bloqueadas: responseJson })
+    //     }
+    //     else if (responseJson == '') {
+    //         this.setState({ progress: false })
+    //         Alert.alert(i18n.t('alt_tela_extrato_nenhumlancamento'));
+    //     }
+    // });
+
+    const data = {
+      url: 'pix-bloqueados/extrato-pix-bloqueados',
+      data: {
+        conta_id: pessoa.conta_id,
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      console.log(res);
+    });
+
     this.setState({ pessoa: pessoa });
     window.addEventListener("scroll", this.handleScroll);
     this.SaldoConta();
@@ -450,64 +491,101 @@ export default class ExtratoConta extends Component {
         <Container className="p-3 col-md-10 d-flex justify-content-center">
           <Row className="baseWindow px-5 py-4">
             <Col>
-              <Row>
-                <p className="mb-4" style={{ fontSize: "1.30em" }}>
-                  <strong>{i18n.t("extrato.textoEscolhaExtrato")}</strong>
-                </p>
-              </Row>
-              <Row>
-                <Col className="form-group">
-                  <label>{i18n.t("extrato.dataInicio")}</label>
-                  <br />
-                  <DatePicker
-                    className="form-control text-center"
-                    locale="pt-BR"
-                    selected={dataDe}
-                    required
-                    dateFormat="dd/MM/yyyy"
-                    popperPlacement="bottom"
-                    maxDate={addDays(new Date(), 0)}
-                    onChange={(data) => this.setState({ dataDe: data })}
-                  />
-                </Col>
-                <Col className="form-group">
-                  <label>{i18n.t("extrato.dataFinal")}</label>
-                  <br />
-                  <DatePicker
-                    className="form-control text-center"
-                    locale="pt-BR"
-                    selected={dataAte}
-                    required
-                    dateFormat="dd/MM/yyyy"
-                    popperPlacement="bottom"
-                    maxDate={addDays(new Date(), 0)}
-                    onChange={(data) => this.setState({ dataAte: data })}
-                  />
-                </Col>
-                <Col className="form-group">
-                  <label>Custom ID</label>
-                  <br />
-                  <input
-                    type="text"
-                    className="form-control text-center"
-                    value={this.state.custom_id || ""}
-                    required
-                    onChange={(e) =>
-                      this.setState({ custom_id: e.target.value })
-                    }
-                    placeholder="Digite o custom_id"
-                  />
-                </Col>
-              </Row>
-              <Row className="form-group m-0">
-                <Button
-                  onClick={this.verExtrato}
-                  disabled={disabled}
-                  className="m-auto px-5 py-2 btnProcurarExtrato"
+              <Row style={{ width: 600 }} className="red mx-2 mb-5">
+                <Button 
+                  className="m-auto" 
+                  style={{ width: 150 }}
+                  onClick={ () => this.setState({ show: '0' })}
+                  active={this.state.show == '0'}
                 >
-                  {i18n.t("extrato.btnPesquisar")}
+                  Extrato
+                </Button>
+
+                <Button 
+                  className="m-auto" 
+                  style={{ width: 150 }}
+                  onClick={ () => this.setState({ show: '1' })}
+                  active={this.state.show == '1'}
+                >
+                  Bloqueado
                 </Button>
               </Row>
+
+              {
+                this.state.show == '0' ? ( <>
+
+                  <Row>
+                    <p className="mb-4 mx-auto" style={{ fontSize: "1.30em" }}>
+                      <strong>{i18n.t("extrato.textoEscolhaExtrato")}</strong>
+                    </p>
+                  </Row>
+                  <Row>
+                    <Col className="form-group d-flex">
+                      <FormGroup className="m-auto">
+                        <label>{i18n.t("extrato.dataInicio")}</label>
+                        <br />
+                        <DatePicker
+                          className="form-control text-center"
+                          locale="pt-BR"
+                          selected={dataDe}
+                          required
+                          dateFormat="dd/MM/yyyy"
+                          popperPlacement="bottom"
+                          maxDate={addDays(new Date(), 0)}
+                          onChange={(data) => this.setState({ dataDe: data })}
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col className="form-group d-flex">
+                      <FormGroup className="m-auto">
+                        <label>{i18n.t("extrato.dataFinal")}</label>
+                        <br />
+                        <DatePicker
+                          className="form-control text-center"
+                          locale="pt-BR"
+                          selected={dataAte}
+                          required
+                          dateFormat="dd/MM/yyyy"
+                          popperPlacement="bottom"
+                          maxDate={addDays(new Date(), 0)}
+                          onChange={(data) => this.setState({ dataAte: data })}
+                        />
+                      </FormGroup>
+                    </Col>
+                    {/* <Col className="form-group">
+                      <label>Custom ID</label>
+                      <br />
+                      <input
+                        type="text"
+                        className="form-control text-center"
+                        value={this.state.custom_id || ""}
+                        required
+                        onChange={(e) =>
+                          this.setState({ custom_id: e.target.value })
+                        }
+                        placeholder="Digite o custom_id"
+                      />
+                    </Col> */}
+                  </Row>
+                  <Row className="form-group m-0">
+                    <Button
+                      onClick={this.verExtrato}
+                      disabled={disabled}
+                      className="m-auto px-5 py-2 btnProcurarExtrato"
+                    >
+                      {i18n.t("extrato.btnPesquisar")}
+                    </Button>
+                  </Row>
+
+                </> )
+
+                : this.state.show == '1' && ( <>
+
+                  
+                
+                </> )
+              }
+
             </Col>
           </Row>
         </Container>
