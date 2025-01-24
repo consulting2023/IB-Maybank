@@ -797,7 +797,7 @@ export default class CadastroPj extends Component {
         this.setState({ cadastro: "5" });
         localStorage.setItem("save", "5");
       } else {
-        alert("As senhas não são iguais. Tente novamente.");
+        alert("senhasDiferentes.retornar");
       }
     }
   };
@@ -892,7 +892,7 @@ export default class CadastroPj extends Component {
               {this.state.cadastro == "0" && (
                 <>
                   <h1 className="mb-2">
-                  {i18n.t("cadastroPj.Iremos começar o cadastro da sua conta PJ")}
+                  {i18n.t("cadastroPj.cadastroStart")}
                   </h1>
                   <hr className="divisoria" />
 
