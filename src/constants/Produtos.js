@@ -4,7 +4,7 @@ import Icones from "./Icon";
 const home_mostrar = true;
 const extrato_mostar = true;
 const transferencia_mostrar = true;
-const depostio_mostrar = false;
+const depostio_mostrar = true;
 const comprovante_mostar = true;
 const pagar_mostrar = false;
 const cobrar_mostrar = false;
