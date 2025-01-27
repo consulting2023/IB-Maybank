@@ -853,7 +853,7 @@ export default class CadastroPj extends Component {
               {this.state.cadastro == "0" && (
                 <>
                   <h1 className="mb-2">
-                  {i18n.t("cadastroPj.Iremos começar o cadastro da sua conta PJ")}
+                  {i18n.t("cadastroPj.cadastroStart")}
                   </h1>
                   <hr className="divisoria" />
 
@@ -878,7 +878,7 @@ export default class CadastroPj extends Component {
                   </FormGroup>
 
                   <FormGroup>
-                    <label>{i18n.t("cadastroPj.Informe o CNPJ da empresa")}</label>
+                    <label>{i18n.t("cadastroPj.cnpjInforme")}</label>
                     <FormControl
                       value={Formatar.cnpj_mask(this.state.cnpj)}
                       placeholder="00.000.000/0000-00"
