@@ -427,7 +427,7 @@ export default class CadastroPj extends Component {
         this.setState({ termoModal: true });
       } else if (res == '300') {
         this.props.alerts(i18n.t("cadastroPj.informamos"), i18n.t("cadastroPj.solicitamos"), "warning");
-      } else if (res == '0') {
+      } else {
         this.props.alerts(i18n.t("cadastroPj.erro"), i18n.t("cadastroPj.cpnjFail"), "warning");
       }
       this.setState({ geralLoading: false });
