@@ -301,6 +301,7 @@ export default class CadastroPf extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
+      console.log(res);
       if (res.a == '0') {
         this.salvarDormente('agencia', this.state.valueAgencia.numero);
         localStorage.setItem("cpf", this.state.cpf);

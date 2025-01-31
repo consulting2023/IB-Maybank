@@ -778,6 +778,8 @@ export default {
     alertArqFail: "Arquivo inválido",
     alertArqFailType: "Arquivo inválido. Apenas arquivos PDF são aceitos.",
     cpnjFail: "CNPJ inválido, tente novamente",
+    informamos: "Informamos que o documento enviado para análise foi identificado como falha.",
+    solicitamos: "Solicitamos que entre em contato conosco através do [canal de suporte/e-mail/telefone].",
     erro: "Erro",
     cepInvalido: "CEP inválido, tente novamente",
     cepError: "Erro ao consultar CEP, tente novamente",
