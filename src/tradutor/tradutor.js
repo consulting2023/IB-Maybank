@@ -3,8 +3,10 @@ import ptBr from "./pt-BR";
 import chCh from "./ch-CH";
 import enUS from "./english";
 import esPN from "./spanish";
+import italian from "./italian";
+import french from "./french";
 
-const langArr = [ptBr, chCh, enUS, esPN];
+const langArr = [ptBr, chCh, enUS, esPN, italian, french];
 
 for (var i = 0, len = langArr.length; i < len; i++) {
   i18n.translations[langArr[i].langInfo.sigla] = langArr[i];
@@ -16,6 +18,7 @@ const setLanguageToI18n = async () => {
   let langCode = localStorage.getItem("lang");
   langArr.filter((e) => e.langInfo.sigla === langCode).length < 1 &&
     (langCode = langArr[0].langInfo.sigla);
+
   localStorage.setItem("lang", langCode);
   i18n.locale = langCode;
 };

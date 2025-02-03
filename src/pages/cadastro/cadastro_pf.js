@@ -301,14 +301,15 @@ export default class CadastroPf extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
-      if (res.a == '0') {
+      console.log(res);
+      if (res == '1' || res == '2') {
         this.salvarDormente('agencia', this.state.valueAgencia.numero);
         localStorage.setItem("cpf", this.state.cpf);
         this.setState({ termoModal: true });
-      } else if (res.a == '1') {
+      } else if (res == '300') {
+        this.props.alerts("Informamos que o documento enviado para análise foi identificado como falha.", "Solicitamos que entre em contato conosco através do [canal de suporte/e-mail/telefone].", "warning");
+      } else {
         this.props.alerts("Erro", "CPF inválido, tente novamente", "warning");
-      } else if (res.a == '2') {
-        this.props.alerts("Erro", "CPF já cadastrado", "warning");
       }
       this.setState({ geralLoading: false });
     });

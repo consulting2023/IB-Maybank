@@ -69,7 +69,7 @@ export async function Geral_API(dados, logado) {
   var headers = {
     Accept: "application/json",
     token2f: criptografar,
-    banco: process.env.NOME_BANCO
+    banco: process.env.NOME_BANCO_HEADER
   };
 
   // Adiciona headers para requisições autenticadas

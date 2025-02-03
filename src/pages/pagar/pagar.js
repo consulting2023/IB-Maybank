@@ -113,33 +113,32 @@ export default class Pagar extends Component {
   consultar_boleto = () => {
     if (this.state.linha_digitavel != '') {
       this.setState({ loading: true });
-
       const data = {
         url: 'pagamento/consulta',
-        data: { 'codigo_de_barras': (this.state.linha_digitavel).replace(/\D/g, "") },
+        data: { 
+          codigo_de_barras: (this.state.linha_digitavel).replace(/\D/g, "") 
+        },
         method: 'POST',
       };
 
       Funcoes.Geral_API(data, true).then((res) => {
-
-        if (res == 0 || res == 403) {
-          // alert("Código de barras inválido");
+        if (res.error == true || res == 0) {
           alert(i18n.t('pagar.invalido'));
           this.setState({ loading: false });
         } else {
           if (this.state.tipo_boleto === 2) {
-            if (res.nome == process.env.RAZAO_NOME) {
+            if (res.dados.nome_beneficiario == process.env.RAZAO_NOME) {
               // alert('Não é permitido pagar um boleto da própria ' + process.env.NOME_BANCO);
               alert(i18n.t('pagar.boletoPropria', {nome_banco: process.env.NOME_BANCO}));
             } else {
-              var vencimento = res.vencimento.split("-");
+              var vencimento = res.dados.vencimento.split("-");
               vencimento = vencimento[2] + "/" + vencimento[1] + "/" + vencimento[0];
 
-              var total_pagar = res.valor;
+              var total_pagar = res.dados.valor;
 
               let resultado = '';
 
-              var codigo = res.numeroLinhaDigitavel.replace(/[^0-9]/g, '');
+              var codigo = res.dados.numeroLinhaDigitavel.replace(/[^0-9]/g, '');
 
               if (this.state.tipo_boleto == 1) {
                 resultado = codigo.substr(0, 4) +
@@ -163,34 +162,34 @@ export default class Pagar extends Component {
                 loading: false,
                 mostrarBoleto: true,
                 code_barra: resultado,
-                nome_beneficiario: res.nome,
-                valor: res.valor_original,
+                nome_beneficiario: res.dados.nome_beneficiario,
+                valor: res.dados.valor_original,
                 vencimento: vencimento,
                 vencimento2: vencimento,
                 // nome_pagador: this.state.pessoa.razao_social,
-                nome_pagador: res.nome_pagador,
+                nome_pagador: res.dados.nome_pagador,
                 // documento_pagador: this.state.pessoa.cpf_cnpj,
-                documento_pagador: res.documento_pagador,
-                desconto: res.valorDesconto,
-                juros_mora: res.valorJuros,
-                multa: res.valorMulta,
-                total_multa: res.total_multa,
+                documento_pagador: res.dados.documento_pagador,
+                desconto: res.dados.valorDesconto,
+                juros_mora: res.dados.valorJuros,
+                multa: res.dados.valorMulta,
+                total_multa: res.dados.total_multa,
                 total_pagar: total_pagar
               });
             }
           } else {
-            if (res.nome == process.env.RAZAO_NOME) {
+            if (res.dados.nome_beneficiario == process.env.RAZAO_NOME) {
               // alert('Não é permitido pagar um boleto da própria ' + process.env.NOME_BANCO);
               alert(i18n.t('pagar.boletoPropria', {nome_banco: process.env.NOME_BANCO}));
             } else {
-              var vencimento = res.vencimento.split("-");
+              var vencimento = res.dados.vencimento.split("-");
               vencimento = vencimento[2] + "/" + vencimento[1] + "/" + vencimento[0];
 
-              var total_pagar = res.valor;
+              var total_pagar = res.dados.valor;
 
               let resultado = '';
 
-              var codigo = res.numeroLinhaDigitavel.replace(/[^0-9]/g, '');
+              var codigo = res.dados.numeroLinhaDigitavel.replace(/[^0-9]/g, '');
               if (this.state.tipo_boleto == 1) {
                 resultado = codigo.substr(0, 4) +
                 codigo.substr(32, 1) +
@@ -214,23 +213,23 @@ export default class Pagar extends Component {
                 mostrarBoleto: true,
 
                 code_barra: resultado,
-                nome_beneficiario: res.nome,
-                valor: res.valor_original,
+                nome_beneficiario: res.dados.nome_beneficiario,
+                documento_beneficiario: res.dados.documento_beneficiario,
+                valor: res.dados.valor_original,
                 vencimento: vencimento,
                 vencimento2: vencimento,
                 nome_pagador: this.state.pessoa.razao_social,
                 documento_pagador: this.state.pessoa.cpf_cnpj,
-                documento_beneficiario: res.numeroDocumento,
-                desconto: res.valorDesconto,
-                juros_mora: res.valorJuros,
-                multa: res.valorMulta,
-                total_multa: res.total_multa,
+                desconto: res.dados.valorDesconto,
+                juros_mora: res.dados.valorJuros,
+                multa: res.dados.valorMulta,
+                total_multa: res.dados.total_multa,
                 total_pagar: total_pagar,
               });
             }
           }
         }
-        this.valor_tarifa(total_pagar)
+        this.valor_tarifa(total_pagar);
       });
     } else {
       // alert('Código de barras inválido')
@@ -238,27 +237,50 @@ export default class Pagar extends Component {
     }
   };
 
-  valor_tarifa = (valor_simulacao) => {
-    const dados = [
-      'pagamento',
-      valor_simulacao
-    ]
-
-    Funcoes.tarifas(dados).then((res) => {
-      this.setState({ valor_tarifa: res })
-    })
-  }
-
-  Valida_token = async (id) => {
+  valor_tarifa = (valor) => {
     const data = {
-      url: 'otp/validar',
+      url: 'tarifa/consulta',
       data: {
-        'usuario_id': this.state.pessoa.usuario_id,
-        'token': id,
+        chave: 'pagamento',
+        conta_id: this.state.pessoa.conta_id,
+        valor: valor
       },
       method: 'POST',
     };
+    Funcoes.Geral_API(data, true).then((res) => {
+      this.setState({ valor_tarifa: res });
+    });
+  };
 
+  enviarToken = () => {
+    this.setState({ token_app: true });
+
+    const data = {
+      url: "utilitarios/validacao-email-envio",
+      data: {
+        email: this.state.pessoa.email,
+      },
+      method: "POST",
+    };
+    setTimeout(() => {
+      // Funcoes.Geral_API(data, true).then((res) => {
+      Funcoes.Geral_API(data, true).then((res) => {
+        // if (res == true) {
+        //   console.log(res);
+        // }
+      });
+    }, 300);
+  };
+
+  Valida_token = async (id) => {
+    const data = {
+      url: 'utilitarios/validacao-email-confere',
+      data: {
+        email: this.state.pessoa.email,
+        token: id,
+      },
+      method: 'POST',
+    };
     setTimeout(() => {
       Funcoes.Geral_API(data, true).then((res) => {
         if (res == true) {
@@ -270,28 +292,6 @@ export default class Pagar extends Component {
       });
     }, 300);
   };
-
-  // Validar_senha = (value) => {
-  //   const data = {
-  //     url: 'usuario/login',
-  //     data: {
-  //       'email': this.state.pessoa.email,
-  //       'password': value,
-  //       'sub_banco_id': '',
-  //       'token_aparelho': '',
-  //       'nome_aparelho': ''
-  //     },
-  //     method: 'POST',
-  //   };
-
-  //   Funcoes.Geral_API(data, true).then((res) => {
-  //     if (res != 0) {
-  //       this.setState({ valida_senha_ok: true });
-  //     } else {
-  //       this.setState({ valida_senha_ok: false });
-  //     }
-  //   });
-  // }
 
   combinacoes = async () => {
     this.setState({ loading: true });
@@ -560,7 +560,14 @@ export default class Pagar extends Component {
     
               <button className="btn btn-danger " onClick={() => { window.location.href = '/Pagar' }}>{i18n.t('pagar.btnVoltar')}</button>
     
-              <button className="btn pagarValidar btn-success float-right" onClick={() => { this.setState({ token_app: true }) }}>{i18n.t('pagar.btnProximo')}</button>
+              <button 
+                className="btn pagarValidar btn-success float-right"
+                onClick={() => { 
+                  this.enviarToken();
+                }}
+              >
+                {i18n.t('pagar.btnProximo')}
+              </button>
     
             </Container>
 
