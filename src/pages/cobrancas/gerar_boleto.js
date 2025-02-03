@@ -30,7 +30,8 @@ export default class BoletoCobranca extends Component {
             dataVecimento: new Date(),
             mostrar_download: false,
             pdf: null,
-            mostrar_boleto: false
+            mostrar_boleto: false,
+            boletoId: '',
         };
     }
 
@@ -179,12 +180,10 @@ export default class BoletoCobranca extends Component {
             if (juros_maior == 0) {
 
                 Funcoes.Geral_API(dados, true).then((res) => {
-                    console.log(res)
-
                     if (res !== 0) {
                         // alert("Boleto gerado com sucesso");
                         alert(i18n.t('cobranca.boletoGerado'));
-                        this.setState({ pdf: res.path, mostrar_download: true });
+                        this.setState({ boletoId: res.id, mostrar_download: true });
 
                     } else {
                         // alert("Erro ao Gerar Boleto, Tente Novamente Mais Tarde");
@@ -199,17 +198,22 @@ export default class BoletoCobranca extends Component {
     }
 
     download_boleto = () => {
-        const linkSource = `data:application/pdf;base64,${this.state.pdf}`;
-        const downloadLink = document.createElement("a");
-        const fileName = "Boleto.pdf";
-        downloadLink.href = linkSource;
-        downloadLink.download = fileName;
-        downloadLink.click();
+        const dados = {
+            url: 'boleto/boleto/imprimir-boleto',
+            data: {
+                id: this.state.boletoId
+            },
+            method: 'POST',
+        };
+        Funcoes.Geral_API(dados, true).then((res) => {
+            const linkSource = `data:application/pdf;base64,${res}`;
+            const downloadLink = document.createElement("a");
+            const fileName = "Boleto.pdf";
+            downloadLink.href = linkSource;
+            downloadLink.download = fileName;
+            downloadLink.click();
+        });
     }
-
-    handleChange(event, maskedvalue, floatvalue) {
-        this.setState({ valor: maskedvalue });
-    };
 
     render() {
             if (this.state.mostrar_boleto == true) {

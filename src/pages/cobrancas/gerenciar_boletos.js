@@ -346,7 +346,7 @@ export default class Gerenciar_Boletos extends Component {
                                     </div>
                                     <div className="form-group col-lg-5">
                                         {/* <label>Data Final:</label> */}
-                                        <label>i18n.t('cobranca.dataFinal'):</label>
+                                        <label>{i18n.t('cobranca.dataFinal')}:</label>
                                         <br></br>
                                         <DatePicker
                                             className="form-control"
