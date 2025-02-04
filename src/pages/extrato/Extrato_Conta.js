@@ -10,7 +10,8 @@ import {
   ButtonGroup,
   Table,
   FormGroup,
-  FormControl
+  FormControl,
+  Modal
 } from "react-bootstrap";
 import * as Formatar from "../../constants/Formatar";
 import { addDays } from "date-fns";
@@ -47,6 +48,8 @@ export default class ExtratoConta extends Component {
 
       bloqueados: [],
       mostrarBloqueados: false,
+      respostaModal: false,
+      bloqueadoSelect: {}
     };
     this.handleScroll = this.handleScroll.bind(this);
   }
@@ -494,7 +497,9 @@ export default class ExtratoConta extends Component {
       disabled,
       show,
       bloqueados,
-      mostrarBloqueados
+      mostrarBloqueados,
+      respostaModal,
+      bloqueadoSelect
     } = this.state;
 
     return (
@@ -507,7 +512,7 @@ export default class ExtratoConta extends Component {
         <Container className="p-3 col-md-10 d-flex justify-content-center">
           <Row className="baseWindow px-5 py-4">
             <Col>
-              <Row style={{ width: 600 }} className="red mx-2 mb-5">
+              <Row style={{ width: 600 }} className="mx-2 mb-5">
                 <Button 
                   className="m-auto" 
                   style={{ width: 150 }}
@@ -713,8 +718,10 @@ export default class ExtratoConta extends Component {
               <Table responsive bordered>
                 <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Valor</th>
                     <th>Data</th>
+                    <th>Motivo</th>
                   </tr>
                 </thead>
 
@@ -722,33 +729,88 @@ export default class ExtratoConta extends Component {
                   {
                     bloqueados.map((row, index) => (
                       <tr key={`${row.id}-${index}`}>
-                        <td>{row.id}</td>
+                        <td>{(row.nome && row.nome != '') ?  row.nome : "Nome não informado"}</td>
+                        <td>R$ {Formatar.formatReal(row.valor)}</td>
                         <td>{Formatar.formatarDate(row.data_criacao)}</td>
-                        <td>{row.descricao}</td>
-                        <td>{Formatar.formatReal(row.valor)}</td>
-                        {/* <td>{row.conta_id}</td> */}
-
-                        {/* <td>{row.custom_id}</td> */}
+                        <td>{(row.motivo && row.motivo != '') ?  row.motivo : "Motivo não informado"}</td>
+                        <td>
+                          <Button
+                            onClick={ () => {
+                              console.log(row);
+                              this.setState({ 
+                                // bloqueadoSelect: row,
+                                respostaModal: true 
+                              });
+                            }}
+                          >
+                            Responder
+                          </Button>
+                        </td>
                       </tr>                     
                     ))
                   }
-                  {/* {extrato.map((row, index) => (
-                    <tr key={`${row.id}-${index}`}>
-                      <td>{row.id}</td>
-                      <td>{Formatar.formatarDate(row.dataHora)}</td>
-                      <td>{row.descricao}</td>
-                      <td>{Formatar.formatReal(row.valor)}</td>
-                      <td>{row.conta_id}</td>
-
-                      <td>{row.custom_id}</td>
-                    </tr>
-                  ))} */}
                 </tbody>
               </Table>             
 
             </> )
           }
         </Container>
+
+        <Modal
+          centered
+          size="md"
+          show={respostaModal}
+          onHide={() => this.setState({ respostaModal: false, bloqueadoSelect: {} })}
+        >
+          <Modal.Header closeButton>
+            {/* <Modal.Title>Enviamos um token para seu e-mail. Informe o token.</Modal.Title> */}
+          </Modal.Header>
+          <Modal.Body>
+            <Container>
+              {
+                (bloqueadoSelect == {}) ? ( <>
+
+                  <ReactLoading
+                    className="d-block m-auto"
+                    type={"spin"}
+                    color={"#000"}
+                    height={"5%"}
+                  />
+
+                </> ) : ( <>
+                {JSON.stringify(bloqueadoSelect)}
+                </> )
+              }
+              {/* Deseja continuar o cadastro da conta do CPF/Passaporte {Formatar.cpf_passaporte_mask(this.state.cpf)}? */}
+            </Container>
+          </Modal.Body>
+          <Modal.Footer className="d-flex">
+            {/* <Button
+              className="mr-auto"
+              variant="primary"
+              onClick={() => {
+                this.setState({ 
+                  cadastro: localStorage.getItem("savepf"),
+                  statusModal: false
+                });
+              }}
+            >
+              Sim
+            </Button>
+
+            <Button
+              className="ml-auto"
+              variant="primary"
+              onClick={() => {
+                this.setState({ statusModal: false, cpf: "" });
+                localStorage.removeItem("cpf");
+                localStorage.removeItem("savepf");
+              }}
+            >
+              Não
+            </Button> */}
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }
