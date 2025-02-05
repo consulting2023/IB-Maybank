@@ -9,6 +9,9 @@ import {
   Button,
   ButtonGroup,
   Table,
+  FormGroup,
+  FormControl,
+  Modal
 } from "react-bootstrap";
 import * as Formatar from "../../constants/Formatar";
 import { addDays } from "date-fns";
@@ -39,7 +42,17 @@ export default class ExtratoConta extends Component {
       disabledCsv: false,
       saldos: {},
 
-      continue: true,
+      show: '0',
+      // 0 = extrato
+      // 1 = bloqueados
+
+      bloqueados: [],
+      mostrarBloqueados: false,
+      respostaModal: false,
+      bloqueadoSelect: {},
+      respostaTxt: "",
+      respostaImg: "",
+      loadingResposta: false
     };
     this.handleScroll = this.handleScroll.bind(this);
   }
@@ -165,8 +178,8 @@ export default class ExtratoConta extends Component {
       const keys = Object.keys(res);
       if (keys.length === 0) {
         this.props.alerts(
-          "Nenhuma movimentação encontrada",
-          "Selecione outro período ou tente novamente mais tarde",
+          i18n.t("extrato.nenhumaMovimentacao"),
+          i18n.t("extrato.selecioneOutroPeriodo"),
           "warning"
         );
         this.setState({
@@ -429,6 +442,92 @@ export default class ExtratoConta extends Component {
     });
   };
 
+  getBloqueados = () => {
+    this.setState({ loading: true });
+
+    const data = {
+      url: 'pix-bloqueados/extrato-pix-bloqueados',
+      data: {
+        conta_id: this.state.pessoa.conta_id,
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      if (res.length > 0) {
+        this.setState({ bloqueados: res, mostrarBloqueados: true });
+      } else {
+        this.props.alerts("Sem PIX bloqueados", "", "warning");
+      }
+      this.setState({ loading: false });
+    });
+  };
+
+  getStatus = (num) => {
+    if (num == 0) {
+      return "Desbloqueado";
+    } else if (num == 1) {
+      return "Bloqueado";
+    } else if (num == 2) {
+      return "Em análise"
+    }
+  }
+
+  uploadRespostaImg = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+          const base64String = reader.result.replace(
+            /^data:image\/(png|jpeg);base64,/,
+            ""
+          );
+          this.setState({ respostaImg: base64String });
+        };
+
+        reader.readAsDataURL(file);
+      } else {
+        alert("Arquivo inválido");
+        this.setState({ respostaImg: "" });
+      }
+    } else {
+      this.setState({ respostaImg: "" });
+    }
+  };
+
+  enviarResposta = () => {
+    this.setState({ loadingResposta: true });
+    const timestamp = Date.now();
+    const nomeArquivo = `respostapix_${timestamp}_${this.state.pessoa.conta_id}.png`;
+
+    const data = {
+      url: 'pix-bloqueados/respostas',
+      data: {
+          "conta_id": this.state.pessoa.conta_id,
+          "id": this.state.bloqueadoSelect.id,
+          "resposta": this.state.respostaTxt,
+          "arquivoResposta1": this.state.respostaImg,
+          "nomeDoArquivo": nomeArquivo
+      },
+      method: 'POST',
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      this.getBloqueados();
+
+      if (res.status == 2) {
+        this.props.alerts("Resposta enviada", "O pix bloqueado entrou em análise", "success");
+        this.setState({ respostaModal: false });
+        this.getBloqueados();
+      } else {
+        this.props.alerts("Erro ao enviar resposta", "Tente novamente mais tarde", "warning");
+      }
+      this.setState({ loadingResposta: false });
+    });
+  }
+
   render() {
     const {
       extrato,
@@ -438,6 +537,14 @@ export default class ExtratoConta extends Component {
       mostrarExtrato,
       soma,
       disabled,
+      show,
+      bloqueados,
+      mostrarBloqueados,
+      respostaModal,
+      bloqueadoSelect,
+      respostaTxt,
+      respostaImg,
+      loadingResposta
     } = this.state;
 
     return (
@@ -450,155 +557,341 @@ export default class ExtratoConta extends Component {
         <Container className="p-3 col-md-10 d-flex justify-content-center">
           <Row className="baseWindow px-5 py-4">
             <Col>
-              <Row>
-                <p className="mb-4" style={{ fontSize: "1.30em" }}>
-                  <strong>{i18n.t("extrato.textoEscolhaExtrato")}</strong>
-                </p>
-              </Row>
-              <Row>
-                <Col className="form-group">
-                  <label>{i18n.t("extrato.dataInicio")}</label>
-                  <br />
-                  <DatePicker
-                    className="form-control text-center"
-                    locale="pt-BR"
-                    selected={dataDe}
-                    required
-                    dateFormat="dd/MM/yyyy"
-                    popperPlacement="bottom"
-                    maxDate={addDays(new Date(), 0)}
-                    onChange={(data) => this.setState({ dataDe: data })}
-                  />
-                </Col>
-                <Col className="form-group">
-                  <label>{i18n.t("extrato.dataFinal")}</label>
-                  <br />
-                  <DatePicker
-                    className="form-control text-center"
-                    locale="pt-BR"
-                    selected={dataAte}
-                    required
-                    dateFormat="dd/MM/yyyy"
-                    popperPlacement="bottom"
-                    maxDate={addDays(new Date(), 0)}
-                    onChange={(data) => this.setState({ dataAte: data })}
-                  />
-                </Col>
-                <Col className="form-group">
-                  <label>Custom ID</label>
-                  <br />
-                  <input
-                    type="text"
-                    className="form-control text-center"
-                    value={this.state.custom_id || ""}
-                    required
-                    onChange={(e) =>
-                      this.setState({ custom_id: e.target.value })
-                    }
-                    placeholder="Digite o custom_id"
-                  />
-                </Col>
-              </Row>
-              <Row className="form-group m-0">
-                <Button
-                  onClick={this.verExtrato}
-                  disabled={disabled}
-                  className="m-auto px-5 py-2 btnProcurarExtrato"
+              <Row style={{ width: 600 }} className="mx-2 mb-5">
+                <Button 
+                  className="m-auto" 
+                  style={{ width: 150 }}
+                  onClick={ () => {
+                    this.setState({ show: '0' });
+                  }}
+                  active={show == '0'}
                 >
-                  {i18n.t("extrato.btnPesquisar")}
+                  Extrato
+                </Button>
+
+                <Button
+                  className="m-auto" 
+                  style={{ width: 150 }}
+                  onClick={ () => {
+                    if (show != '1') {
+                      this.setState({ show: '1' });
+                      this.getBloqueados();
+                    }
+                  }}
+                  active={show == '1'}
+                >
+                  Bloqueado
                 </Button>
               </Row>
+
+              {
+                (show == '0') ? ( <>
+
+                  <Row>
+                    <p className="mb-4 mx-auto" style={{ fontSize: "1.30em" }}>
+                      <strong>{i18n.t("extrato.textoEscolhaExtrato")}</strong>
+                    </p>
+                  </Row>
+                  <Row>
+                    <Col className="form-group d-flex">
+                      <FormGroup className="m-auto">
+                        <label>{i18n.t("extrato.dataInicio")}</label>
+                        <br />
+                        <DatePicker
+                          className="form-control text-center"
+                          locale="pt-BR"
+                          selected={dataDe}
+                          required
+                          dateFormat="dd/MM/yyyy"
+                          popperPlacement="bottom"
+                          maxDate={addDays(new Date(), 0)}
+                          onChange={(data) => this.setState({ dataDe: data })}
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col className="form-group d-flex">
+                      <FormGroup className="m-auto">
+                        <label>{i18n.t("extrato.dataFinal")}</label>
+                        <br />
+                        <DatePicker
+                          className="form-control text-center"
+                          locale="pt-BR"
+                          selected={dataAte}
+                          required
+                          dateFormat="dd/MM/yyyy"
+                          popperPlacement="bottom"
+                          maxDate={addDays(new Date(), 0)}
+                          onChange={(data) => this.setState({ dataAte: data })}
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col className="form-group">
+                      <label>Custom ID</label>
+                      <br />
+                      <input
+                        type="text"
+                        className="form-control text-center"
+                        value={this.state.custom_id || ""}
+                        required
+                        onChange={(e) =>
+                          this.setState({ custom_id: e.target.value })
+                        }
+                        placeholder="Digite o custom_id"
+                      />
+                    </Col>
+                  </Row>
+                  <Row className="form-group m-0">
+                    <Button
+                      onClick={this.verExtrato}
+                      disabled={disabled}
+                      className="m-auto px-5 py-2 btnProcurarExtrato"
+                    >
+                      {i18n.t("extrato.btnPesquisar")}
+                    </Button>
+                  </Row>
+
+                </> )
+
+                : (show == '1') && ( <>
+
+                  <p className="mb-4 mx-auto text-center" style={{ fontSize: "1.30em" }}>
+                    <strong>Movimentações bloqueadas</strong>
+                  </p>
+                  
+                </> )
+              }
+
             </Col>
           </Row>
         </Container>
 
         <Container className="p-3 col-md-10">
-          {loading && (
-            <ReactLoading
-              className="d-block m-auto"
-              type={"spin"}
-              color={"#000"}
-              height={"5%"}
-            />
-          )}
+          
+          {
+            loading && ( <>
+              <ReactLoading
+                className="d-block m-auto"
+                type={"spin"}
+                color={"#000"}
+                height={"5%"}
+              />
+            </> )
+          }
 
-          {mostrarExtrato && (
-            <Col className="baseWindow px-5 py-4">
-              <Row>
-                <ButtonGroup className="buttonGroup flex-row justify-content-between">
-                  <Button className="mr-1" onClick={this.extrato_pdf}>
-                    {i18n.t("extrato.downloadPdf")}
-                  </Button>
+          { 
+            (show == '0' && mostrarExtrato) ? ( <>
 
-                  <div>
-                    {/* Indicador de loading */}
-                    {this.state.loadingCsv && (
-                      <div className="loading-overlay">
-                        <div className="spinner"></div>
-                        <p>Gerando arquivo CSV, por favor, aguarde...</p>
-                      </div>
-                    )}
-
-                    {/* Botão para gerar o CSV */}
-
-                    <Button
-                      className="mr-1"
-                      onClick={this.extrato_csv}
-                      disabled={this.state.loadingCsv || this.state.disabledCsv}
-                    >
-                      {this.state.loading
-                        ? "Gerando..."
-                        : "Download Extrato CSV"}
+              <Col className="baseWindow px-5 py-4">
+                <Row>
+                  <ButtonGroup className="buttonGroup flex-row justify-content-between">
+                    <Button className="mr-1" onClick={this.extrato_pdf}>
+                      {i18n.t("extrato.downloadPdf")}
                     </Button>
-                  </div>
-                </ButtonGroup>
-                {soma !== 0 && (
-                  <div className="d-flex flex-grow-1">
-                    <p className="my-auto ml-auto texto-saldos-Extrato">
-                      Total no período:
-                      <span className={soma < 0 ? "redText" : "greenText"}>
-                        {" "}
-                        R$ {Formatar.formatReal(soma)}
-                      </span>
-                    </p>
+
+                    <div>
+                      {/* Indicador de loading */}
+                      {this.state.loadingCsv && (
+                        <div className="loading-overlay">
+                          <div className="spinner"></div>
+                          <p>Gerando arquivo CSV, por favor, aguarde...</p>
+                        </div>
+                      )}
+
+                      {/* Botão para gerar o CSV */}
+
+                      <Button
+                        className="mr-1"
+                        onClick={this.extrato_csv}
+                        disabled={this.state.loadingCsv || this.state.disabledCsv}
+                      >
+                        {this.state.loading
+                          ? "Gerando..."
+                          : "Download Extrato CSV"}
+                      </Button>
+                    </div>
+                  </ButtonGroup>
+                  {soma !== 0 && (
+                    <div className="d-flex flex-grow-1">
+                      <p className="my-auto ml-auto texto-saldos-Extrato">
+                        Total no período:
+                        <span className={soma < 0 ? "redText" : "greenText"}>
+                          {" "}
+                          R$ {Formatar.formatReal(soma)}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                </Row>
+                <Table responsive bordered>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Data</th>
+                      <th>Descrição</th>
+                      <th>Valor</th>
+                      <th>Conta</th>
+
+                      <th>Custom ID</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {extrato.map((row, index) => (
+                      <tr key={`${row.id}-${index}`}>
+                        <td>{row.id}</td>
+                        <td>{Formatar.formatarDate(row.dataHora)}</td>
+                        <td>{row.descricao}</td>
+                        <td>{Formatar.formatReal(row.valor)}</td>
+                        <td>{row.conta_id}</td>
+
+                        <td>{row.custom_id}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+                {loading && (
+                  <div className="text-center mt-3">
+                    <ReactLoading type={"spin"} color={"#000"} height={50} />
                   </div>
                 )}
-              </Row>
+              </Col>
+
+            </> )
+
+            : (show == '1' && mostrarBloqueados) && ( <>
+
               <Table responsive bordered>
                 <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Data</th>
-                    <th>Descrição</th>
+                    <th>Status</th>
+                    <th>Nome</th>
                     <th>Valor</th>
-                    <th>Conta</th>
-                    
-                    <th>Custom ID</th>
+                    <th>Data</th>
+                    <th>Motivo</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {extrato.map((row, index) => (
-                    <tr key={`${row.id}-${index}`}>
-                      <td>{row.id}</td>
-                      <td>{Formatar.formatarDate(row.dataHora)}</td>
-                      <td>{row.descricao}</td>
-                      <td>{Formatar.formatReal(row.valor)}</td>
-                      <td>{row.conta_id}</td>
-                      
-                      <td>{row.custom_id}</td>
-                    </tr>
-                  ))}
+                  {
+                    bloqueados.map((row, index) => (
+                      <tr key={`${row.id}-${index}`}>
+                        <td>{this.getStatus(row.status)}</td>
+                        <td>{(row.nome && row.nome != '') ?  row.nome : "Nome não informado"}</td>
+                        <td>R$ {Formatar.formatReal(row.valor)}</td>
+                        <td>{Formatar.formatarDate(row.data_criacao)}</td>
+                        <td>{(row.motivo && row.motivo != '') ?  row.motivo : "Motivo não informado"}</td>
+                        <td>
+                          <Button
+                            onClick={ () => {
+                              this.setState({ 
+                                bloqueadoSelect: row,
+                                respostaModal: true 
+                              });
+                            }}
+                            disabled={ row.status != 1 }
+                          >
+                            Responder
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  }
                 </tbody>
-              </Table>
-              {loading && (
-                <div className="text-center mt-3">
-                  <ReactLoading type={"spin"} color={"#000"} height={50} />
-                </div>
-              )}
-            </Col>
-          )}
+              </Table>             
+
+            </> )
+          }
         </Container>
+
+        <Modal
+          centered
+          size="xl"
+          show={respostaModal}
+          onHide={() => {
+            if (!loadingResposta) {
+              this.setState({ respostaModal: false, respostaTxt: "", respostaImg: "" });
+            }
+          }}
+        >
+          <Modal.Header closeButton />
+          <Modal.Body>
+            <Container>
+              {
+                (Object.keys(bloqueadoSelect).length == 0 || loadingResposta) ? ( <>
+
+                  <ReactLoading
+                    className="d-block m-auto"
+                    type={"spin"}
+                    color={"#000"}
+                    height={"5%"}
+                  />
+
+                </> ) : ( <>
+
+                  <Table responsive bordered>
+                    <thead>
+                      <tr>
+                        <th>Status</th>
+                        <th>Nome</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                        <th>Motivo</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr>
+                        <td>{this.getStatus(bloqueadoSelect.status)}</td>
+                        <td>{(bloqueadoSelect.nome && bloqueadoSelect.nome != '') ?  bloqueadoSelect.nome : "Nome não informado"}</td>
+                        <td>R$ {Formatar.formatReal(bloqueadoSelect.valor)}</td>
+                        <td>{Formatar.formatarDate(bloqueadoSelect.data_criacao)}</td>
+                        <td>{(bloqueadoSelect.motivo && bloqueadoSelect.motivo != '') ?  bloqueadoSelect.motivo : "Motivo não informado"}</td>
+                      </tr>                     
+                    </tbody>
+                  </Table>
+
+                  <div className="m-5">
+                    <FormGroup className="mx-2">
+                      <label>Responder:</label>
+
+                      <FormControl
+                        onChange={ (e) => this.setState({ respostaTxt: e.target.value }) }
+                        value={respostaTxt}
+                        id="resposta"
+                        as="textarea"
+                        placeholder="Resposta"
+                      />
+                    </FormGroup>
+
+                    <FormGroup className="mx-2">
+                      <label>Anexar uma imagem:</label>
+                      <FormControl
+                        onChange={ (event) => this.uploadRespostaImg(event) } 
+                        accept="image/png, image/jpeg, application/pdf" 
+                        className="d-block"
+                        id="file"
+                        type="file"
+                      />
+                    </FormGroup>
+                  </div>
+
+                </> )
+              }
+            </Container>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              disabled={ respostaTxt == '' || respostaImg == '' }
+              className="float-right"
+              variant="primary"
+              onClick={() => {
+                this.enviarResposta()
+              }}
+            >
+              Enviar resposta
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }
