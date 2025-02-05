@@ -867,7 +867,7 @@ export default class ExtratoConta extends Component {
                       <label>Anexar uma imagem:</label>
                       <FormControl
                         onChange={ (event) => this.uploadRespostaImg(event) } 
-                        accept="image/png, image/jpeg, application/pdf" 
+                        accept="image/png, image/jpeg" 
                         className="d-block"
                         id="file"
                         type="file"
