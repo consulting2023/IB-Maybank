@@ -49,7 +49,10 @@ export default class ExtratoConta extends Component {
       bloqueados: [],
       mostrarBloqueados: false,
       respostaModal: false,
-      bloqueadoSelect: {}
+      bloqueadoSelect: {},
+      respostaTxt: "",
+      respostaImg: "",
+      loadingResposta: false
     };
     this.handleScroll = this.handleScroll.bind(this);
   }
@@ -175,8 +178,8 @@ export default class ExtratoConta extends Component {
       const keys = Object.keys(res);
       if (keys.length === 0) {
         this.props.alerts(
-          "Nenhuma movimentação encontrada",
-          "Selecione outro período ou tente novamente mais tarde",
+          i18n.t("extrato.nenhumaMovimentacao"),
+          i18n.t("extrato.selecioneOutroPeriodo"),
           "warning"
         );
         this.setState({
@@ -451,7 +454,6 @@ export default class ExtratoConta extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((res) => {
-      console.log(res);
       if (res.length > 0) {
         this.setState({ bloqueados: res, mostrarBloqueados: true });
       } else {
@@ -459,32 +461,72 @@ export default class ExtratoConta extends Component {
       }
       this.setState({ loading: false });
     });
-
-    // const data = {
-    //   url: 'pix-bloqueados/extrato-pix-bloqueados',
-    //   data: {
-    //       "conta_id": global.pessoa.conta_id
-    //   },
-    //   method: 'POST',
-    //   console: false,
-    //   tipo_aparelho: global.tipoaparelho,
-    //   funcao: 'lancamentos_bloqueados',
-    //   tela: 'extrato'
-    // };
-    // Geral.Geral_API_Logado(data).then((responseJson) => {
-    //   var keys = Object.keys(responseJson);
-    //   var num = keys.length;
-    //   if (num !== 0) {
-    //     this.setState({ progress: false })
-    //     this.setState({ movimentacoes_bloqueadas: responseJson })
-    //   }
-    //   else if (responseJson == '') {
-    //     this.setState({ progress: false })
-    //     Alert.alert(i18n.t('alt_tela_extrato_nenhumlancamento'));
-    //   }
-    // });
-
   };
+
+  getStatus = (num) => {
+    if (num == 0) {
+      return "Desbloqueado";
+    } else if (num == 1) {
+      return "Bloqueado";
+    } else if (num == 2) {
+      return "Em análise"
+    }
+  }
+
+  uploadRespostaImg = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type === "image/png" || file.type === "image/jpeg") {
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+          const base64String = reader.result.replace(
+            /^data:image\/(png|jpeg);base64,/,
+            ""
+          );
+          this.setState({ respostaImg: base64String });
+        };
+
+        reader.readAsDataURL(file);
+      } else {
+        alert("Arquivo inválido");
+        this.setState({ respostaImg: "" });
+      }
+    } else {
+      this.setState({ respostaImg: "" });
+    }
+  };
+
+  enviarResposta = () => {
+    this.setState({ loadingResposta: true });
+    const timestamp = Date.now();
+    const nomeArquivo = `respostapix_${timestamp}_${this.state.pessoa.conta_id}.png`;
+
+    const data = {
+      url: 'pix-bloqueados/respostas',
+      data: {
+          "conta_id": this.state.pessoa.conta_id,
+          "id": this.state.bloqueadoSelect.id,
+          "resposta": this.state.respostaTxt,
+          "arquivoResposta1": this.state.respostaImg,
+          "nomeDoArquivo": nomeArquivo
+      },
+      method: 'POST',
+    };
+
+    Funcoes.Geral_API(data, true).then((res) => {
+      this.getBloqueados();
+
+      if (res.status == 2) {
+        this.props.alerts("Resposta enviada", "O pix bloqueado entrou em análise", "success");
+        this.setState({ respostaModal: false });
+        this.getBloqueados();
+      } else {
+        this.props.alerts("Erro ao enviar resposta", "Tente novamente mais tarde", "warning");
+      }
+      this.setState({ loadingResposta: false });
+    });
+  }
 
   render() {
     const {
@@ -499,7 +541,10 @@ export default class ExtratoConta extends Component {
       bloqueados,
       mostrarBloqueados,
       respostaModal,
-      bloqueadoSelect
+      bloqueadoSelect,
+      respostaTxt,
+      respostaImg,
+      loadingResposta
     } = this.state;
 
     return (
@@ -580,7 +625,7 @@ export default class ExtratoConta extends Component {
                         />
                       </FormGroup>
                     </Col>
-                    {/* <Col className="form-group">
+                    <Col className="form-group">
                       <label>Custom ID</label>
                       <br />
                       <input
@@ -593,7 +638,7 @@ export default class ExtratoConta extends Component {
                         }
                         placeholder="Digite o custom_id"
                       />
-                    </Col> */}
+                    </Col>
                   </Row>
                   <Row className="form-group m-0">
                     <Button
@@ -718,6 +763,7 @@ export default class ExtratoConta extends Component {
               <Table responsive bordered>
                 <thead>
                   <tr>
+                    <th>Status</th>
                     <th>Nome</th>
                     <th>Valor</th>
                     <th>Data</th>
@@ -729,6 +775,7 @@ export default class ExtratoConta extends Component {
                   {
                     bloqueados.map((row, index) => (
                       <tr key={`${row.id}-${index}`}>
+                        <td>{this.getStatus(row.status)}</td>
                         <td>{(row.nome && row.nome != '') ?  row.nome : "Nome não informado"}</td>
                         <td>R$ {Formatar.formatReal(row.valor)}</td>
                         <td>{Formatar.formatarDate(row.data_criacao)}</td>
@@ -736,17 +783,17 @@ export default class ExtratoConta extends Component {
                         <td>
                           <Button
                             onClick={ () => {
-                              console.log(row);
                               this.setState({ 
-                                // bloqueadoSelect: row,
+                                bloqueadoSelect: row,
                                 respostaModal: true 
                               });
                             }}
+                            disabled={ row.status != 1 }
                           >
                             Responder
                           </Button>
                         </td>
-                      </tr>                     
+                      </tr>
                     ))
                   }
                 </tbody>
@@ -758,17 +805,19 @@ export default class ExtratoConta extends Component {
 
         <Modal
           centered
-          size="md"
+          size="xl"
           show={respostaModal}
-          onHide={() => this.setState({ respostaModal: false, bloqueadoSelect: {} })}
+          onHide={() => {
+            if (!loadingResposta) {
+              this.setState({ respostaModal: false, respostaTxt: "", respostaImg: "" });
+            }
+          }}
         >
-          <Modal.Header closeButton>
-            {/* <Modal.Title>Enviamos um token para seu e-mail. Informe o token.</Modal.Title> */}
-          </Modal.Header>
+          <Modal.Header closeButton />
           <Modal.Body>
             <Container>
               {
-                (bloqueadoSelect == {}) ? ( <>
+                (Object.keys(bloqueadoSelect).length == 0 || loadingResposta) ? ( <>
 
                   <ReactLoading
                     className="d-block m-auto"
@@ -778,37 +827,69 @@ export default class ExtratoConta extends Component {
                   />
 
                 </> ) : ( <>
-                {JSON.stringify(bloqueadoSelect)}
+
+                  <Table responsive bordered>
+                    <thead>
+                      <tr>
+                        <th>Status</th>
+                        <th>Nome</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                        <th>Motivo</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr>
+                        <td>{this.getStatus(bloqueadoSelect.status)}</td>
+                        <td>{(bloqueadoSelect.nome && bloqueadoSelect.nome != '') ?  bloqueadoSelect.nome : "Nome não informado"}</td>
+                        <td>R$ {Formatar.formatReal(bloqueadoSelect.valor)}</td>
+                        <td>{Formatar.formatarDate(bloqueadoSelect.data_criacao)}</td>
+                        <td>{(bloqueadoSelect.motivo && bloqueadoSelect.motivo != '') ?  bloqueadoSelect.motivo : "Motivo não informado"}</td>
+                      </tr>                     
+                    </tbody>
+                  </Table>
+
+                  <div className="m-5">
+                    <FormGroup className="mx-2">
+                      <label>Responder:</label>
+
+                      <FormControl
+                        onChange={ (e) => this.setState({ respostaTxt: e.target.value }) }
+                        value={respostaTxt}
+                        id="resposta"
+                        as="textarea"
+                        placeholder="Resposta"
+                      />
+                    </FormGroup>
+
+                    <FormGroup className="mx-2">
+                      <label>Anexar uma imagem:</label>
+                      <FormControl
+                        onChange={ (event) => this.uploadRespostaImg(event) } 
+                        accept="image/png, image/jpeg, application/pdf" 
+                        className="d-block"
+                        id="file"
+                        type="file"
+                      />
+                    </FormGroup>
+                  </div>
+
                 </> )
               }
-              {/* Deseja continuar o cadastro da conta do CPF/Passaporte {Formatar.cpf_passaporte_mask(this.state.cpf)}? */}
             </Container>
           </Modal.Body>
-          <Modal.Footer className="d-flex">
-            {/* <Button
-              className="mr-auto"
-              variant="primary"
-              onClick={() => {
-                this.setState({ 
-                  cadastro: localStorage.getItem("savepf"),
-                  statusModal: false
-                });
-              }}
-            >
-              Sim
-            </Button>
-
+          <Modal.Footer>
             <Button
-              className="ml-auto"
+              disabled={ respostaTxt == '' || respostaImg == '' }
+              className="float-right"
               variant="primary"
               onClick={() => {
-                this.setState({ statusModal: false, cpf: "" });
-                localStorage.removeItem("cpf");
-                localStorage.removeItem("savepf");
+                this.enviarResposta()
               }}
             >
-              Não
-            </Button> */}
+              Enviar resposta
+            </Button>
           </Modal.Footer>
         </Modal>
       </div>

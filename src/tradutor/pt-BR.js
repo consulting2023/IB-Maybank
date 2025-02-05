@@ -113,6 +113,9 @@ export default {
     extrato: "Extrato",
     nenhumLancamento: "Nenhum lançamento encontrado",
     // nenhumaMovimentacao: 'Não foi encontrado nenhuma movimentação na data selecionada'
+
+    nenhumaMovimentacao: "Nenhuma movimentação encontrada",
+    selecioneOutroPeriodo: "Selecione outro período ou tente novamente mais tarde",
   },
 
   deposito: {
