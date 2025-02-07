@@ -410,7 +410,9 @@ export default class Pagar extends Component {
         } else if (res.mov_id) {
             //*pagamento realizado
           this.setState({ token_app: false });
-          this.comprovante_ver(res.mov_id);
+          alert("Pagamento efetuado com sucesso!");
+          Funcoes.comprovante_ver(res.mov_id);
+          window.location.href = '/pagar'
         } else {
           //*algum erro não previsto
           alert('Processamento Invalido, Contate seu Gerente!');
@@ -429,8 +431,6 @@ export default class Pagar extends Component {
         "id": id
       },
       method: 'POST',
-      funcao: 'comprovante_ver',
-      tela: 'pagar'
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
