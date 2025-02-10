@@ -421,12 +421,14 @@ export default class CadastroPj extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
-      if (res) {
+      if (res == '1' || res == '2') {
         this.salvarDormente("agencia", this.state.valueAgencia.numero);
         localStorage.setItem("cnpj", this.state.cnpj);
         this.setState({ termoModal: true });
+      } else if (res == '300') {
+        this.props.alerts(i18n.t("cadastroPj.informamos"), i18n.t("cadastroPj.solicitamos"), "warning");
       } else {
-        this.props.alerts(i18n.t("cadastroPJ.erro"), i18n.t("cadastroPJ.cpnjFail"), "warning");
+        this.props.alerts(i18n.t("cadastroPj.erro"), i18n.t("cadastroPj.cpnjFail"), "warning");
       }
       this.setState({ geralLoading: false });
     });
@@ -853,7 +855,7 @@ export default class CadastroPj extends Component {
               {this.state.cadastro == "0" && (
                 <>
                   <h1 className="mb-2">
-                  {i18n.t("cadastroPj.Iremos começar o cadastro da sua conta PJ")}
+                  {i18n.t("cadastroPj.cadastroStart")}
                   </h1>
                   <hr className="divisoria" />
 
@@ -878,7 +880,7 @@ export default class CadastroPj extends Component {
                   </FormGroup>
 
                   <FormGroup>
-                    <label>{i18n.t("cadastroPj.Informe o CNPJ da empresa")}</label>
+                    <label>{i18n.t("cadastroPj.cnpjInforme")}</label>
                     <FormControl
                       value={Formatar.cnpj_mask(this.state.cnpj)}
                       placeholder="00.000.000/0000-00"

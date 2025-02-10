@@ -4,10 +4,10 @@ import Icones from "./Icon";
 const home_mostrar = true;
 const extrato_mostar = true;
 const transferencia_mostrar = true;
-const depostio_mostrar = false;
+const deposito_mostrar = true;
 const comprovante_mostar = true;
-const pagar_mostrar = false;
-const cobrar_mostrar = false;
+const pagar_mostrar = true;
+const cobrar_mostrar = true;
 const cartao_mostrar = true;
 const servicos_mostrar = false;
 const qrcode_mostrar = true;
@@ -48,7 +48,7 @@ const getListaProdutos = () => {
       icone: Icones.deposito,
       titulo: "sidebar.deposito",
       rota: "/deposito",
-      mostrar: depostio_mostrar,
+      mostrar: deposito_mostrar,
     },
     {
       key: 4,
@@ -191,7 +191,7 @@ export default {
   home: home_mostrar,
   extrato: extrato_mostar,
   transferencia: transferencia_mostrar,
-  deposito: depostio_mostrar,
+  deposito: deposito_mostrar,
   comprovante: comprovante_mostar,
   pagar: pagar_mostrar,
   cobrancas: cobrar_mostrar,
