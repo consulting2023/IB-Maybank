@@ -136,7 +136,7 @@ export default class Login extends Component {
           token_aparelho: "",
           nome_aparelho: "",
 
-          tokenc: this.state.captcha,
+          // tokenc: this.state.captcha,
 
           so: this.state.os,
           brand: this.state.browser,
@@ -486,7 +486,7 @@ export default class Login extends Component {
                 <br />
 
                 <div>
-                  <Row>
+                  {/* <Row>
                     <ReCAPTCHA
                       className="mx-auto mb-2"
                       sitekey={process.env.CAPTCHA_KEY}
@@ -505,7 +505,7 @@ export default class Login extends Component {
                       theme="light"
                       hl={i18n.t("login.captchaLang")}
                     />
-                  </Row>
+                  </Row> */}
 
                   <Row>
                     {Produtos.cadastro.cadastroLiberado ? (
