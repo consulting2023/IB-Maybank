@@ -53,6 +53,13 @@ export default {
       "Account not approved, contact the manager for more details",
     cadastrar: "Register",
     selecionarConta: "Select the type of account to register",
+
+    erroInterno: "Internal error",
+    captchaLang: "en",
+    erro: "Error",
+    requisicaoNaoPermitida: "Request not allowed",
+    erroConexao: "Connection error",
+    tenteRecarregarPagina: "Try reloading the page",
   },
 
   home: {

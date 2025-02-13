@@ -57,6 +57,13 @@ export default {
       "Cuenta no aprobada, contacte al gerente para más información",
     cadastrar: "Registrar",
     selecionarConta: "Seleccione el tipo de cuenta para registrar",
+
+    erroInterno: "Error interno",
+    captchaLang: "es",
+    erro: "Error",
+    requisicaoNaoPermitida: "Solicitud no permitida",
+    erroConexao: "Error de conexión",
+    tenteRecarregarPagina: "Intenta recargar la página",
   },
 
   home: {

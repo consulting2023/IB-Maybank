@@ -29,6 +29,7 @@ import i18n from "../../tradutor/tradutor";
 import Password from "../../components/password/Password";
 import Otp from "../../components/otp/otp";
 import LangButton from "../../components/langButton/LangButton";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default class Login extends Component {
   constructor() {
@@ -59,6 +60,8 @@ export default class Login extends Component {
       browser: "",
       cpu: "",
       identificador: "",
+
+      captcha: "",
     };
   }
 
@@ -133,6 +136,8 @@ export default class Login extends Component {
           token_aparelho: "",
           nome_aparelho: "",
 
+          tokenc: this.state.captcha,
+
           so: this.state.os,
           brand: this.state.browser,
           model: this.state.cpu,
@@ -143,16 +148,20 @@ export default class Login extends Component {
 
       // Funcoes.Geral_API(data, false).then((res) => {
       Funcoes.Geral_API(data, false).then((res) => {
-        console.log(res);
-
         if (res == 0) {
           this.props.alerts(
             i18n.t("login.alertaCombinacoes"),
             i18n.t("login.senhaIncorreta"),
             "warning"
           );
+        } else if (res == 303) {
+          this.props.alerts(
+            i18n.t("login.erro"),
+            i18n.t("login.requisicaoNaoPermitida"),
+            "warning"
+          );
         } else if (texto == "") {
-          this.props.alerts("Erro interno", "", "danger");
+          this.props.alerts(i18n.t("login.erroInterno"), "", "danger");
         } else {
           var arrContas = [];
           Object.keys(res).forEach(function (key) {
@@ -478,6 +487,27 @@ export default class Login extends Component {
 
                 <div>
                   <Row>
+                    <ReCAPTCHA
+                      className="mx-auto mb-2"
+                      sitekey={process.env.CAPTCHA_KEY}
+                      onChange={ (e) => { 
+                        this.setState({ captcha: e });
+                      }}
+                      onErrored={ () => {
+                        this.props.alerts(
+                          i18n.t("login.erroConexao"),
+                          i18n.t("login.tenteRecarregarPagina"),
+                          "warning"
+                        );
+                      }}
+                      size="normal"
+                      type="image"
+                      theme="light"
+                      hl={i18n.t("login.captchaLang")}
+                    />
+                  </Row>
+
+                  <Row>
                     {Produtos.cadastro.cadastroLiberado ? (
                       <Col className="text-center">
                         <Button
@@ -512,7 +542,8 @@ export default class Login extends Component {
                             this.state.email.length < 5 ||
                             !this.state.email.match(
                               /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                            )
+                            ) ||
+                            this.state.captcha == ""
                           }
                           type="button"
                           className="botaologin btn-primary"

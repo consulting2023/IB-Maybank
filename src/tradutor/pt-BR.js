@@ -54,6 +54,13 @@ export default {
     contaNãoAprovada: "Conta não aprovada, contate o gerente para saber mais",
     cadastrar: "Cadastrar",
     selecionarConta: "Selecione o tipo de conta para cadastro",
+
+    erroInterno: "Erro interno",
+    captchaLang: "pt-BR",
+    erro: "Erro",
+    requisicaoNaoPermitida: "Requisição não permitida",
+    erroConexao: "Erro de conexão",
+    tenteRecarregarPagina: "Tente recarregar a página",
   },
 
   home: {
