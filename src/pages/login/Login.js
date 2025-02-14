@@ -540,7 +540,7 @@ export default class Login extends Component {
                             this.state.password[4] == "" ||
                             this.state.password[5] == "" ||
                             this.state.email.length < 5 ||
-                            this.state.captcha == "" ||
+                            // this.state.captcha == "" ||
                             !this.state.email.match(
                               /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
                             )
