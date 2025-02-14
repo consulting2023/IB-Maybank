@@ -411,7 +411,8 @@ export default class Pagar extends Component {
             //*pagamento realizado
           this.setState({ token_app: false });
           alert("Pagamento efetuado com sucesso!");
-          Funcoes.comprovante_ver(res.mov_id);
+          // Funcoes.comprovante_ver(res.mov_id);
+          Funcoes.comprovanteGeral(res.mov_id);
           window.location.href = '/pagar'
         } else {
           //*algum erro não previsto

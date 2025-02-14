@@ -33,11 +33,11 @@ export default class ComprovanteConta extends Component {
       custom_id: "",
     };
   }
-  componentDidiMout() {
-    Funcoes.pessoa;
-    var arr = pessoa;
-    this.setState({ dadosCorrentista: arr });
-  }
+  // componentDidiMout() {
+  //   Funcoes.pessoa;
+  //   var arr = pessoa;
+  //   this.setState({ dadosCorrentista: arr });
+  // }
 
   verComprovante = () => {
     this.setState({ loading: true, disabled: true });
@@ -393,7 +393,7 @@ export default class ComprovanteConta extends Component {
                       style={{ marginLeft: "15px" }}
                       className="btn btn-sm baixarComprovante btn-success"
                       onClick={() =>
-                        Funcoes.comprovante_pdf(comprovante.mov.id)
+                        Funcoes.comprovanteGeral(comprovante.mov.id)
                       }
                     >
                       Ver PDF

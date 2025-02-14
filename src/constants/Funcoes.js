@@ -190,6 +190,151 @@ export function logout() {
   if (window.location.pathname != "/") window.location.href = "/";
 }
 
+export function comprovanteGeral(id) {
+  const data = {
+    url: "conta/comprovante-pdf",
+    data: { id: id, app: 1 },
+    method: "POST",
+  };
+
+  Geral_API(data, true).then(res => {
+    if (!res) {
+      console.error("Dados inválidos ou ausentes.");
+    } else {
+      if (res.transferencia) {
+        comprovante_pdf(id);
+      } else if (res.pix) {
+        comprovante_ver(id);
+      } else if (res.pagamento) {
+
+        const pagamento = res.pagamento;
+
+        const dados_pagador = pagamento.dados_pagador || {};
+        const dados_recebedor = pagamento.dados_recebedor || {};
+        const dados_transacao = pagamento.dados_transacao || {};
+
+        const doc = new jsPDF();
+        const startY = 70;
+        const tableWidth = 190;
+        const cellPadding = 5;
+        const cellHeight = 10;
+        let cursorY = startY;
+
+        // Adiciona o logotipo
+        const addLogoAndGeneratePDF = (logoBase64) => {
+          if (logoBase64) {
+            doc.addImage(logoBase64, "PNG", 10, 10, 40, 40);
+          }
+
+          doc.setFontSize(14);
+          doc.text(
+            `Comprovante de ${res.pix ? "PIX" : "Pagamento"}`,
+            10,
+            cursorY - 10
+          );
+
+          // Desenha tabela com espaçamento entre título e resultado
+          const drawTableRow = (label, value) => {
+            // Define a largura disponível para o texto
+            const availableWidth = tableWidth - 110; // 110 é o espaço onde a etiqueta (label) e a margem estão
+  
+            // Divida o texto em várias linhas, se necessário
+            const valueLines = doc.splitTextToSize(value, availableWidth);
+
+            // Calcular a altura da célula com base no número de linhas de texto
+            const rowHeight = cellHeight + (valueLines.length - 1) * 10; // Ajusta a altura da célula conforme as linhas
+
+            // Desenha a borda da célula com a altura ajustada
+            doc.rect(10, cursorY, tableWidth, rowHeight); // Borda externa (sem borda central)
+  
+            // Coloca o texto do título (label)
+            doc.text(`${label}:`, 15, cursorY + cellPadding);
+  
+            // Agora desenha cada linha de texto ajustada
+            valueLines.forEach((line, index) => {
+              doc.text(line, 105, cursorY + cellPadding + index * 10); // Desenha a linha do valor
+            });
+
+            // Atualiza o cursorY com base na altura da célula
+            cursorY += rowHeight;         
+          };
+
+          // Dados da transação
+          drawTableRow("Data", dados_transacao.data_pagamento || "N/A");
+          drawTableRow("Valor Pago", `R$ ${dados_transacao.valor_pago || "N/A"}`);
+
+          cursorY += 10; // Espaço entre as seções
+
+          if (pagamento.tipo == "saida") {
+            // Dados do pagador
+            doc.setFontSize(12);
+            doc.text("Dados do Pagador", 10, cursorY);
+            cursorY += 10;
+            drawTableRow("Nome", dados_pagador.nome || "N/A");
+            drawTableRow("Documento", dados_pagador.documento || "N/A");
+            drawTableRow("Conta Origem", dados_pagador.conta_origem || "N/A");
+            drawTableRow("Banco", dados_pagador.banco || "N/A");
+            drawTableRow("Tipo", dados_pagador.tipo || "N/A");
+
+            cursorY += 10; // Espaço entre as seções
+
+            // Dados do recebedor
+            doc.text("Dados do Recebedor", 10, cursorY);
+            cursorY += 10;
+            drawTableRow("Nome", dados_recebedor.nome || "N/A");
+            drawTableRow("Documento", dados_recebedor.documento || "N/A");
+            drawTableRow("Código de barra", dados_transacao.codigo_barra || "N/A");
+          } else {
+            doc.setFontSize(12);
+            doc.text("Dados do Recebedor", 10, cursorY);
+            cursorY += 10;
+            drawTableRow("Nome", dados_recebedor.nome || "N/A");
+            drawTableRow("Documento", dados_recebedor.documento || "N/A");
+            drawTableRow("Código de barra", dados_transacao.codigo_barra || "N/A");
+
+            cursorY += 10; // Espaço entre as seções
+            doc.text("Dados do Pagador", 10, cursorY);
+            cursorY += 10;
+            drawTableRow("Nome", dados_pagador.nome || "N/A");
+            drawTableRow("Documento", dados_pagador.documento || "N/A");
+            drawTableRow("Conta Origem", dados_pagador.conta_origem || "N/A");
+            drawTableRow("Banco", dados_pagador.banco || "N/A");
+            drawTableRow("Tipo", dados_pagador.tipo || "N/A");
+          }
+
+          doc.save("comprovante_pagamento.pdf");
+        };
+
+        const image = new Image();
+        image.src = require("../assets/images/logos/icon_logo.png").default;
+
+        image.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = image.width;
+          canvas.height = image.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(image, 0, 0, image.width, image.height);
+          const logoBase64 = canvas.toDataURL("image/png");
+          addLogoAndGeneratePDF(logoBase64);
+        };
+
+        image.onerror = () => {
+          console.error("Erro ao carregar a imagem do logotipo.");
+          addLogoAndGeneratePDF(null);
+        };
+
+      } else {
+        alert("Erro ao gerar comprovante");
+      }
+    }
+  })
+  .catch((error) => {
+    // console.error("Erro na requisição");
+    console.error("Erro na requisição", error);
+  });
+}
+
+//comprovante transferencia
 export function comprovante_pdf(id) {
   const data = {
     url: "conta/comprovante-pdf",
@@ -305,7 +450,7 @@ export function comprovante_pdf(id) {
           }
         } else {
           doc.setFontSize(12);
-          doc.text("Dados do Pagador", 10, cursorY);
+          doc.text("Dados do Recebedor", 10, cursorY);
           cursorY += 10;
           drawTableRow("Nome", dados_recebedor.nome || "N/A");
           drawTableRow(
@@ -322,7 +467,7 @@ export function comprovante_pdf(id) {
             drawTableRow("Tipo de Conta", dados_recebedor.tipo_conta || "N/A");
           }
           cursorY += 10; // Espaço entre as seções
-          doc.text("Dados do Recebedor", 10, cursorY);
+          doc.text("Dados do Pagador", 10, cursorY);
           cursorY += 10;
           drawTableRow("Nome", dados_pagador.nome || "N/A");
           drawTableRow("Documento", dados_pagador.documento || "N/A");
@@ -387,6 +532,7 @@ export function comprovante_pdf(id) {
     });
 }
 
+// comprovante pix
 export async function comprovante_ver(id) {
   const data = {
     url: "conta/comprovante-pdf",
