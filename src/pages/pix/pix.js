@@ -302,10 +302,15 @@ export default class Pix extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
-      this.setState({ tarifa: responseJson });
+      let tarifa = responseJson;
 
-      var valor = this.state.valor;
-      var tarifado = parseFloat(this.state.tarifa) + parseFloat(valor);
+      let valor = this.state.valor;
+      valor = valor.replace("R$", "")
+      valor = valor.replace(" ", "");
+      valor = valor.replace(".", "");
+      valor = valor.replace(",", ".");
+
+      var tarifado = parseFloat(tarifa) + parseFloat(valor);
 
       if (parseFloat(tarifado) > parseFloat(this.state.saldo)) {
         this.setState({ loading: false });
