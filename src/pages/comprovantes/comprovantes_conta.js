@@ -383,7 +383,7 @@ export default class ComprovanteConta extends Component {
                     <div style={{ marginTop: "10px" }} className="col-lg-2">
                       {" "}
                       <strong>{i18n.t("comprovante.valor")} </strong>
-                      {Formatar.formatarMoeda(comprovante.mov.valor * -1.0)}
+                      {Formatar.formatarMoeda(comprovante.mov.valor)}
                     </div>
                     <div style={{ marginTop: "10px" }} className="col-lg-2">
                       <strong>{i18n.t("comprovante.data")} </strong>
