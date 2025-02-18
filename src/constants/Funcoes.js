@@ -4,6 +4,7 @@ import { decode, encode } from "base-64";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { v4 as uuidv4 } from "uuid";
+import * as Formatar from "./Formatar";
 
 const tokenKey = "super_chave_secreta";
 const this_version = "1.0";
@@ -198,6 +199,7 @@ export function comprovanteGeral(id) {
   };
 
   Geral_API(data, true).then(res => {
+    console.log('comprovanteGeral', res);
     if (!res) {
       console.error("Dados inválidos ou ausentes.");
     } else {
@@ -207,121 +209,125 @@ export function comprovanteGeral(id) {
         comprovante_ver(id);
       } else if (res.pagamento) {
 
-        const pagamento = res.pagamento;
+      const { dados_pagador, dados_recebedor, dados_transacao } = res.pagamento; 
 
-        const dados_pagador = pagamento.dados_pagador || {};
-        const dados_recebedor = pagamento.dados_recebedor || {};
-        const dados_transacao = pagamento.dados_transacao || {};
 
-        const doc = new jsPDF();
-        const startY = 70;
-        const tableWidth = 190;
-        const cellPadding = 5;
-        const cellHeight = 10;
-        let cursorY = startY;
 
-        // Adiciona o logotipo
-        const addLogoAndGeneratePDF = (logoBase64) => {
-          if (logoBase64) {
-            doc.addImage(logoBase64, "PNG", 10, 10, 40, 40);
-          }
+        // const pagamento = res.pagamento;
 
-          doc.setFontSize(14);
-          doc.text(
-            `Comprovante de ${res.pix ? "PIX" : "Pagamento"}`,
-            10,
-            cursorY - 10
-          );
+        // const dados_pagador = pagamento.dados_pagador || {};
+        // const dados_recebedor = pagamento.dados_recebedor || {};
+        // const dados_transacao = pagamento.dados_transacao || {};
 
-          // Desenha tabela com espaçamento entre título e resultado
-          const drawTableRow = (label, value) => {
-            // Define a largura disponível para o texto
-            const availableWidth = tableWidth - 110; // 110 é o espaço onde a etiqueta (label) e a margem estão
+        // const doc = new jsPDF();
+        // const startY = 70;
+        // const tableWidth = 190;
+        // const cellPadding = 5;
+        // const cellHeight = 10;
+        // let cursorY = startY;
+
+        // // Adiciona o logotipo
+        // const addLogoAndGeneratePDF = (logoBase64) => {
+        //   if (logoBase64) {
+        //     doc.addImage(logoBase64, "PNG", 10, 10, 40, 40);
+        //   }
+
+        //   doc.setFontSize(14);
+        //   doc.text(
+        //     `Comprovante de ${res.pix ? "PIX" : "Pagamento"}`,
+        //     10,
+        //     cursorY - 10
+        //   );
+
+        //   // Desenha tabela com espaçamento entre título e resultado
+        //   const drawTableRow = (label, value) => {
+        //     // Define a largura disponível para o texto
+        //     const availableWidth = tableWidth - 110; // 110 é o espaço onde a etiqueta (label) e a margem estão
   
-            // Divida o texto em várias linhas, se necessário
-            const valueLines = doc.splitTextToSize(value, availableWidth);
+        //     // Divida o texto em várias linhas, se necessário
+        //     const valueLines = doc.splitTextToSize(value, availableWidth);
 
-            // Calcular a altura da célula com base no número de linhas de texto
-            const rowHeight = cellHeight + (valueLines.length - 1) * 10; // Ajusta a altura da célula conforme as linhas
+        //     // Calcular a altura da célula com base no número de linhas de texto
+        //     const rowHeight = cellHeight + (valueLines.length - 1) * 10; // Ajusta a altura da célula conforme as linhas
 
-            // Desenha a borda da célula com a altura ajustada
-            doc.rect(10, cursorY, tableWidth, rowHeight); // Borda externa (sem borda central)
+        //     // Desenha a borda da célula com a altura ajustada
+        //     doc.rect(10, cursorY, tableWidth, rowHeight); // Borda externa (sem borda central)
   
-            // Coloca o texto do título (label)
-            doc.text(`${label}:`, 15, cursorY + cellPadding);
+        //     // Coloca o texto do título (label)
+        //     doc.text(`${label}:`, 15, cursorY + cellPadding);
   
-            // Agora desenha cada linha de texto ajustada
-            valueLines.forEach((line, index) => {
-              doc.text(line, 105, cursorY + cellPadding + index * 10); // Desenha a linha do valor
-            });
+        //     // Agora desenha cada linha de texto ajustada
+        //     valueLines.forEach((line, index) => {
+        //       doc.text(line, 105, cursorY + cellPadding + index * 10); // Desenha a linha do valor
+        //     });
 
-            // Atualiza o cursorY com base na altura da célula
-            cursorY += rowHeight;         
-          };
+        //     // Atualiza o cursorY com base na altura da célula
+        //     cursorY += rowHeight;         
+        //   };
 
-          // Dados da transação
-          drawTableRow("Data", dados_transacao.data_pagamento || "N/A");
-          drawTableRow("Valor Pago", `R$ ${dados_transacao.valor_pago || "N/A"}`);
+        //   // Dados da transação
+        //   drawTableRow("Data", dados_transacao.data_pagamento || "N/A");
+        //   drawTableRow("Valor Pago", `R$ ${dados_transacao.valor_pago || "N/A"}`);
 
-          cursorY += 10; // Espaço entre as seções
+        //   cursorY += 10; // Espaço entre as seções
 
-          if (pagamento.tipo == "saida") {
-            // Dados do pagador
-            doc.setFontSize(12);
-            doc.text("Dados do Pagador", 10, cursorY);
-            cursorY += 10;
-            drawTableRow("Nome", dados_pagador.nome || "N/A");
-            drawTableRow("Documento", dados_pagador.documento || "N/A");
-            drawTableRow("Conta Origem", dados_pagador.conta_origem || "N/A");
-            drawTableRow("Banco", dados_pagador.banco || "N/A");
-            drawTableRow("Tipo", dados_pagador.tipo || "N/A");
+        //   if (pagamento.tipo == "saida") {
+        //     // Dados do pagador
+        //     doc.setFontSize(12);
+        //     doc.text("Dados do Pagador", 10, cursorY);
+        //     cursorY += 10;
+        //     drawTableRow("Nome", dados_pagador.nome || "N/A");
+        //     drawTableRow("Documento", dados_pagador.documento || "N/A");
+        //     drawTableRow("Conta Origem", dados_pagador.conta_origem || "N/A");
+        //     drawTableRow("Banco", dados_pagador.banco || "N/A");
+        //     drawTableRow("Tipo", dados_pagador.tipo || "N/A");
 
-            cursorY += 10; // Espaço entre as seções
+        //     cursorY += 10; // Espaço entre as seções
 
-            // Dados do recebedor
-            doc.text("Dados do Recebedor", 10, cursorY);
-            cursorY += 10;
-            drawTableRow("Nome", dados_recebedor.nome || "N/A");
-            drawTableRow("Documento", dados_recebedor.documento || "N/A");
-            drawTableRow("Código de barra", dados_transacao.codigo_barra || "N/A");
-          } else {
-            doc.setFontSize(12);
-            doc.text("Dados do Recebedor", 10, cursorY);
-            cursorY += 10;
-            drawTableRow("Nome", dados_recebedor.nome || "N/A");
-            drawTableRow("Documento", dados_recebedor.documento || "N/A");
-            drawTableRow("Código de barra", dados_transacao.codigo_barra || "N/A");
+        //     // Dados do recebedor
+        //     doc.text("Dados do Recebedor", 10, cursorY);
+        //     cursorY += 10;
+        //     drawTableRow("Nome", dados_recebedor.nome || "N/A");
+        //     drawTableRow("Documento", dados_recebedor.documento || "N/A");
+        //     drawTableRow("Código de barra", dados_transacao.codigo_barra || "N/A");
+        //   } else {
+        //     doc.setFontSize(12);
+        //     doc.text("Dados do Recebedor", 10, cursorY);
+        //     cursorY += 10;
+        //     drawTableRow("Nome", dados_recebedor.nome || "N/A");
+        //     drawTableRow("Documento", dados_recebedor.documento || "N/A");
+        //     drawTableRow("Código de barra", dados_transacao.codigo_barra || "N/A");
 
-            cursorY += 10; // Espaço entre as seções
-            doc.text("Dados do Pagador", 10, cursorY);
-            cursorY += 10;
-            drawTableRow("Nome", dados_pagador.nome || "N/A");
-            drawTableRow("Documento", dados_pagador.documento || "N/A");
-            drawTableRow("Conta Origem", dados_pagador.conta_origem || "N/A");
-            drawTableRow("Banco", dados_pagador.banco || "N/A");
-            drawTableRow("Tipo", dados_pagador.tipo || "N/A");
-          }
+        //     cursorY += 10; // Espaço entre as seções
+        //     doc.text("Dados do Pagador", 10, cursorY);
+        //     cursorY += 10;
+        //     drawTableRow("Nome", dados_pagador.nome || "N/A");
+        //     drawTableRow("Documento", dados_pagador.documento || "N/A");
+        //     drawTableRow("Conta Origem", dados_pagador.conta_origem || "N/A");
+        //     drawTableRow("Banco", dados_pagador.banco || "N/A");
+        //     drawTableRow("Tipo", dados_pagador.tipo || "N/A");
+        //   }
 
-          doc.save("comprovante_pagamento.pdf");
-        };
+        //   doc.save("comprovante_pagamento.pdf");
+        // };
 
-        const image = new Image();
-        image.src = require("../assets/images/logos/icon_logo.png").default;
+        // const image = new Image();
+        // image.src = require("../assets/images/logos/icon_logo.png").default;
 
-        image.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = image.width;
-          canvas.height = image.height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(image, 0, 0, image.width, image.height);
-          const logoBase64 = canvas.toDataURL("image/png");
-          addLogoAndGeneratePDF(logoBase64);
-        };
+        // image.onload = () => {
+        //   const canvas = document.createElement("canvas");
+        //   canvas.width = image.width;
+        //   canvas.height = image.height;
+        //   const ctx = canvas.getContext("2d");
+        //   ctx.drawImage(image, 0, 0, image.width, image.height);
+        //   const logoBase64 = canvas.toDataURL("image/png");
+        //   addLogoAndGeneratePDF(logoBase64);
+        // };
 
-        image.onerror = () => {
-          console.error("Erro ao carregar a imagem do logotipo.");
-          addLogoAndGeneratePDF(null);
-        };
+        // image.onerror = () => {
+        //   console.error("Erro ao carregar a imagem do logotipo.");
+        //   addLogoAndGeneratePDF(null);
+        // };
 
       } else {
         alert("Erro ao gerar comprovante");
@@ -551,7 +557,7 @@ export async function comprovante_ver(id) {
     }
 
     const pix = res.pix;
-    const { dados_pagador, dados_recebedor, dados_transacao } = pix;
+    const { dados_pagador, dados_recebedor, dados_transacao, tipo } = pix;
 
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
@@ -569,78 +575,132 @@ export async function comprovante_ver(id) {
       cursorY += 30;
 
       // Título do comprovante
-      doc.setFontSize(16);
-      doc.text("Comprovante PIX", pageWidth / 2, cursorY, {
-        align: "center",
-      });
-      cursorY += 10;
+      // doc.setFontSize(12);
+      // doc.text(
+      //   'COMPROVANTE',
+      //   pageWidth / 2,
+      //   cursorY, 
+      //   { align: "center" }
+      // );
+      // cursorY += 10;
 
-      doc.setFontSize(10);
+      // Nome transação
+      doc.setFont(undefined, "normal");
+      doc.setFontSize(16);
       doc.text(
-        `DATA DE EMISSÃO: ${dados_transacao.data_transacao}`,
-        pageWidth - 60,
-        cursorY,
-        { align: "right" }
+        `PIX ${ tipo == 'entrada' ? 'RECEBIDO' : 'ENVIADO' }`,
+        pageWidth / 2,
+        cursorY, 
+        { align: "center" }
       );
       cursorY += 10;
 
+      doc.setFont(undefined, "bold");
+      doc.setFontSize(16);
+      doc.text(
+        `R$ ${dados_transacao.valor_pago}`,
+        pageWidth / 2,
+        cursorY,
+        { align: "center" }
+      );
+      cursorY += 10;
+
+      doc.setFont(undefined, "normal");
+      doc.setFontSize(12);
+      doc.text(
+        `${Formatar.formatarSemanaComprovante(dados_transacao.data_transacao)} | ${Formatar.formatarHoraComprovante(dados_transacao.data_transacao)} `,
+        pageWidth / 2,
+        cursorY,
+        { align: "center" }
+      );
+      cursorY += 18;
+
+     // cursorY += 10;
+
       // Função para adicionar seções ao PDF
-      const addSection = (title, items) => {
-        doc.setFontSize(12);
-        doc.text(title, 10, cursorY);
+      const addSection = (title, items, isLastSection = false) => {
+        const margin = 30; // Margem à esquerda
+        const maxWidth = pageWidth - margin * 2; // Largura máxima disponível para o texto
+      
+        // Ajustando o título
+        doc.setFont(undefined, "bold");
+        doc.setFontSize(10);
+        doc.text(title, margin, cursorY);
         cursorY += 8;
-
+      
         items.forEach(({ label, value }) => {
-          doc.setFontSize(10);
-          doc.text(`${label}:`, 10, cursorY);
-          doc.text(value ? String(value) : "N/A", 70, cursorY);
-          cursorY += 6;
-        });
+          // Ajustando o rótulo (label) em fonte normal
+          doc.setFont(undefined, "normal");
+          doc.setFontSize(12);
 
-        cursorY += 8; // Espaço entre seções
+          // Calculando o comprimento da label para ajustar a posição do value
+          const labelWidth = doc.getTextWidth(`${label}:`);
+        
+          // Desenhando a label
+          doc.text(`${label}:`, margin, cursorY);
+        
+          // Ajustando o valor (value) em negrito
+          doc.setFont(undefined, "bold");
+        
+          // Se o value for muito longo, divide o texto
+          const valueText = value ? String(value) : "N/A";
+          const splitValue = doc.splitTextToSize(valueText, maxWidth - labelWidth - 10); // Subtrai o espaço da label e uma margem extra
+        
+          // Desenha o texto dividido, alinhando a primeira linha à direita
+          splitValue.forEach((line, index) => {
+            const valueX = pageWidth - margin; // Coloca o valor na margem direita
+            const yPosition = cursorY + (index * 6); // Ajusta a posição Y para cada linha
+            doc.text(line, valueX, yPosition, { align: "right" });
+          });
+        
+          cursorY += splitValue.length * 6; // Ajusta o cursorY para o número de linhas de texto
+        });
+      
+        // Linha divisória no final da seção, mas não se for a última seção
+        if (!isLastSection) {
+          const lineY = cursorY + 5; // Define a posição Y da linha (um pouco abaixo da última linha de texto)
+          doc.setLineWidth(0.5); // Define a espessura da linha
+          doc.line(margin, lineY, pageWidth - margin, lineY); // Desenha a linha horizontal
+        
+          cursorY += 15; // Espaço adicional após a linha divisória
+        }
       };
 
+
       // Dados do Pagador
-      addSection("Dados do Pagador", [
+      addSection("pagador", [
         { label: "Nome", value: dados_pagador.nome },
-        { label: "CPF", value: dados_pagador.documento },
-        { label: "Conta de Origem", value: dados_pagador.conta_origem },
-        { label: "Banco", value: dados_pagador.banco },
+        { label: "CPF/CNPJ", value: dados_pagador.documento },
+        { label: "Instituição", value: dados_pagador.banco },
       ]);
 
       // Dados do Recebedor
-      addSection("Dados do Recebedor", [
+      addSection("recebedor", [
         { label: "Nome", value: dados_recebedor.nome },
-        { label: "Banco", value: dados_recebedor.banco },
-        { label: "Agência", value: dados_recebedor.agencia },
-        { label: "Conta", value: dados_recebedor.conta },
-        { label: "Documento", value: dados_recebedor.documento },
+        { label: "CPF/CNPJ", value: dados_recebedor.documento },
+        { label: "Instituição", value: dados_recebedor.banco },
         { label: "Chave PIX", value: dados_transacao.chave_pix },
       ]);
 
       // Dados da Transação
-      addSection("Dados da Transação", [
-        { label: "Valor", value: `R$ ${dados_transacao.valor_pago}` },
-        { label: "Chave PIX", value: dados_transacao.chave_pix },
+      const itensDadosTransacao = [
         {
-          label: "Data/Hora da Transação",
-          value: dados_transacao.data_transacao,
-        },
-        {
-          label: "Identificador da Transação",
+          label: "ID da Transação",
           value: dados_transacao.identificador_transacao,
         },
-        {
-          label: "Descrição",
-          value: dados_transacao.descricao,
-        },
-      ]);
+      ];
+
+      if (dados_transacao.descricao) {
+          itensDadosTransacao.push({
+            label: "Descrição",
+            value: dados_transacao.descricao,
+          });
+      }
+
+      addSection("sobre a transação", itensDadosTransacao, true);
 
       // Salva o PDF
       doc.save("comprovante_pix.pdf");
-
-      setLoading(false);
-      setShowModalComprovante({ visible: false });
     };
 
     // Carrega e converte o logotipo

@@ -105,6 +105,14 @@ export function formatarDateMesInterpolacao($data1, $data2) {
   return dates;
 }
 
+export function formatarHoraComprovante($data) {
+  return moment($data, 'DD/MM/YYYY HH:mm:ss').format("HH[h]mm");
+}
+
+export function formatarSemanaComprovante($data) {
+  return moment($data, 'DD/MM/YYYY HH:mm:ss').locale('pt-br').format('dddd DD/MM/YYYY');
+}
+
 export function cpf_mask(cpf) {
   cpf = cpf.substring(0, 14);
   cpf = cpf.replace(/\D/g, "");
