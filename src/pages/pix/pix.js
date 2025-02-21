@@ -406,7 +406,7 @@ export default class Pix extends Component {
         setTimeout(() => {
           alert(i18n.t("pix.pixCod1"));
           this.closeModalTransferencia();
-          Funcoes.comprovante_ver(responseJson.mov_id);
+          Funcoes.comprovanteGeral(responseJson.mov_id);
         }, 1000);
       } else if (responseJson.cod == 2) {
         this.AgendarPix();

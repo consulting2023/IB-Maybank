@@ -105,12 +105,12 @@ export function formatarDateMesInterpolacao($data1, $data2) {
   return dates;
 }
 
-export function formatarHoraComprovante($data) {
-  return moment($data, 'DD/MM/YYYY HH:mm:ss').format("HH[h]mm");
+export function formatarDataComprovante($data) {
+  return moment($data, 'DD/MM/YYYY HH:mm:ss').format("DD/MM/YYYY");
 }
 
-export function formatarSemanaComprovante($data) {
-  return moment($data, 'DD/MM/YYYY HH:mm:ss').locale('pt-br').format('dddd DD/MM/YYYY');
+export function formatarHoraComprovante($data) {
+  return moment($data, 'DD/MM/YYYY HH:mm:ss').format("HH:mm:ss");
 }
 
 export function cpf_mask(cpf) {

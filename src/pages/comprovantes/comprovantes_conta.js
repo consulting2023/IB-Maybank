@@ -392,7 +392,7 @@ export default class ComprovanteConta extends Component {
                     <button
                       style={{ marginLeft: "15px" }}
                       className="btn btn-sm baixarComprovante btn-success"
-                      onClick={() =>
+                      onClick={async () => 
                         Funcoes.comprovanteGeral(comprovante.mov.id)
                       }
                     >
