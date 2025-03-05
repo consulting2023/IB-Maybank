@@ -63,6 +63,9 @@ export default class Login extends Component {
 
       captcha: "",
       captchaModal: false,
+
+      qr: "",
+      qtTempo: 0,
     };
   }
 
@@ -82,11 +85,30 @@ export default class Login extends Component {
     Funcoes.getUniqueToken().then((res) => {
       this.setState({ identificador: res });
     });
-  }
 
-  componentWillUnmount() {
-    this.gerar_qrcode();
-    this.validar_qrcode();
+    this.getQr(390);
+
+
+
+  getQr = async (id) => {
+    const textoAleatorio = this.gerarStringAleatoria(16);  // Gera uma string aleatória de 16 caracteres
+    const hash = CryptoJS.MD5(textoAleatorio).toString(CryptoJS.enc.Hex);
+    // this.setState({ hash });
+    console.log(hash);
+    const data = {
+      url: "otp/qrcode",
+      data: {
+        "usuario_id": 390,
+        // "usuario_id": id,
+        "device_key": "3299b9b4c3b8f577739ef4984cc32145"
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(data, false).then((res) => {
+      console.log(res);
+      this.setState({ qr: res.qrcode, qrTempo: res.tempo_de_vida_previsto });
+    });
   }
 
   combinacoes = async () => {
@@ -103,6 +125,7 @@ export default class Login extends Component {
     } else {
       this.setState({ loading: true });
 
+  }
       const cartesian = (a) =>
         a.reduce((a, b) => a.flatMap((d) => b.map((e) => [d, e].flat())));
       let output = cartesian(password);
@@ -142,9 +165,10 @@ export default class Login extends Component {
         },
         method: "POST",
       };
-
+      console.log(data);
       // Funcoes.Geral_API(data, false).then((res) => {
       Funcoes.Geral_API(data, false).then((res) => {
+        console.log('login', res);
         if (res == 0) {
           this.props.alerts(
             i18n.t("login.alertaCombinacoes"),
@@ -283,27 +307,28 @@ export default class Login extends Component {
   };
 
   Valida_token = async (id) => {
-    let email = "";
-    Produtos.testSuporte.testLogin
-      ? (email = Produtos.testSuporte.emailTest)
-      : (email = this.state.email);
+    // let email = "";
+    // Produtos.testSuporte.testLogin
+    //   ? (email = Produtos.testSuporte.emailTest)
+    //   : (email = this.state.email);
     const pessoa = JSON.parse(this.state.token_chave);
     const data = {
-      url: "utilitarios/validacao-email-ib",
+      // url: "utilitarios/validacao-email-ib",
+      url: "otp/validar",
       data: {
         usuario_id: pessoa.conta_id,
-        email: email,
+        // email: email,
         token: id,
         ativa: 1,
       },
       method: "POST",
     };
     setTimeout(() => {
-      // Funcoes.Geral_API(data, true).then((res) => {
       Funcoes.Geral_API(data, true).then((res) => {
         if (res == true) {
-          Funcoes.setToken(this.state.token_chave, this.state.pfp);
-          window.location.href = "/home";
+
+          // Funcoes.setToken(this.state.token_chave, this.state.pfp);
+          // window.location.href = "/home";
         } else {
           this.props.alerts("Erro", "Token inválido", "warning");
         }
@@ -632,6 +657,18 @@ export default class Login extends Component {
                     </div>
                   ) : null}
                 </div>
+
+                  <Container>
+                    <hr />
+                    <h4>{i18n.t('login.qrcode')}</h4>
+                    <span>{i18n.t('login.ler_qrcode')}</span>
+                    <Row >
+                      <Col className="col-md-12">
+                        <img src={this.state.Qrcode_imagem} className="qrCode" />
+                      </Col>
+                    </Row>
+                  </Container>
+                
               </Modal.Body>
             </Modal>
 
