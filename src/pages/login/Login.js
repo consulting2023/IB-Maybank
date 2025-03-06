@@ -10,6 +10,7 @@ import {
   ButtonGroup,
   FormControl,
   FormGroup,
+  Image
 } from "react-bootstrap";
 import Icones from "../../constants/Icon";
 import OtpInput from "react-otp-input";
@@ -36,16 +37,14 @@ export default class Login extends Component {
     super();
     this.state = {
       loadingModal: false,
-      Qrcode_imagem: null,
       contas: [],
       confirmShow: false,
 
+      pessoa_id: "",
       token_chave: "",
       pfp: "",
       novaSenhaShow: false,
       token: false,
-      inputToken: true,
-      inputTokenQrcode: false,
       email: "",
 
       password: ["", "", "", "", "", ""],
@@ -64,8 +63,11 @@ export default class Login extends Component {
       captcha: "",
       captchaModal: false,
 
-      qr: "",
-      qtTempo: 0,
+      qr: {
+        qrcode: "",
+        tempo_de_vida_previsto: 1
+      },
+      qrValid: false,
     };
   }
 
@@ -85,31 +87,75 @@ export default class Login extends Component {
     Funcoes.getUniqueToken().then((res) => {
       this.setState({ identificador: res });
     });
+  }
 
-    this.getQr(390);
+  gerarChave = () => {
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let resultado = '';
+    for (let i = 0; i < 64; i++) {
+      const indiceAleatorio = Math.floor(Math.random() * caracteres.length);
+      resultado += caracteres[indiceAleatorio];
+    }
+    return resultado;
+  }
 
-
-
-  getQr = async (id) => {
-    const textoAleatorio = this.gerarStringAleatoria(16);  // Gera uma string aleatória de 16 caracteres
-    const hash = CryptoJS.MD5(textoAleatorio).toString(CryptoJS.enc.Hex);
-    // this.setState({ hash });
-    console.log(hash);
+  getQr = async () => {
+    const key = this.gerarChave();
     const data = {
       url: "otp/qrcode",
       data: {
-        "usuario_id": 390,
-        // "usuario_id": id,
-        "device_key": "3299b9b4c3b8f577739ef4984cc32145"
+        "usuario_id": this.state.otp_user_id,
+        "device_key": key
       },
       method: "POST",
     };
 
+    console.log(data);
+
     Funcoes.Geral_API(data, false).then((res) => {
-      console.log(res);
-      this.setState({ qr: res.qrcode, qrTempo: res.tempo_de_vida_previsto });
+      this.setState({ qr: res });
     });
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.qr.tempo_de_vida_previsto !== this.state.qr.tempo_de_vida_previsto) {
+      this.iniciarQr();
+    }
+  }
+
+  iniciarQr = () => {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+
+    this.intervalId = setInterval(() => {
+      this.getQr();
+    }, this.state.qr.tempo_de_vida_previsto * 1000);
+  };
+
+  pararQr = () => {
+    if (this.intervalId) {
+      clearInterval(this.intervalId); // Limpa o intervalo
+      this.intervalId = null; // Reseta o id do intervalo
+    }
+  };
+
+  iniciarQrCheck = () => {
+    if (this.intervalCheckId) {
+      clearInterval(this.intervalCheckId);
+    }
+
+    this.intervalCheckId = setInterval(() => {
+      this.getQr();
+    }, this.state.qr.tempo_de_vida_previsto * 1000);
+  };
+
+  pararQrCheck = () => {
+    if (this.intervalCheckId) {
+      clearInterval(this.intervalCheckId); // Limpa o intervalo
+      this.intervalCheckId = null; // Reseta o id do intervalo
+    }
+  };
 
   combinacoes = async () => {
     this.setState({ loading: true });
@@ -125,7 +171,6 @@ export default class Login extends Component {
     } else {
       this.setState({ loading: true });
 
-  }
       const cartesian = (a) =>
         a.reduce((a, b) => a.flatMap((d) => b.map((e) => [d, e].flat())));
       let output = cartesian(password);
@@ -222,11 +267,6 @@ export default class Login extends Component {
     const contaGrupos = dados.conta_grupos || [];
     localStorage.setItem("conta_grupos", JSON.stringify(contaGrupos));
     this.enviarToken();
-    this.setState({
-      Qrcode_imagem: null,
-      inputToken: true,
-      inputTokenQrcode: false,
-    });
 
     var n = dados.conta.id;
     n = ("0000000" + n).slice(-7);
@@ -292,13 +332,16 @@ export default class Login extends Component {
       pessoa.pf_pj = "pj";
     }
     const chave = JSON.stringify(pessoa);
+    console.log('pessoa', pessoa);
     this.setState({
       token: true,
       token_chave: chave,
+      otp_user_id: pessoa.usuario_id,
       pfp: dados.foto_perfil,
       confirmShow: false,
       loading: false,
     });
+    this.iniciarQr();
   };
 
   tipoConta = (conta) => {
@@ -326,7 +369,6 @@ export default class Login extends Component {
     setTimeout(() => {
       Funcoes.Geral_API(data, true).then((res) => {
         if (res == true) {
-
           // Funcoes.setToken(this.state.token_chave, this.state.pfp);
           // window.location.href = "/home";
         } else {
@@ -641,13 +683,12 @@ export default class Login extends Component {
               onHide={() => this.setState({ token: false })}
             >
               <Modal.Body>
-                <h1>{i18n.t("login.chave_de_acesso")}</h1>
+                {/* <h1>{i18n.t("login.chave_de_acesso")}</h1> */}
                 <span>
-                  {i18n.t("login.abra_o_aplicativo", {
-                    banco: process.env.NOME_BANCO,
-                  })}
+                  {/* {i18n.t("login.abra_o_aplicativo")} */}
+                  Confirme sua identidade inserindo sua Chave de Acesso encontrada no app
                 </span>
-                <div>
+                {/* <div>
                   {this.state.inputToken ? (
                     <div>
                       <hr className="divisoria" />
@@ -656,9 +697,34 @@ export default class Login extends Component {
                       <Otp otpProp={this.getOtp} className="mt-2" />
                     </div>
                   ) : null}
-                </div>
+                </div> */}
+                  <div className="mt-3">
+                    <Otp otpProp={this.getOtp}/>
+                  </div>
 
-                  <Container>
+                  <hr className="divisoria" />
+
+                  <span>
+                    ou escaneando este QR Code com o app
+                  </span>
+
+                  <div className="mt-3 d-flex" style={{ height: 200, backgroundColor: 'white' }}>
+                    {
+                      this.state.qr.qrcode == '' ? ( <>
+                        <ReactLoading
+                          className="d-block m-auto"
+                          type={"spin"}
+                          color={"#000000"}
+                          height={"50px"}
+                          width={"15%"}
+                        />
+                      </> ) : ( <>
+                        <Image style={{ height: '200px', width: '200px' }} className="m-auto" src={this.state.qr.qrcode} />
+                      </> )
+                    }
+                  </div>
+
+                  {/* <Container>
                     <hr />
                     <h4>{i18n.t('login.qrcode')}</h4>
                     <span>{i18n.t('login.ler_qrcode')}</span>
@@ -667,7 +733,7 @@ export default class Login extends Component {
                         <img src={this.state.Qrcode_imagem} className="qrCode" />
                       </Col>
                     </Row>
-                  </Container>
+                  </Container> */}
                 
               </Modal.Body>
             </Modal>
