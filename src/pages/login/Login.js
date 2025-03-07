@@ -693,7 +693,7 @@ export default class Login extends Component {
             >
               <Modal.Body>
                 <span>
-                  Confirme sua identidade inserindo sua Chave de Acesso encontrada no app
+                  {i18n.t("login.confirmeSuaIdentidadeInserindo")}
                 </span>
                 <div className="mt-3">
                   <Otp otpProp={this.getOtp}/>
@@ -702,7 +702,7 @@ export default class Login extends Component {
                 <hr className="divisoria" />
 
                 <span>
-                  ou escaneando este QR Code com o app
+                  {i18n.t("login.ouEscaneandoEste")}
                 </span>
 
                 <div className="mt-3 d-flex" style={{ height: 200, backgroundColor: 'white' }}>

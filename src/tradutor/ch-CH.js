@@ -57,7 +57,9 @@ export default {
     requisicaoNaoPermitida: "请求不允许",
     erroConexao: "连接错误",
     tenteRecarregarPagina: "尝试重新加载页面",
-    tokenInvalido: "无效的令牌"
+    tokenInvalido: "无效的令牌",
+    confirmeSuaIdentidadeInserindo: "请通过在应用中找到的访问密钥确认您的身份",
+    ouEscaneandoEste: "或者通过应用扫描此二维码",
   },
 
   home: {

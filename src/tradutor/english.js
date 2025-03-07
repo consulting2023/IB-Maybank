@@ -60,7 +60,9 @@ export default {
     requisicaoNaoPermitida: "Request not allowed",
     erroConexao: "Connection error",
     tenteRecarregarPagina: "Try reloading the page",
-    tokenInvalido: "Invalid token"
+    tokenInvalido: "Invalid token",
+    confirmeSuaIdentidadeInserindo: "Confirm your identity by entering your Access Key found in the app",
+    ouEscaneandoEste: "Or scanning this QR Code with the app",
   },
 
   home: {

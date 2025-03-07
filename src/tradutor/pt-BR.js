@@ -61,7 +61,9 @@ export default {
     requisicaoNaoPermitida: "Requisição não permitida",
     erroConexao: "Erro de conexão",
     tenteRecarregarPagina: "Tente recarregar a página",
-    tokenInvalido: "Token inválido"
+    tokenInvalido: "Token inválido",
+    confirmeSuaIdentidadeInserindo: "Confirme sua identidade inserindo sua Chave de Acesso encontrada no app",
+    ouEscaneandoEste: "Ou escaneando este QR Code com o app",
   },
 
   home: {

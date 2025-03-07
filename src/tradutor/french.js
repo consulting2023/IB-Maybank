@@ -64,7 +64,9 @@ export default {
       requisicaoNaoPermitida: "Demande non autorisée",
       erroConexao: "Erreur de connexion",
       tenteRecarregarPagina: "Essayez de recharger la page",
-      tokenInvalido: "Jeton invalide"
+      tokenInvalido: "Jeton invalide",
+      confirmeSuaIdentidadeInserindo: "Confirmez votre identité en saisissant votre clé d'accès trouvée dans l'application",
+      ouEscaneandoEste: "Ou en scannant ce QR Code avec l'application",
     },
 
     home: {
