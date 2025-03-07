@@ -67,7 +67,7 @@ export default class Login extends Component {
         qrcode: "",
         tempo_de_vida_previsto: 1
       },
-      qrValid: false,
+      qr_key: ""
     };
   }
 
@@ -89,6 +89,12 @@ export default class Login extends Component {
     });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.qr.tempo_de_vida_previsto !== this.state.qr.tempo_de_vida_previsto) {
+      this.iniciarQr();
+    }
+  }
+
   gerarChave = () => {
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let resultado = '';
@@ -96,6 +102,7 @@ export default class Login extends Component {
       const indiceAleatorio = Math.floor(Math.random() * caracteres.length);
       resultado += caracteres[indiceAleatorio];
     }
+    this.setState({ qr_key: resultado });
     return resultado;
   }
 
@@ -110,52 +117,61 @@ export default class Login extends Component {
       method: "POST",
     };
 
-    console.log(data);
-
     Funcoes.Geral_API(data, false).then((res) => {
       this.setState({ qr: res });
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.qr.tempo_de_vida_previsto !== this.state.qr.tempo_de_vida_previsto) {
-      this.iniciarQr();
-    }
-  }
-
   iniciarQr = () => {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
+    //Iniciar intervalo de geração do QRCode
+    if (this.intervalQr) {
+      clearInterval(this.intervalQr);
     }
-
-    this.intervalId = setInterval(() => {
+    this.intervalQr = setInterval(() => {
       this.getQr();
     }, this.state.qr.tempo_de_vida_previsto * 1000);
+
+
+    //Iniciar intervalo de checagem de se o QRCode
+    if (this.intervalStatus) {
+      clearInterval(this.intervalStatus);
+    }
+    this.intervalStatus = setInterval(() => {
+      this.getQrStatus();
+    }, 5000);
   };
 
   pararQr = () => {
-    if (this.intervalId) {
-      clearInterval(this.intervalId); // Limpa o intervalo
-      this.intervalId = null; // Reseta o id do intervalo
+    //Cancelar geração de QRCode
+    if (this.intervalQr) {
+      clearInterval(this.intervalQr);
+      this.intervalQr = null;
+    }
+
+    //Cancelar checagem de validação do QRCode
+    if (this.intervalStatus) {
+      clearInterval(this.intervalStatus);
+      this.intervalStatus = null;
     }
   };
 
-  iniciarQrCheck = () => {
-    if (this.intervalCheckId) {
-      clearInterval(this.intervalCheckId);
-    }
+  getQrStatus = async () => {
+    const data = {
+      url: "otp/qrcode-liberado",
+      data: {
+        "usuario_id": this.state.otp_user_id,
+        "device_key": this.state.qr_key
+      },
+      method: "POST",
+    };
 
-    this.intervalCheckId = setInterval(() => {
-      this.getQr();
-    }, this.state.qr.tempo_de_vida_previsto * 1000);
-  };
-
-  pararQrCheck = () => {
-    if (this.intervalCheckId) {
-      clearInterval(this.intervalCheckId); // Limpa o intervalo
-      this.intervalCheckId = null; // Reseta o id do intervalo
-    }
-  };
+    Funcoes.Geral_API(data, false).then(res => {
+      if (res) {
+        Funcoes.setToken(this.state.token_chave, this.state.pfp);
+        window.location.href = "/home";
+      }
+    });
+  }
 
   combinacoes = async () => {
     this.setState({ loading: true });
@@ -210,10 +226,7 @@ export default class Login extends Component {
         },
         method: "POST",
       };
-      console.log(data);
-      // Funcoes.Geral_API(data, false).then((res) => {
       Funcoes.Geral_API(data, false).then((res) => {
-        console.log('login', res);
         if (res == 0) {
           this.props.alerts(
             i18n.t("login.alertaCombinacoes"),
@@ -369,8 +382,8 @@ export default class Login extends Component {
     setTimeout(() => {
       Funcoes.Geral_API(data, true).then((res) => {
         if (res == true) {
-          // Funcoes.setToken(this.state.token_chave, this.state.pfp);
-          // window.location.href = "/home";
+          Funcoes.setToken(this.state.token_chave, this.state.pfp);
+          window.location.href = "/home";
         } else {
           this.props.alerts("Erro", "Token inválido", "warning");
         }
@@ -680,7 +693,10 @@ export default class Login extends Component {
               // dialogClassName="modalDialog"
               show={this.state.token}
               // show={true}
-              onHide={() => this.setState({ token: false })}
+              onHide={() => {
+                this.setState({ token: false });
+                this.pararQr();
+              }}
             >
               <Modal.Body>
                 {/* <h1>{i18n.t("login.chave_de_acesso")}</h1> */}
