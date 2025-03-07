@@ -302,16 +302,15 @@ export default class CadastroPf extends Component {
     };
     Funcoes.Geral_API(data).then((res) => {
       console.log(res);
-      if (res == '1' || res == '2') {
+      if (res == 1) {
         this.salvarDormente('agencia', this.state.valueAgencia.numero);
         localStorage.setItem("cpf", this.state.cpf);
         this.setState({ termoModal: true });
-      } else if (res == '300') {
-        this.props.alerts("Informamos que o documento enviado para análise foi identificado como falha.", "Solicitamos que entre em contato conosco através do [canal de suporte/e-mail/telefone].", "warning");
       } else {
         this.props.alerts("Erro", "CPF inválido, tente novamente", "warning");
       }
       this.setState({ geralLoading: false });
+      
     });
   };
 

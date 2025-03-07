@@ -33,11 +33,11 @@ export default class ComprovanteConta extends Component {
       custom_id: "",
     };
   }
-  componentDidiMout() {
-    Funcoes.pessoa;
-    var arr = pessoa;
-    this.setState({ dadosCorrentista: arr });
-  }
+  // componentDidiMout() {
+  //   Funcoes.pessoa;
+  //   var arr = pessoa;
+  //   this.setState({ dadosCorrentista: arr });
+  // }
 
   verComprovante = () => {
     this.setState({ loading: true, disabled: true });
@@ -383,7 +383,7 @@ export default class ComprovanteConta extends Component {
                     <div style={{ marginTop: "10px" }} className="col-lg-2">
                       {" "}
                       <strong>{i18n.t("comprovante.valor")} </strong>
-                      {Formatar.formatarMoeda(comprovante.mov.valor * -1.0)}
+                      {Formatar.formatarMoeda(comprovante.mov.valor)}
                     </div>
                     <div style={{ marginTop: "10px" }} className="col-lg-2">
                       <strong>{i18n.t("comprovante.data")} </strong>
@@ -392,8 +392,8 @@ export default class ComprovanteConta extends Component {
                     <button
                       style={{ marginLeft: "15px" }}
                       className="btn btn-sm baixarComprovante btn-success"
-                      onClick={() =>
-                        Funcoes.comprovante_pdf(comprovante.mov.id)
+                      onClick={async () => 
+                        Funcoes.comprovanteGeral(comprovante.mov.id)
                       }
                     >
                       Ver PDF

@@ -50,6 +50,13 @@ export default {
     contaNãoAprovada: "帐户未批准，请联系经理了解更多信息",
     cadastrar: "注册",
     selecionarConta: "请选择要注册的账户类型",
+
+    erroInterno: "内部错误",
+    captchaLang: "zh-CN",
+    erro: "错误",
+    requisicaoNaoPermitida: "请求不允许",
+    erroConexao: "连接错误",
+    tenteRecarregarPagina: "尝试重新加载页面",
   },
 
   home: {

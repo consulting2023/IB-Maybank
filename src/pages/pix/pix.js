@@ -302,10 +302,15 @@ export default class Pix extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((responseJson) => {
-      this.setState({ tarifa: responseJson });
+      let tarifa = responseJson;
 
-      var valor = this.state.valor;
-      var tarifado = parseFloat(this.state.tarifa) + parseFloat(valor);
+      let valor = this.state.valor;
+      valor = valor.replace("R$", "")
+      valor = valor.replace(" ", "");
+      valor = valor.replace(".", "");
+      valor = valor.replace(",", ".");
+
+      var tarifado = parseFloat(tarifa) + parseFloat(valor);
 
       if (parseFloat(tarifado) > parseFloat(this.state.saldo)) {
         this.setState({ loading: false });
@@ -401,7 +406,7 @@ export default class Pix extends Component {
         setTimeout(() => {
           alert(i18n.t("pix.pixCod1"));
           this.closeModalTransferencia();
-          Funcoes.comprovante_ver(responseJson.mov_id);
+          Funcoes.comprovanteGeral(responseJson.mov_id);
         }, 1000);
       } else if (responseJson.cod == 2) {
         this.AgendarPix();

@@ -57,6 +57,13 @@ export default {
       "Conto non approvato, contatta il manager per ulteriori informazioni",
     cadastrar: "Registrati",
     selecionarConta: "Seleziona il tipo di conto da registrare",
+
+    erroInterno: "Errore interno",
+    captchaLang: "it",
+    erro: "Errore",
+    requisicaoNaoPermitida: "Richiesta non consentita",
+    erroConexao: "Errore di connessione",
+    tenteRecarregarPagina: "Prova a ricaricare la pagina",
   },
 
   home: {

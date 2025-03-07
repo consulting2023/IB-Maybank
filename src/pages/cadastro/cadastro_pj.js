@@ -421,16 +421,16 @@ export default class CadastroPj extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
-      if (res == '1' || res == '2') {
+      console.log(res)
+      if (res == 1) {
         this.salvarDormente("agencia", this.state.valueAgencia.numero);
         localStorage.setItem("cnpj", this.state.cnpj);
         this.setState({ termoModal: true });
-      } else if (res == '300') {
-        this.props.alerts(i18n.t("cadastroPj.informamos"), i18n.t("cadastroPj.solicitamos"), "warning");
       } else {
         this.props.alerts(i18n.t("cadastroPj.erro"), i18n.t("cadastroPj.cpnjFail"), "warning");
       }
-      this.setState({ geralLoading: false });
+      this.setState({ geralLoading: false }); 
+    
     });
   };
 

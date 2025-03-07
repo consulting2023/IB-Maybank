@@ -4,6 +4,7 @@ import { decode, encode } from "base-64";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { v4 as uuidv4 } from "uuid";
+import * as Formatar from "./Formatar";
 
 const tokenKey = "super_chave_secreta";
 const this_version = "1.0";
@@ -190,6 +191,236 @@ export function logout() {
   if (window.location.pathname != "/") window.location.href = "/";
 }
 
+export function comprovanteGeral(id) {
+  const data = {
+    url: "conta/comprovante-pdf",
+    data: { id: id, app: 1 },
+    method: "POST",
+  };
+
+  Geral_API(data, true).then(res => {
+    if (!res) {
+      console.error("Dados inválidos ou ausentes.");
+    } else {
+      let movTipo = null;
+      if (res.transferencia) {
+        movTipo = 'transferencia';
+      } else if (res.pix) {
+        movTipo = 'pix';
+      } else if (res.pagamento) {
+        movTipo = 'pagamento';
+      }
+
+      const { dados_pagador, dados_recebedor, dados_transacao } = res[movTipo];
+
+      const doc = new jsPDF('landscape', 'mm', 'a4');
+
+      const addLogoAndGeneratePDF = (logoBase64, imgWidth, imgHeight) => {
+        const logoHeight = 20;
+        const margin = 8;
+        const pageWidth = doc.internal.pageSize.width;
+        let title = "";
+        let date = "";
+
+        if (logoBase64 && imgWidth && imgHeight) {
+          const logoWidth = logoHeight * (imgWidth / imgHeight);
+          doc.addImage(logoBase64, "PNG", margin, margin, logoWidth, logoHeight);
+        }
+
+        if (movTipo == 'transferencia') {
+          title = "Comprovante de Transferência";
+          date = `DATA DA TRANSFERÊNCIA: ${Formatar.formatarDataComprovante(dados_transacao.data)}`
+        } else if (movTipo == 'pix') {
+          title = "Comprovante PIX";
+          date = `DATA DE EMISSÃO: ${Formatar.formatarDataComprovante(dados_transacao.data_transacao)}`
+        } else if (movTipo == 'pagamento') {
+          title = "Comprovante de Pagamento"
+          date = `DATA DE EMISSÃO: ${Formatar.formatarDataComprovante(dados_transacao.data_pagamento)}`
+        }
+
+        //Título
+        doc.setFontSize(24);
+        doc.setFont(undefined, "bold");
+        doc.text(
+          title,
+          pageWidth / 2,
+          margin,
+          {
+            align: "center",
+            baseline: "top"
+          }
+        );
+
+        //Data de emissão
+        doc.setFontSize(8);
+        doc.setFont(undefined, "normal");
+        doc.text(
+          date,
+          pageWidth - margin,
+          margin,
+          { 
+            align: "right",
+            baseline: "top"
+          }
+        );
+
+        //Subtítulo
+        doc.setTextColor("#696969");
+        doc.setFontSize(10);
+        doc.setFont(undefined, "normal");
+        doc.text(
+          "Via internet MAY BANK INTERMEDIACAO DE NEGOCIOS EIRELI",
+          pageWidth / 2, 
+          margin + logoHeight,
+          { 
+            align: "center",
+            baseline: "bottom"
+          }
+        );
+
+        // Função para adicionar seções ao PDF
+        let cursorY = logoHeight + margin + 15;
+        const addSection = (title, items, lastSection) => {
+          doc.setTextColor("#696969");
+          doc.setFontSize(12);
+          doc.setFont(undefined, "bold");
+          doc.text(title, margin, cursorY, { baseline: "top" });
+          cursorY += doc.getTextDimensions(`${title}`).h + 10;
+
+          items.forEach((obj, index) => {
+            if (obj && obj.label && obj.value) {
+              doc.setTextColor("#000000");
+              doc.setFontSize(12);
+              doc.setFont(undefined, "bold");
+              doc.text(`${obj.label}:`, margin, cursorY);
+
+              doc.setTextColor("#696969");
+              doc.setFont(undefined, "normal");
+              doc.text(obj.value ? String(obj.value) : "N/A", ((pageWidth / 4) + margin), cursorY);
+
+              if (index != (items.length - 1))
+                cursorY += 6;
+            }
+          });
+          if (!lastSection) {
+            cursorY += 8;
+            doc.setDrawColor("#A9A9A9");
+            doc.setLineWidth(0.2);
+            doc.line(margin, cursorY, (pageWidth - margin), cursorY); 
+            cursorY += 8;
+          }
+        };
+
+
+        if (movTipo == 'transferencia') {
+
+          addSection("Dados do Pagador", [
+            { label: "Nome", value: dados_pagador.nome },
+            { label: "CPF/CNPJ", value: dados_pagador.documento },
+            { label: "Conta de Origem", value: dados_pagador.conta_origem },
+            { label: "Instituição", value: dados_pagador.banco },
+          ]);
+
+          addSection("Dados do Recebedor", [
+            { label: "Nome", value: dados_recebedor.nome },
+            { label: "CPF/CNPJ", value: dados_recebedor.documento },
+            { label: "Conta ", value: dados_recebedor.conta_destino },
+            { label: "Instituição", value: dados_recebedor.banco },
+            { label: "Tipo de Conta", value: dados_recebedor.tipo_conta },
+          ]);
+
+          addSection("Dados da Transferência", [
+            { label: "Valor", value: `R$ ${dados_transacao.valor_pago}` },
+            { label: "Data da Transferência", value: Formatar.formatarDataComprovante(dados_transacao.data) },
+            { label: "Horário da Transferência", value: Formatar.formatarHoraComprovante(dados_transacao.data) },
+            { label: "Finalidade", value: dados_transacao.finalidade },
+            { label: "Status", value: dados_transacao.status },
+          ], true);
+
+          doc.save("COMPROVANTE_TRANSFERENCIA.pdf");
+
+        } else if (movTipo == 'pix') {
+
+          addSection("Dados do Pagador", [
+            { label: "Nome", value: dados_pagador.nome },
+            { label: "CPF/CNPJ", value: dados_pagador.documento },
+            { label: "Instituição", value: dados_pagador.banco },
+          ]);
+
+          addSection("Dados do Recebedor", [
+            { label: "Nome", value: dados_recebedor.nome },
+            { label: "CPF/CNPJ", value: dados_recebedor.documento },
+            { label: "Instituição", value: dados_recebedor.banco },
+            { label: "Chave PIX", value: dados_transacao.chave_pix },
+          ]);
+
+          addSection("Dados da Transação", [
+            { label: "Valor", value: `R$ ${dados_transacao.valor_pago}` },
+            { label: "Data da Transação", value: Formatar.formatarDataComprovante(dados_transacao.data_transacao) },
+            { label: "Horário da Transação", value: Formatar.formatarHoraComprovante(dados_transacao.data_transacao) },
+            (dados_transacao.descricao && { label: "Descrição", value: dados_transacao.descricao }),
+            { label: "ID da Transação", value: dados_transacao.identificador_transacao }
+          ], true);
+
+          doc.save("COMPROVANTE_PIX.pdf");
+
+        } else if (movTipo == 'pagamento') {
+
+          addSection("Dados do Pagador", [
+            { label: "Nome", value: dados_pagador.nome },
+            { label: "CPF/CNPJ", value: dados_pagador.documento },
+            { label: "Conta de Origem", value: dados_pagador.conta_origem },
+            { label: "Instituição", value: dados_pagador.banco },
+          ]);
+
+          addSection("Dados do Recebedor", [
+            { label: "Nome", value: dados_recebedor.nome },
+            { label: "CPF/CNPJ", value: dados_recebedor.documento },
+            { label: "Código de barra", value: dados_transacao.codigo_barra },
+          ]);
+
+          addSection("Dados do Pagamento", [
+            { label: "Valor", value: `R$ ${dados_transacao.valor_pago}` },
+            { label: "Data do Pagamento", value: Formatar.formatarDataComprovante(dados_transacao.data_pagamento) },
+            { label: "Horário do Pagamento", value: Formatar.formatarHoraComprovante(dados_transacao.data_pagamento) },
+            { label: "Data de Vencimento", value: Formatar.formatarDataComprovante(dados_transacao.data_vencimento) },
+            (dados_transacao.descricao && { label: "Descrição", value: dados_transacao.descricao }),
+            { label: "Desconto", value: `R$ ${dados_transacao.desconto}` },
+            { label: "Juros", value: `R$ ${dados_transacao.juros}` },
+            { label: "Multa", value: `R$ ${dados_transacao.multa}` },
+          ], true);
+
+          doc.save("COMPROVANTE_PAGAMENTO.pdf");
+        }
+      };
+
+      // Carrega e converte o logotipo
+      const image = new Image();
+      image.src = require("../assets/images/logos/logo_transparente.png").default;
+
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0, image.width, image.height);
+        const logoBase64 = canvas.toDataURL("image/png");
+        addLogoAndGeneratePDF(logoBase64, image.width, image.height);
+      };
+
+      image.onerror = () => {
+        console.error("Erro ao carregar a imagem do logotipo.");
+        addLogoAndGeneratePDF(null);
+      };
+    }
+  })
+  .catch((error) => {
+    console.error("Erro na requisição");
+    // console.error("Erro na requisição", error);
+  });
+}
+
+//comprovante transferencia
 export function comprovante_pdf(id) {
   const data = {
     url: "conta/comprovante-pdf",
@@ -305,7 +536,7 @@ export function comprovante_pdf(id) {
           }
         } else {
           doc.setFontSize(12);
-          doc.text("Dados do Pagador", 10, cursorY);
+          doc.text("Dados do Recebedor", 10, cursorY);
           cursorY += 10;
           drawTableRow("Nome", dados_recebedor.nome || "N/A");
           drawTableRow(
@@ -322,7 +553,7 @@ export function comprovante_pdf(id) {
             drawTableRow("Tipo de Conta", dados_recebedor.tipo_conta || "N/A");
           }
           cursorY += 10; // Espaço entre as seções
-          doc.text("Dados do Recebedor", 10, cursorY);
+          doc.text("Dados do Pagador", 10, cursorY);
           cursorY += 10;
           drawTableRow("Nome", dados_pagador.nome || "N/A");
           drawTableRow("Documento", dados_pagador.documento || "N/A");
@@ -387,6 +618,7 @@ export function comprovante_pdf(id) {
     });
 }
 
+// comprovante pix
 export async function comprovante_ver(id) {
   const data = {
     url: "conta/comprovante-pdf",
@@ -397,109 +629,132 @@ export async function comprovante_ver(id) {
   try {
     const res = await Geral_API(data, true);
 
-    if (!res || !res.pix) {
-      console.error("Dados inválidos ou ausentes.");
-      setLoading(false);
-      setShowModalComprovante({ visible: false });
-      return;
-    }
-
     const pix = res.pix;
     const { dados_pagador, dados_recebedor, dados_transacao } = pix;
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.width;
-    let cursorY = 20;
+    const doc = new jsPDF('landscape', 'mm', 'a4');
 
-    // Função para adicionar logotipo e gerar PDF
-    const addLogoAndGeneratePDF = (logoBase64) => {
-      if (logoBase64) {
-        doc.addImage(logoBase64, "PNG", 10, 10, 40, 40);
+    const addLogoAndGeneratePDF = (logoBase64, imgWidth, imgHeight) => {
+      const logoHeight = 20;
+      const margin = 8;
+      const pageWidth = doc.internal.pageSize.width;
+
+      if (logoBase64 && imgWidth && imgHeight) {
+        const logoWidth = logoHeight * (imgWidth / imgHeight);
+        doc.addImage(logoBase64, "PNG", margin, margin, logoWidth, logoHeight);
       }
 
-      // Informações do banco
-      doc.setFontSize(12);
-      doc.text("MAY BANK INTERMEDIACAO DE NEGOCIOS EIRELI", 60, cursorY + 10);
-      cursorY += 30;
-
-      // Título do comprovante
-      doc.setFontSize(16);
-      doc.text("Comprovante PIX", pageWidth / 2, cursorY, {
-        align: "center",
-      });
-      cursorY += 10;
-
-      doc.setFontSize(10);
+      //Título
+      doc.setFontSize(24);
+      doc.setFont(undefined, "bold");
       doc.text(
-        `DATA DE EMISSÃO: ${dados_transacao.data_transacao}`,
-        pageWidth - 60,
-        cursorY,
-        { align: "right" }
+        "Comprovante PIX",
+        pageWidth / 2,
+        margin,
+        {
+          align: "center",
+          baseline: "top"
+        }
       );
-      cursorY += 10;
+
+      //Data de emissão
+      doc.setFontSize(8);
+      doc.setFont(undefined, "normal");
+      doc.text(
+        `DATA DE EMISSÃO: ${Formatar.formatarDataComprovante(dados_transacao.data_transacao)}`,
+        pageWidth - margin,
+        margin,
+        { 
+          align: "right",
+          baseline: "top"
+        }
+      );
+
+      //Subtítulo
+      doc.setTextColor("#696969");
+      doc.setFontSize(10);
+      doc.setFont(undefined, "normal");
+      doc.text(
+        "Via internet MAY BANK INTERMEDIACAO DE NEGOCIOS EIRELI",
+        pageWidth / 2, 
+        margin + logoHeight,
+        { 
+          align: "center",
+          baseline: "bottom"
+        }
+      );
 
       // Função para adicionar seções ao PDF
-      const addSection = (title, items) => {
+      let cursorY = logoHeight + margin + 15;
+      const addSection = (title, items, lastSection) => {
+
+        doc.setTextColor("#696969");
         doc.setFontSize(12);
-        doc.text(title, 10, cursorY);
-        cursorY += 8;
+        doc.setFont(undefined, "bold");
+        doc.text(title, margin, cursorY, { baseline: "top" });
+        cursorY += doc.getTextDimensions(`${title}`).h + 10;
 
-        items.forEach(({ label, value }) => {
-          doc.setFontSize(10);
-          doc.text(`${label}:`, 10, cursorY);
-          doc.text(value ? String(value) : "N/A", 70, cursorY);
-          cursorY += 6;
+        items.forEach(({ label, value }, index) => {
+          doc.setTextColor("#000000");
+          doc.setFontSize(12);
+          doc.setFont(undefined, "bold");
+          doc.text(`${label}:`, margin, cursorY);
+
+          doc.setTextColor("#696969");
+          doc.setFont(undefined, "normal");
+          doc.text(value ? String(value) : "N/A", ((pageWidth / 4) + margin), cursorY);
+
+          if (index != (items.length - 1))
+            cursorY += 6;
         });
-
-        cursorY += 8; // Espaço entre seções
+        if (!lastSection) {
+          cursorY += 8;
+          doc.setDrawColor("#A9A9A9");
+          doc.setLineWidth(0.2);
+          doc.line(margin, cursorY, (pageWidth - margin), cursorY); 
+          cursorY += 8;
+        }
       };
 
       // Dados do Pagador
       addSection("Dados do Pagador", [
         { label: "Nome", value: dados_pagador.nome },
-        { label: "CPF", value: dados_pagador.documento },
-        { label: "Conta de Origem", value: dados_pagador.conta_origem },
-        { label: "Banco", value: dados_pagador.banco },
+        { label: "CPF/CNPJ", value: dados_pagador.documento },
+        { label: "Instituição", value: dados_pagador.banco },
       ]);
 
       // Dados do Recebedor
       addSection("Dados do Recebedor", [
         { label: "Nome", value: dados_recebedor.nome },
-        { label: "Banco", value: dados_recebedor.banco },
-        { label: "Agência", value: dados_recebedor.agencia },
-        { label: "Conta", value: dados_recebedor.conta },
-        { label: "Documento", value: dados_recebedor.documento },
+        { label: "CPF/CNPJ", value: dados_recebedor.documento },
+        { label: "Instituição", value: dados_recebedor.banco },
         { label: "Chave PIX", value: dados_transacao.chave_pix },
       ]);
 
       // Dados da Transação
-      addSection("Dados da Transação", [
+      let transacaoData = [
         { label: "Valor", value: `R$ ${dados_transacao.valor_pago}` },
-        { label: "Chave PIX", value: dados_transacao.chave_pix },
-        {
-          label: "Data/Hora da Transação",
-          value: dados_transacao.data_transacao,
-        },
-        {
-          label: "Identificador da Transação",
-          value: dados_transacao.identificador_transacao,
-        },
-        {
-          label: "Descrição",
-          value: dados_transacao.descricao,
-        },
-      ]);
+        { label: "Data da Transação", value: Formatar.formatarDataComprovante(dados_transacao.data_transacao) },
+        { label: "Horário da Transação", value: Formatar.formatarHoraComprovante(dados_transacao.data_transacao) },
+        { label: "ID da Transação", value: dados_transacao.identificador_transacao }
+      ]
+
+      if (dados_transacao.descricao) {
+        transacaoData.splice(
+          transacaoData.length - 1, 0,
+          { label: "Descrição", value: dados_transacao.descricao }
+        );
+      }
+
+      addSection("Dados da Transação", transacaoData, true);
 
       // Salva o PDF
-      doc.save("comprovante_pix.pdf");
-
-      setLoading(false);
-      setShowModalComprovante({ visible: false });
+      doc.save("COMPROVANTE_PIX.pdf");
     };
 
     // Carrega e converte o logotipo
     const image = new Image();
-    image.src = require("../assets/images/logos/icon_logo.png").default;
+    image.src = require("../assets/images/logos/logo_transparente.png").default;
 
     image.onload = () => {
       const canvas = document.createElement("canvas");
@@ -508,7 +763,7 @@ export async function comprovante_ver(id) {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(image, 0, 0, image.width, image.height);
       const logoBase64 = canvas.toDataURL("image/png");
-      addLogoAndGeneratePDF(logoBase64);
+      addLogoAndGeneratePDF(logoBase64, image.width, image.height);
     };
 
     image.onerror = () => {
@@ -517,8 +772,6 @@ export async function comprovante_ver(id) {
     };
   } catch (error) {
     console.error("Erro na requisição ou ao gerar o PDF", error);
-    setLoading(false);
-    setShowModalComprovante({ visible: false });
   }
 }
 

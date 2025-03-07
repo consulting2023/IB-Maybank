@@ -29,6 +29,7 @@ import i18n from "../../tradutor/tradutor";
 import Password from "../../components/password/Password";
 import Otp from "../../components/otp/otp";
 import LangButton from "../../components/langButton/LangButton";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default class Login extends Component {
   constructor() {
@@ -59,6 +60,9 @@ export default class Login extends Component {
       browser: "",
       cpu: "",
       identificador: "",
+
+      captcha: "",
+      captchaModal: false,
     };
   }
 
@@ -68,7 +72,6 @@ export default class Login extends Component {
     UAParser()
       .withClientHints()
       .then((result) => {
-        console.log(result);
         this.setState({
           os: result.os.name + " " + result.os.version,
           browser: result.browser.name + " " + result.browser.major,
@@ -79,9 +82,6 @@ export default class Login extends Component {
     Funcoes.getUniqueToken().then((res) => {
       this.setState({ identificador: res });
     });
-
-    const token = Funcoes.getUniqueToken();
-    console.log("Token: " + token);
   }
 
   componentWillUnmount() {
@@ -133,6 +133,8 @@ export default class Login extends Component {
           token_aparelho: "",
           nome_aparelho: "",
 
+          tokenc: this.state.captcha,
+
           so: this.state.os,
           brand: this.state.browser,
           model: this.state.cpu,
@@ -143,16 +145,20 @@ export default class Login extends Component {
 
       // Funcoes.Geral_API(data, false).then((res) => {
       Funcoes.Geral_API(data, false).then((res) => {
-        console.log(res);
-
         if (res == 0) {
           this.props.alerts(
             i18n.t("login.alertaCombinacoes"),
             i18n.t("login.senhaIncorreta"),
             "warning"
           );
+        } else if (res == 303) {
+          this.props.alerts(
+            i18n.t("login.erro"),
+            i18n.t("login.requisicaoNaoPermitida"),
+            "warning"
+          );
         } else if (texto == "") {
-          this.props.alerts("Erro interno", "", "danger");
+          this.props.alerts(i18n.t("login.erroInterno"), "", "danger");
         } else {
           var arrContas = [];
           Object.keys(res).forEach(function (key) {
@@ -180,7 +186,6 @@ export default class Login extends Component {
   };
 
   loginConta = (dados) => {
-    console.log(dados.conta.ativo);
     if (dados.conta.ativo == 0) {
       this.props.alerts(
         i18n.t("login.tituloContaNãoAprovada"),
@@ -191,7 +196,6 @@ export default class Login extends Component {
     }
     localStorage.setItem("nivel", dados.usuario.nivel);
     const contaGrupos = dados.conta_grupos || [];
-    console.log("Salvando conta_grupos no localStorage:", contaGrupos);
     localStorage.setItem("conta_grupos", JSON.stringify(contaGrupos));
     this.enviarToken();
     this.setState({
@@ -297,7 +301,6 @@ export default class Login extends Component {
     setTimeout(() => {
       // Funcoes.Geral_API(data, true).then((res) => {
       Funcoes.Geral_API(data, true).then((res) => {
-        console.log(res);
         if (res == true) {
           Funcoes.setToken(this.state.token_chave, this.state.pfp);
           window.location.href = "/home";
@@ -339,7 +342,6 @@ export default class Login extends Component {
       // Funcoes.Geral_API(data, true).then((res) => {
       Funcoes.Geral_API(data, true).then((res) => {
         if (res == true) {
-          console.log(res);
         }
       });
     }, 300);
@@ -477,6 +479,7 @@ export default class Login extends Component {
                 <br />
 
                 <div>
+
                   <Row>
                     {Produtos.cadastro.cadastroLiberado ? (
                       <Col className="text-center">
@@ -509,14 +512,14 @@ export default class Login extends Component {
                             this.state.password[3] == "" ||
                             this.state.password[4] == "" ||
                             this.state.password[5] == "" ||
-                            this.state.email.length < 5 ||
                             !this.state.email.match(
                               /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
                             )
                           }
                           type="button"
                           className="botaologin btn-primary"
-                          onClick={() => this.combinacoes()}
+                          // onClick={() => this.combinacoes()}
+                          onClick={() => this.setState({ captchaModal: true, captcha: "" })}
                         >
                           {i18n.t("login.entrar")}
                         </Button>
@@ -628,22 +631,6 @@ export default class Login extends Component {
                       <Otp otpProp={this.getOtp} className="mt-2" />
                     </div>
                   ) : null}
-
-                  {/* QR Code */}
-                  {/* {this.state.inputTokenQrcode ?
-                    <Container>
-                      <hr />
-                      <h4>{i18n.t('login.qrcode')}</h4>
-                      <span>{i18n.t('login.ler_qrcode')}</span>
-                      <Row >
-                        <Col className="col-md-12">
-                          <img src={this.state.Qrcode_imagem} className="qrCode" />
-                        </Col>
-                      </Row>
-                    </Container>
-                  :
-                    <></>
-                  } */}
                 </div>
               </Modal.Body>
             </Modal>
@@ -734,6 +721,67 @@ export default class Login extends Component {
                   </ButtonGroup>
                 </div>
               </Modal.Body>
+            </Modal>
+
+            <Modal
+              centered
+              contentClassName="modalContent"
+              show={this.state.captchaModal}
+              onHide={() => this.setState({ captchaModal: false })}
+            >
+              <Modal.Header closeButton>
+                Para sua segurança, complete o captcha antes de prosseguir
+              </Modal.Header>
+              <Modal.Body>
+                <div>
+                  <Row>
+                    <ReCAPTCHA
+                      className="mx-auto mb-2"
+                      sitekey={process.env.CAPTCHA_KEY}
+                      onChange={ (e) => { 
+                        this.setState({ captcha: e });
+                      }}
+                      onErrored={ () => {
+                        this.props.alerts(
+                          i18n.t("login.erroConexao"),
+                          i18n.t("login.tenteRecarregarPagina"),
+                          "warning"
+                        );
+                      }}
+                      size="normal"
+                      type="image"
+                      theme="light"
+                      hl={i18n.t("login.captchaLang")}
+                    />
+                  </Row>
+                </div>
+              </Modal.Body>
+              <Modal.Footer>
+                {
+                  this.state.captcha && ( <>
+                    <Button
+                      onClick={ () => {
+                        if (
+                          this.state.password[0] != "" &&
+                          this.state.password[1] != "" &&
+                          this.state.password[2] != "" &&
+                          this.state.password[3] != "" &&
+                          this.state.password[4] != "" &&
+                          this.state.password[5] != "" &&
+                          this.state.email.match(
+                            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+                          )
+                        ) {
+                          this.setState({ captchaModal: false });
+                          this.combinacoes();
+                        }
+                      }}
+                    >
+                      Continuar
+                    </Button>
+                  </> )
+                }
+              </Modal.Footer>
             </Modal>
           </div>
         </div>

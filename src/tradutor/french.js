@@ -57,6 +57,13 @@ export default {
         "Compte non approuvé, contactez le gestionnaire pour plus d'informations",
       cadastrar: "S'inscrire",
       selecionarConta: "Sélectionnez le type de compte à enregistrer",
+
+      erroInterno: "Erreur interne",
+      captchaLang: "fr",
+      erro: "Erreur",
+      requisicaoNaoPermitida: "Demande non autorisée",
+      erroConexao: "Erreur de connexion",
+      tenteRecarregarPagina: "Essayez de recharger la page",
     },
 
     home: {
