@@ -61,6 +61,7 @@ export default {
     requisicaoNaoPermitida: "Requisição não permitida",
     erroConexao: "Erro de conexão",
     tenteRecarregarPagina: "Tente recarregar a página",
+    tokenInvalido: "Token inválido"
   },
 
   home: {
