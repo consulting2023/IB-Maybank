@@ -60,6 +60,7 @@ export default {
     requisicaoNaoPermitida: "Request not allowed",
     erroConexao: "Connection error",
     tenteRecarregarPagina: "Try reloading the page",
+    tokenInvalido: "Invalid token"
   },
 
   home: {

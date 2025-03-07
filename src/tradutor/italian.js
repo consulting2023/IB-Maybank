@@ -64,6 +64,7 @@ export default {
     requisicaoNaoPermitida: "Richiesta non consentita",
     erroConexao: "Errore di connessione",
     tenteRecarregarPagina: "Prova a ricaricare la pagina",
+    tokenInvalido: "Token non valido"
   },
 
   home: {

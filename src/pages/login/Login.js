@@ -345,7 +345,6 @@ export default class Login extends Component {
       pessoa.pf_pj = "pj";
     }
     const chave = JSON.stringify(pessoa);
-    console.log('pessoa', pessoa);
     this.setState({
       token: true,
       token_chave: chave,
@@ -363,17 +362,11 @@ export default class Login extends Component {
   };
 
   Valida_token = async (id) => {
-    // let email = "";
-    // Produtos.testSuporte.testLogin
-    //   ? (email = Produtos.testSuporte.emailTest)
-    //   : (email = this.state.email);
     const pessoa = JSON.parse(this.state.token_chave);
     const data = {
-      // url: "utilitarios/validacao-email-ib",
       url: "otp/validar",
       data: {
         usuario_id: pessoa.conta_id,
-        // email: email,
         token: id,
         ativa: 1,
       },
@@ -385,7 +378,7 @@ export default class Login extends Component {
           Funcoes.setToken(this.state.token_chave, this.state.pfp);
           window.location.href = "/home";
         } else {
-          this.props.alerts("Erro", "Token inválido", "warning");
+          this.props.alerts(i18n.t("login.erro"), i18n.t("login.tokenInvalido"), "warning");
         }
       });
     }, 300);
@@ -699,58 +692,34 @@ export default class Login extends Component {
               }}
             >
               <Modal.Body>
-                {/* <h1>{i18n.t("login.chave_de_acesso")}</h1> */}
                 <span>
-                  {/* {i18n.t("login.abra_o_aplicativo")} */}
                   Confirme sua identidade inserindo sua Chave de Acesso encontrada no app
                 </span>
-                {/* <div>
-                  {this.state.inputToken ? (
-                    <div>
-                      <hr className="divisoria" />
-                      <h1>{i18n.t("login.token")}</h1>
-                      <span>{i18n.t("login.chave_token")}</span>
-                      <Otp otpProp={this.getOtp} className="mt-2" />
-                    </div>
-                  ) : null}
-                </div> */}
-                  <div className="mt-3">
-                    <Otp otpProp={this.getOtp}/>
-                  </div>
+                <div className="mt-3">
+                  <Otp otpProp={this.getOtp}/>
+                </div>
 
-                  <hr className="divisoria" />
+                <hr className="divisoria" />
 
-                  <span>
-                    ou escaneando este QR Code com o app
-                  </span>
+                <span>
+                  ou escaneando este QR Code com o app
+                </span>
 
-                  <div className="mt-3 d-flex" style={{ height: 200, backgroundColor: 'white' }}>
-                    {
-                      this.state.qr.qrcode == '' ? ( <>
-                        <ReactLoading
-                          className="d-block m-auto"
-                          type={"spin"}
-                          color={"#000000"}
-                          height={"50px"}
-                          width={"15%"}
-                        />
-                      </> ) : ( <>
-                        <Image style={{ height: '200px', width: '200px' }} className="m-auto" src={this.state.qr.qrcode} />
-                      </> )
-                    }
-                  </div>
-
-                  {/* <Container>
-                    <hr />
-                    <h4>{i18n.t('login.qrcode')}</h4>
-                    <span>{i18n.t('login.ler_qrcode')}</span>
-                    <Row >
-                      <Col className="col-md-12">
-                        <img src={this.state.Qrcode_imagem} className="qrCode" />
-                      </Col>
-                    </Row>
-                  </Container> */}
-                
+                <div className="mt-3 d-flex" style={{ height: 200, backgroundColor: 'white' }}>
+                  {
+                    this.state.qr.qrcode == '' ? ( <>
+                      <ReactLoading
+                        className="d-block m-auto"
+                        type={"spin"}
+                        color={"#000000"}
+                        height={"50px"}
+                        width={"15%"}
+                      />
+                    </> ) : ( <>
+                      <Image style={{ height: '200px', width: '200px' }} className="m-auto" src={this.state.qr.qrcode} />
+                    </> )
+                  }
+                </div>
               </Modal.Body>
             </Modal>
 
