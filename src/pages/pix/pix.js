@@ -593,10 +593,11 @@ export default class Pix extends Component {
   };
 
   GerarQrRecebimento = () => {
-    this.setState({ loading: true });
+    console.log(Funcoes.pessoa.pf_pj)
+    
 
     var valor_qrcodeenviar = this.state.valorQr;
-
+    
     if (valor_qrcodeenviar == "") {
       valor_qrcodeenviar = 0;
     } else {
@@ -605,6 +606,13 @@ export default class Pix extends Component {
       valor_qrcodeenviar = valor_qrcodeenviar.replace(",", ".");
     }
 
+    if (Funcoes.pessoa.pf_pj == "pf") {
+      alert(
+        "Para gerar o QR Code o valor não poder ser zerado."
+      );
+      return;
+    }
+    console.log(valor_qrcodeenviar)
     let dados = {};
 
     if (
@@ -612,6 +620,7 @@ export default class Pix extends Component {
       this.state.contaGrupos !== "undefined" &&
       this.state.contaGrupos.length > 1
     ) {
+      this.setState({ loading: true });
       dados = {
         url: "pix/pix/gera-qrcode-estatico",
         method: "POST",
@@ -628,6 +637,7 @@ export default class Pix extends Component {
         },
       };
     } else {
+      this.setState({ loading: true });
       dados = {
         url: "pix/pix/gera-qrcode-estatico",
         method: "POST",
