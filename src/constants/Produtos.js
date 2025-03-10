@@ -312,5 +312,11 @@ export default {
     cadastroLiberado: true,
     cadastroPF: true,
     cadastroPj: true
-  }
+  },
+
+  login_otp: {
+    email: false,
+    chave: true,
+    qrcode: true,
+  },
 };

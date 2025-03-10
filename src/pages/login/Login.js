@@ -67,7 +67,8 @@ export default class Login extends Component {
         qrcode: "",
         tempo_de_vida_previsto: 1
       },
-      qr_key: ""
+      qr_key: "",
+      qr_reloads: 0
     };
   }
 
@@ -90,8 +91,10 @@ export default class Login extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.qr.tempo_de_vida_previsto !== this.state.qr.tempo_de_vida_previsto) {
-      this.iniciarQr();
+    if (Produtos.login_otp.qrcode) {
+      if (prevState.qr.tempo_de_vida_previsto !== this.state.qr.tempo_de_vida_previsto) {
+        this.iniciarQr();
+      }
     }
   }
 
@@ -118,7 +121,14 @@ export default class Login extends Component {
     };
 
     Funcoes.Geral_API(data, false).then((res) => {
-      this.setState({ qr: res });
+      const reloads = ++this.state.qr_reloads; 
+      if (reloads >= 5) {
+        this.pararQr();
+        this.setState({ token: false });
+      } else {
+        this.setState({ qr: res, qr_reloads: reloads });
+      }
+
     });
   }
 
@@ -138,7 +148,7 @@ export default class Login extends Component {
     }
     this.intervalStatus = setInterval(() => {
       this.getQrStatus();
-    }, 5000);
+    }, 3000);
   };
 
   pararQr = () => {
@@ -153,6 +163,8 @@ export default class Login extends Component {
       clearInterval(this.intervalStatus);
       this.intervalStatus = null;
     }
+
+    this.setState({ qr_reloads: 0 });
   };
 
   getQrStatus = async () => {
@@ -279,7 +291,10 @@ export default class Login extends Component {
     localStorage.setItem("nivel", dados.usuario.nivel);
     const contaGrupos = dados.conta_grupos || [];
     localStorage.setItem("conta_grupos", JSON.stringify(contaGrupos));
-    this.enviarToken();
+
+    if (Produtos.login_otp.email) {
+      this.enviarToken();
+    }
 
     var n = dados.conta.id;
     n = ("0000000" + n).slice(-7);
@@ -353,7 +368,10 @@ export default class Login extends Component {
       confirmShow: false,
       loading: false,
     });
-    this.iniciarQr();
+
+    if (Produtos.login_otp.qrcode) {
+      this.iniciarQr();
+    }
   };
 
   tipoConta = (conta) => {
@@ -361,12 +379,40 @@ export default class Login extends Component {
     if (conta.representante) return i18n.t("login.pessoa_juridica");
   };
 
-  Valida_token = async (id) => {
+  Valida_token_chave = async (id) => {
     const pessoa = JSON.parse(this.state.token_chave);
     const data = {
       url: "otp/validar",
       data: {
         usuario_id: pessoa.conta_id,
+        token: id,
+        ativa: 1,
+      },
+      method: "POST",
+    };
+    setTimeout(() => {
+      Funcoes.Geral_API(data, true).then((res) => {
+        if (res == true) {
+          Funcoes.setToken(this.state.token_chave, this.state.pfp);
+          window.location.href = "/home";
+        } else {
+          this.props.alerts(i18n.t("login.erro"), i18n.t("login.tokenInvalido"), "warning");
+        }
+      });
+    }, 300);
+  };
+
+  Valida_token_email = async (id) => {
+    let email = "";
+    Produtos.testSuporte.testLogin
+      ? (email = Produtos.testSuporte.emailTest)
+      : (email = this.state.email);
+    const pessoa = JSON.parse(this.state.token_chave);
+    const data = {
+      url: "utilitarios/validacao-email-ib",
+      data: {
+        usuario_id: pessoa.conta_id,
+        email: email,
         token: id,
         ativa: 1,
       },
@@ -394,7 +440,11 @@ export default class Login extends Component {
 
   getOtp = async (data) => {
     if (data.length == 6) {
-      this.Valida_token(data);
+      if (Produtos.login_otp.email) {
+        this.Valida_token_email(data);
+      } else if (Produtos.login_otp.chave) {
+        this.Valida_token_chave(data);
+      }
     }
   };
 
@@ -692,34 +742,79 @@ export default class Login extends Component {
               }}
             >
               <Modal.Body>
-                <span>
-                  {i18n.t("login.confirmeSuaIdentidadeInserindo")}
-                </span>
-                <div className="mt-3">
-                  <Otp otpProp={this.getOtp}/>
-                </div>
+                <Modal.Title className="mb-4">
+                  {i18n.t("login.confirmeSuaIdentidade")}:
+                </Modal.Title>
 
-                <hr className="divisoria" />
-
-                <span>
-                  {i18n.t("login.ouEscaneandoEste")}
-                </span>
-
-                <div className="mt-3 d-flex" style={{ height: 200, backgroundColor: 'white' }}>
+                <div>
                   {
-                    this.state.qr.qrcode == '' ? ( <>
-                      <ReactLoading
-                        className="d-block m-auto"
-                        type={"spin"}
-                        color={"#000000"}
-                        height={"50px"}
-                        width={"15%"}
-                      />
-                    </> ) : ( <>
-                      <Image style={{ height: '200px', width: '200px' }} className="m-auto" src={this.state.qr.qrcode} />
-                    </> )
+                    (Produtos.login_otp.email && Produtos.login_otp.chave) ? (
+
+                      <span>
+                        {i18n.t("login.insiraCodigoEnviadoEmailChave")}:
+                      </span>
+
+                    ) : Produtos.login_otp.email ? (
+
+                      <span>
+                        {i18n.t("login.insiraCodigoEnviadoEmail")}:
+                      </span>
+
+                    ) : Produtos.login_otp.chave && (
+
+                      <span>
+                        {i18n.t("login.insiraCodigoChave")}
+                      </span>
+
+                    )
                   }
+
+                  <div className="mt-3">
+                    <Otp otpProp={this.getOtp}/>
+                  </div>
                 </div>
+
+                {
+                  Produtos.login_otp.qrcode && (Produtos.login_otp.chave || Produtos.login_otp.email) && (
+                    <div className="d-flex my-3">
+                      <hr className="divisoria" />
+
+                      <span className="my-auto mx-3">
+                        {i18n.t("login.ouQr")}
+                      </span>
+
+                      <hr className="divisoria" />
+                    </div>
+                  )
+                }
+
+                {
+                  Produtos.login_otp.qrcode && (
+                    <div>
+                      <span>
+                        {i18n.t("login.escaneieQr")}
+                      </span>
+
+                      <div className="mt-3 d-flex rounded" style={{ height: 200, backgroundColor: 'white' }}>
+                        {
+                          this.state.qr.qrcode == '' ? (
+                            <ReactLoading
+                              className="d-block m-auto"
+                              type={"spin"}
+                              color={"#000000"}
+                              height={"50px"}
+                              width={"15%"}
+                            />
+                          ) : (
+                            <Image style={{ height: '200px', width: '200px' }} className="m-auto" src={this.state.qr.qrcode} />
+                          )
+                        }
+                      </div>
+                    </div>
+                  )
+                }
+
+
               </Modal.Body>
             </Modal>
 

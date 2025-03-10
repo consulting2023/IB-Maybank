@@ -65,8 +65,12 @@ export default {
     erroConexao: "Errore di connessione",
     tenteRecarregarPagina: "Prova a ricaricare la pagina",
     tokenInvalido: "Token non valido",
-    confirmeSuaIdentidadeInserindo: "Conferma la tua identità inserendo la tua Chiave di Accesso trovata nell'app",
-    ouEscaneandoEste: "Oppure scansionando questo QR Code con l'app",
+    confirmeSuaIdentidade: "Conferma la tua identità",
+    insiraCodigoEnviadoEmail: "Inserisci il codice inviato alla tua e-mail",
+    insiraCodigoChave: "Inserisci il codice dalla Chiave di Accesso dell'app",
+    insiraCodigoEnviadoEmailChave: "Inserisci il codice inviato alla tua e-mail o trovato nella Chiave di Accesso dell'app",
+    ouQr: "o",
+    escaneieQr: "Scansiona il QR Code con la Chiave di Accesso dell'app",
   },
 
   home: {

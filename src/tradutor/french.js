@@ -65,8 +65,12 @@ export default {
       erroConexao: "Erreur de connexion",
       tenteRecarregarPagina: "Essayez de recharger la page",
       tokenInvalido: "Jeton invalide",
-      confirmeSuaIdentidadeInserindo: "Confirmez votre identité en saisissant votre clé d'accès trouvée dans l'application",
-      ouEscaneandoEste: "Ou en scannant ce QR Code avec l'application",
+      confirmeSuaIdentidade: "Confirmez votre identité",
+      insiraCodigoEnviadoEmail: "Entrez le code envoyé à votre e-mail",
+      insiraCodigoChave: "Entrez le code de la clé d'accès de l'application",
+      insiraCodigoEnviadoEmailChave: "Entrez le code envoyé à votre e-mail ou trouvé dans la clé d'accès de l'application",
+      ouQr: "ou",
+      escaneieQr: "Scannez le QR Code avec la clé d'accès de l'application",
     },
 
     home: {

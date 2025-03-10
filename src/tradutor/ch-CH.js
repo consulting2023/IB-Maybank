@@ -58,8 +58,12 @@ export default {
     erroConexao: "连接错误",
     tenteRecarregarPagina: "尝试重新加载页面",
     tokenInvalido: "无效的令牌",
-    confirmeSuaIdentidadeInserindo: "请通过在应用中找到的访问密钥确认您的身份",
-    ouEscaneandoEste: "或者通过应用扫描此二维码",
+    confirmeSuaIdentidade: "确认您的身份",
+    insiraCodigoEnviadoEmail: "请输入发送到您电子邮件的代码",
+    insiraCodigoChave: "输入应用程序访问密钥的代码",
+    insiraCodigoEnviadoEmailChave: "请输入发送到您电子邮件的代码或在应用程序的访问密钥中找到的代码",
+    ouQr: "或者",
+    escaneieQr: "使用应用程序的访问密钥扫描二维码",
   },
 
   home: {

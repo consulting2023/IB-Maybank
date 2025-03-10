@@ -61,8 +61,12 @@ export default {
     erroConexao: "Connection error",
     tenteRecarregarPagina: "Try reloading the page",
     tokenInvalido: "Invalid token",
-    confirmeSuaIdentidadeInserindo: "Confirm your identity by entering your Access Key found in the app",
-    ouEscaneandoEste: "Or scanning this QR Code with the app",
+    confirmeSuaIdentidade: "Confirm your identity",
+    insiraCodigoEnviadoEmail: "Enter the code sent to your email",
+    insiraCodigoChave: "Enter the code from the app Access Key",
+    insiraCodigoEnviadoEmailChave: "Enter the code sent to your email or found in the app Access Key",
+    ouQr: "or",
+    escaneieQr: "Scan the QR Code with the app Access Key",
   },
 
   home: {
