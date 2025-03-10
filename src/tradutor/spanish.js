@@ -64,6 +64,13 @@ export default {
     requisicaoNaoPermitida: "Solicitud no permitida",
     erroConexao: "Error de conexión",
     tenteRecarregarPagina: "Intenta recargar la página",
+    tokenInvalido: "Token inválido",
+    confirmeSuaIdentidade: "Confirme su identidad",
+    insiraCodigoEnviadoEmail: "Ingrese el código enviado a su correo electrónico",
+    insiraCodigoChave: "Ingrese el código de la Clave de Acceso de la app",
+    insiraCodigoEnviadoEmailChave: "Ingrese el código enviado a su correo electrónico o encontrado en la Clave de Acceso de la app",
+    ouQr: "o",
+    escaneieQr: "Escanee el Código QR con la Clave de Acceso de la app",
   },
 
   home: {

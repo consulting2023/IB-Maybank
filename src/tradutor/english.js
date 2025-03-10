@@ -60,6 +60,13 @@ export default {
     requisicaoNaoPermitida: "Request not allowed",
     erroConexao: "Connection error",
     tenteRecarregarPagina: "Try reloading the page",
+    tokenInvalido: "Invalid token",
+    confirmeSuaIdentidade: "Confirm your identity",
+    insiraCodigoEnviadoEmail: "Enter the code sent to your email",
+    insiraCodigoChave: "Enter the code from the app Access Key",
+    insiraCodigoEnviadoEmailChave: "Enter the code sent to your email or found in the app Access Key",
+    ouQr: "or",
+    escaneieQr: "Scan the QR Code with the app Access Key",
   },
 
   home: {
