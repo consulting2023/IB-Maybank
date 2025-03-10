@@ -229,7 +229,7 @@ export default class Login extends Component {
           token_aparelho: "",
           nome_aparelho: "",
 
-          tokenc: this.state.captcha,
+          // tokenc: this.state.captcha,
 
           so: this.state.os,
           brand: this.state.browser,
@@ -238,6 +238,9 @@ export default class Login extends Component {
         },
         method: "POST",
       };
+      if (Produtos.login_captcha) {
+        data.data['tokenc'] = this.state.captcha;
+      }
       Funcoes.Geral_API(data, false).then((res) => {
         if (res == 0) {
           this.props.alerts(
@@ -642,7 +645,13 @@ export default class Login extends Component {
                           type="button"
                           className="botaologin btn-primary"
                           // onClick={() => this.combinacoes()}
-                          onClick={() => this.setState({ captchaModal: true, captcha: "" })}
+                          onClick={() => {
+                            if (Produtos.login_captcha) {
+                              this.setState({ captchaModal: true, captcha: "" });
+                            } else {
+                              this.combinacoes()
+                            }
+                          }}
                         >
                           {i18n.t("login.entrar")}
                         </Button>
