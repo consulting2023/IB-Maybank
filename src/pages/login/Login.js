@@ -760,13 +760,13 @@ export default class Login extends Component {
                     (Produtos.login_otp.email && Produtos.login_otp.chave) ? (
 
                       <span>
-                        {i18n.t("login.insiraCodigoEnviadoEmailChave")}:
+                        {i18n.t("login.insiraCodigoEnviadoEmailChave")}
                       </span>
 
                     ) : Produtos.login_otp.email ? (
 
                       <span>
-                        {i18n.t("login.insiraCodigoEnviadoEmail")}:
+                        {i18n.t("login.insiraCodigoEnviadoEmail")}
                       </span>
 
                     ) : Produtos.login_otp.chave && (
