@@ -70,6 +70,8 @@ export default class Login extends Component {
       qr_key: "",
       qr_reloads: 0
     };
+
+    this.recaptchaRef = React.createRef();
   }
 
   componentDidMount() {
@@ -928,17 +930,33 @@ export default class Login extends Component {
                 <div>
                   <Row>
                     <ReCAPTCHA
+                      ref={this.recaptchaRef}
                       className="mx-auto mb-2"
                       sitekey={process.env.CAPTCHA_KEY}
                       onChange={ (e) => { 
                         this.setState({ captcha: e });
                       }}
                       onErrored={ () => {
-                        this.props.alerts(
-                          i18n.t("login.erroConexao"),
-                          i18n.t("login.tenteRecarregarPagina"),
-                          "warning"
-                        );
+                        //Tentar limpar cookies
+                        const cookies = document.cookie.split(";");
+
+                        cookies.forEach((cookie) => {
+                          const cookieName = cookie.split("=")[0].trim();
+
+                          // Limpar cookies relacionados ao Google (domínio google.com ou googleusercontent.com)
+                          if (cookieName.includes("google")) {
+                            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=google.com;`;
+                            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=googleusercontent.com;`;
+                          }
+                        });
+
+                        this.recaptchaRef.current.reset();
+
+                        // this.props.alerts(
+                        //   i18n.t("login.erroConexao"),
+                        //   i18n.t("login.tenteRecarregarPagina"),
+                        //   "warning"
+                        // );
                       }}
                       size="normal"
                       type="image"
