@@ -148,7 +148,7 @@ export default class Login extends Component {
     }
     this.intervalStatus = setInterval(() => {
       this.getQrStatus();
-    }, 3000);
+    }, 10000);
   };
 
   pararQr = () => {

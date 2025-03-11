@@ -320,5 +320,5 @@ export default {
     qrcode: false,
   },
 
-  login_captcha: false
+  login_captcha: true
 };
