@@ -315,7 +315,7 @@ export default {
   },
 
   login_otp: {
-    email: true,
+    email: false,
     chave: true,
     qrcode: true,
   },
