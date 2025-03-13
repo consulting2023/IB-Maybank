@@ -150,7 +150,7 @@ export default class Login extends Component {
     }
     this.intervalStatus = setInterval(() => {
       this.getQrStatus();
-    }, 10000);
+    }, 3000);
   };
 
   pararQr = () => {
@@ -748,83 +748,86 @@ export default class Login extends Component {
               show={this.state.token}
               // show={true}
               onHide={() => {
-                this.setState({ token: false });
+                this.setState({ token: false, qr: { qrcode: "", tempo_de_vida_previsto: 1} });
                 this.pararQr();
               }}
             >
               <Modal.Body>
-                <Modal.Title className="mb-4">
-                  {i18n.t("login.confirmeSuaIdentidade")}:
-                </Modal.Title>
-
-                <div>
-                  {
-                    (Produtos.login_otp.email && Produtos.login_otp.chave) ? (
-
-                      <span>
-                        {i18n.t("login.insiraCodigoEnviadoEmailChave")}
-                      </span>
-
-                    ) : Produtos.login_otp.email ? (
-
-                      <span>
-                        {i18n.t("login.insiraCodigoEnviadoEmail")}
-                      </span>
-
-                    ) : Produtos.login_otp.chave && (
-
-                      <span>
-                        {i18n.t("login.insiraCodigoChave")}
-                      </span>
-
-                    )
-                  }
-
-                  <div className="mt-3">
-                    <Otp otpProp={this.getOtp}/>
-                  </div>
-                </div>
-
                 {
-                  Produtos.login_otp.qrcode && (Produtos.login_otp.chave || Produtos.login_otp.email) && (
-                    <div className="d-flex my-3">
-                      <hr className="divisoria" />
+                  (Produtos.login_otp.email || Produtos.login_otp.chave || Produtos.login_otp.qrcode) ? ( <>
+                    <Modal.Title className="mb-4">
+                      {i18n.t("login.confirmeSuaIdentidade")}:
+                    </Modal.Title>
 
-                      <span className="my-auto mx-3">
-                        {i18n.t("login.ouQr")}
-                      </span>
-
-                      <hr className="divisoria" />
-                    </div>
-                  )
-                }
-
-                {
-                  Produtos.login_otp.qrcode && (
                     <div>
-                      <span>
-                        {i18n.t("login.escaneieQr")}
-                      </span>
+                      {
+                        (Produtos.login_otp.email && Produtos.login_otp.chave) ? (
 
-                      <div className="mt-3 d-flex rounded" style={{ height: 200, backgroundColor: 'white' }}>
-                        {
-                          this.state.qr.qrcode == '' ? (
-                            <ReactLoading
-                              className="d-block m-auto"
-                              type={"spin"}
-                              color={"#000000"}
-                              height={"50px"}
-                              width={"15%"}
-                            />
-                          ) : (
-                            <Image style={{ height: '200px', width: '200px' }} className="m-auto" src={this.state.qr.qrcode} />
-                          )
-                        }
+                          <span>
+                            {i18n.t("login.insiraCodigoEnviadoEmailChave")}
+                          </span>
+
+                        ) : Produtos.login_otp.email ? (
+
+                          <span>
+                            {i18n.t("login.insiraCodigoEnviadoEmail")}
+                          </span>
+
+                        ) : Produtos.login_otp.chave && (
+
+                          <span>
+                            {i18n.t("login.insiraCodigoChave")}
+                          </span>
+
+                        )
+                      }
+
+                      <div className="mt-3">
+                        <Otp otpProp={this.getOtp}/>
                       </div>
                     </div>
-                  )
-                }
 
+                    {
+                      Produtos.login_otp.qrcode && (Produtos.login_otp.chave || Produtos.login_otp.email) && (
+                        <div className="d-flex my-3">
+                          <hr className="divisoria" />
+
+                          <span className="my-auto mx-3">
+                            {i18n.t("login.ouQr")}
+                          </span>
+
+                          <hr className="divisoria" />
+                        </div>
+                      )
+                    }
+
+                    {
+                      Produtos.login_otp.qrcode && (
+                        <div>
+                          <span>
+                            {i18n.t("login.escaneieQr")}
+                          </span>
+
+                          <div className="mt-3 d-flex rounded" style={{ height: 200, backgroundColor: 'white' }}>
+                            {
+                              this.state.qr.qrcode == '' ? (
+                                <ReactLoading
+                                  className="d-block m-auto"
+                                  type={"spin"}
+                                  color={"#000000"}
+                                  height={"50px"}
+                                  width={"15%"}
+                                />
+                              ) : (
+                                <Image style={{ height: '200px', width: '200px' }} className="m-auto" src={this.state.qr.qrcode} />
+                              )
+                            }
+                          </div>
+                        </div>
+                      )
+                    }
+                 </> ) : (<>ERRO: NENHUMA OTP SELECIONADA</>)
+                }
 
               </Modal.Body>
             </Modal>

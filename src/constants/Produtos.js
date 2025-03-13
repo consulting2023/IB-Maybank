@@ -316,8 +316,8 @@ export default {
 
   login_otp: {
     email: true,
-    chave: false,
-    qrcode: false,
+    chave: true,
+    qrcode: true,
   },
 
   login_captcha: true
