@@ -80,6 +80,7 @@ export async function Geral_API(dados, logado) {
     headers["token"] = info.token_api;
     headers["contaid"] = info.conta_id;
     headers["chave"] = info.chave;
+    headers["usuarioid"] = info.usuario_id;
   }
 
   const data = dados.data;
