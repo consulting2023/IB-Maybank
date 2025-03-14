@@ -68,7 +68,6 @@ export default {
     confirmeSuaIdentidade: "Conferma la tua identità",
     insiraCodigoEnviadoEmail: "Inserisci il codice inviato alla tua e-mail e SMS",
     insiraCodigoChave: "Inserisci il codice dalla Chiave di Accesso dell'app",
-    insiraCodigoEnviadoEmailChave: "Inserisci il codice inviato alla tua e-mail o SMS e trovato nella Chiave di Accesso dell'app",
     ouQr: "o",
     escaneieQr: "Scansiona il QR Code con la Chiave di Accesso dell'app",
   },

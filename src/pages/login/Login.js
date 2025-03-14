@@ -745,8 +745,8 @@ export default class Login extends Component {
               centered
               contentClassName="modalContent"
               // dialogClassName="modalDialog"
-              show={this.state.token}
-              // show={true}
+              // show={this.state.token}
+              show={true}
               onHide={() => {
                 this.setState({ token: false, qr: { qrcode: "", tempo_de_vida_previsto: 1} });
                 this.pararQr();
@@ -758,48 +758,6 @@ export default class Login extends Component {
                     <Modal.Title className="mb-4">
                       {i18n.t("login.confirmeSuaIdentidade")}:
                     </Modal.Title>
-
-                    <div>
-                      {
-                        (Produtos.login_otp.email && Produtos.login_otp.chave) ? (
-
-                          <span>
-                            {i18n.t("login.insiraCodigoEnviadoEmailChave")}
-                          </span>
-
-                        ) : Produtos.login_otp.email ? (
-
-                          <span>
-                            {i18n.t("login.insiraCodigoEnviadoEmail")}
-                          </span>
-
-                        ) : Produtos.login_otp.chave && (
-
-                          <span>
-                            {i18n.t("login.insiraCodigoChave")}
-                          </span>
-
-                        )
-                      }
-
-                      <div className="mt-3">
-                        <Otp otpProp={this.getOtp}/>
-                      </div>
-                    </div>
-
-                    {
-                      Produtos.login_otp.qrcode && (Produtos.login_otp.chave || Produtos.login_otp.email) && (
-                        <div className="d-flex my-3">
-                          <hr className="divisoria" />
-
-                          <span className="my-auto mx-3">
-                            {i18n.t("login.ouQr")}
-                          </span>
-
-                          <hr className="divisoria" />
-                        </div>
-                      )
-                    }
 
                     {
                       Produtos.login_otp.qrcode && (
@@ -826,6 +784,49 @@ export default class Login extends Component {
                         </div>
                       )
                     }
+
+                    {
+                      Produtos.login_otp.qrcode && (Produtos.login_otp.chave || Produtos.login_otp.email) && (
+                        <div className="d-flex my-3">
+                          <hr className="divisoria" />
+
+                          <span className="my-auto mx-3">
+                            {i18n.t("login.ouQr")}
+                          </span>
+
+                          <hr className="divisoria" />
+                        </div>
+                      )
+                    }
+
+                    {
+                      (Produtos.login_otp.email || Produtos.login_otp.chave) && (
+                        <div>
+                          {
+                            Produtos.login_otp.email ? (
+
+                              <span>
+                                {i18n.t("login.insiraCodigoEnviadoEmail")}
+                              </span>
+
+                            ) : Produtos.login_otp.chave && (
+
+                              <span>
+                                {i18n.t("login.insiraCodigoChave")}
+                              </span>
+
+                            )
+                          }
+
+                          <div className="mt-3">
+                            <Otp otpProp={this.getOtp}/>
+                          </div>
+                        </div>   
+                      )
+                    }
+
+                    
+
                  </> ) : (<>ERRO: NENHUMA OTP SELECIONADA</>)
                 }
 

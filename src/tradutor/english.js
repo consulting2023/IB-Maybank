@@ -64,7 +64,6 @@ export default {
     confirmeSuaIdentidade: "Confirm your identity",
     insiraCodigoEnviadoEmail: "Enter the code sent to your email and SMS",
     insiraCodigoChave: "Enter the code from the app Access Key",
-    insiraCodigoEnviadoEmailChave: "Enter the code sent to your email or SMS and found in the app Access Key",
     ouQr: "or",
     escaneieQr: "Scan the QR Code with the app Access Key",
   },
