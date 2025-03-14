@@ -745,8 +745,8 @@ export default class Login extends Component {
               centered
               contentClassName="modalContent"
               // dialogClassName="modalDialog"
-              // show={this.state.token}
-              show={true}
+              show={this.state.token}
+              // show={true}
               onHide={() => {
                 this.setState({ token: false, qr: { qrcode: "", tempo_de_vida_previsto: 1} });
                 this.pararQr();
