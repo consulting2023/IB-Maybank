@@ -488,6 +488,7 @@ export default class CadastroPf extends Component {
       method: "POST",
     };
     Funcoes.Geral_API(data).then((res) => {
+      // console.log('salvando campo ', campo, valor);
       if (!res) {
         alert("Falha ao cadastrar informações, tente novamente.");
         // alert("Falha ao cadastrar informações, tente novamente." + campo );
@@ -515,7 +516,7 @@ export default class CadastroPf extends Component {
       complemento: this.state.complemento,
 
       imageself: this.state.selfie,
-      imagecomprovante_endereco: this.state.comprovante,
+      imagecomprovante: this.state.comprovante,
       politico: this.state.politico
     };
 
@@ -887,25 +888,18 @@ export default class CadastroPf extends Component {
                             <label>Sua renda</label>
 
                             <FormControl
-                              value={this.state.renda}
-                              style={{ height: 40, width: 300 }}
-                              onChange={(e) => {
-                                const value = e.target.value;
-
-                                const numericValue = value.replace(
-                                  /[^0-9]/g,
-                                  ""
-                                );
-
-                                const formattedValue = new Intl.NumberFormat(
+                              value={
+                                new Intl.NumberFormat(
                                   "pt-BR",
                                   {
                                     style: "currency",
                                     currency: "BRL",
                                   }
-                                ).format(numericValue / 100);
-
-                                this.setState({ renda: formattedValue });
+                                ).format(this.state.renda / 100)
+                              }
+                              style={{ height: 40, width: 300 }}
+                              onChange={(e) => {
+                                this.setState({ renda: e.target.value.replace(/[^0-9]/g, '') });
                               }}
                               disabled={this.state.geralLoading}
                             />
