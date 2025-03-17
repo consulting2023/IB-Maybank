@@ -179,7 +179,7 @@ export default class Login extends Component {
       method: "POST",
     };
 
-    Funcoes.Geral_API(data, false).then(res => {
+    Funcoes.Geral_API(data, true).then(res => {
       if (res) {
         Funcoes.setToken(this.state.token_chave, this.state.pfp);
         window.location.href = "/home";
@@ -941,20 +941,20 @@ export default class Login extends Component {
                         this.setState({ captcha: e });
                       }}
                       onErrored={ () => {
-                        //Tentar limpar cookies
-                        const cookies = document.cookie.split(";");
+                        // const cookies = document.cookie.split(";");
 
-                        cookies.forEach((cookie) => {
-                          const cookieName = cookie.split("=")[0].trim();
+                        // cookies.forEach((cookie) => {
+                        //   const cookieName = cookie.split("=")[0].trim();
 
-                          // Limpar cookies relacionados ao Google (domínio google.com ou googleusercontent.com)
-                          if (cookieName.includes("google")) {
-                            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=google.com;`;
-                            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=googleusercontent.com;`;
-                          }
-                        });
+                        //   if (cookieName.includes("google")) {
+                        //     document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=google.com;`;
+                        //     document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=googleusercontent.com;`;
+                        //   }
+                        // });
 
-                        this.recaptchaRef.current.reset();
+                        setTimeout(() => {
+                          this.recaptchaRef.current.reset();
+                        }, 1000);
 
                         // this.props.alerts(
                         //   i18n.t("login.erroConexao"),
