@@ -231,8 +231,6 @@ export default class Login extends Component {
           token_aparelho: "",
           nome_aparelho: "",
 
-          // tokenc: this.state.captcha,
-
           so: this.state.os,
           brand: this.state.browser,
           model: this.state.cpu,
@@ -495,7 +493,7 @@ export default class Login extends Component {
     };
 
     setTimeout(() => {
-      Funcoes.Geral_API(data, true).then((res) => {
+      Funcoes.Geral_API(data, false).then((res) => {
         if (res === 1) {
           alert(i18n.t("login.tokenEnviado"));
         }
