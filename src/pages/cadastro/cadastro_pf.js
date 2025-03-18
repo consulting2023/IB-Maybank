@@ -57,7 +57,7 @@ export default class CadastroPf extends Component {
       generoStr: "",
       estadocivil: {},
       estadocivilStr: "",
-      renda: "",
+      renda: "0.00",
 
       cep: "",
       cepLoading: false,
@@ -889,17 +889,16 @@ export default class CadastroPf extends Component {
 
                             <FormControl
                               value={
-                                new Intl.NumberFormat(
-                                  "pt-BR",
-                                  {
-                                    style: "currency",
-                                    currency: "BRL",
-                                  }
-                                ).format(this.state.renda / 100)
+                                new Intl.NumberFormat("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                  minimumFractionDigits: 0,
+                                }).format(this.state.renda)
                               }
                               style={{ height: 40, width: 300 }}
                               onChange={(e) => {
-                                this.setState({ renda: e.target.value.replace(/[^0-9]/g, '') });
+                                console.log(this.state.renda);
+                                this.setState({ renda: parseInt(e.target.value.replace(/\D/g, "")) });
                               }}
                               disabled={this.state.geralLoading}
                             />
