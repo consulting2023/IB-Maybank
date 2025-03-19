@@ -606,7 +606,7 @@ export default class Pix extends Component {
       valor_qrcodeenviar = valor_qrcodeenviar.replace(",", ".");
     }
 
-    if (Funcoes.pessoa.pf_pj == "pf") {
+    if (Funcoes.pessoa.pf_pj == "pf" && valor_qrcodeenviar == 0) {
       alert(
         "Para gerar o QR Code o valor não poder ser zerado."
       );
