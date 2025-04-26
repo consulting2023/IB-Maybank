@@ -73,9 +73,13 @@ export default class RelatorioCrypo extends Component {
           data_de: dataDe,
           data_ate: dataAte,
           ultimo_id: "", // Inicia a pesquisa sem último item carregado
+          end_to_end: endToEnd || "",
+          custom_id: id || "",
         },
         method: "POST",
       };
+
+      console.log(data.data)
 
       Funcoes.Geral_API(data, true).then((res) => {
         if (res.status && res.data.length > 0) {
@@ -222,6 +226,32 @@ export default class RelatorioCrypo extends Component {
                 />
               </Form.Group>
             </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>{i18n.t("relatorio.customId")}</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="id"
+                  value={this.state.id}
+                  onChange={this.handleInputChange}
+                  
+                />
+              </Form.Group>
+            </Col>
+
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>{i18n.t("relatorio.endtoend")}</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="endToEnd"
+                  value={this.state.endToEnd}
+                  onChange={this.handleInputChange}
+                  
+                />
+              </Form.Group>
+            </Col>
+
           </Row>
           <Col>
             <Button onClick={this.verExtrato} disabled={this.state.disabled}>
