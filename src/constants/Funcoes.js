@@ -81,6 +81,7 @@ export async function Geral_API(dados, logado) {
     headers["contaid"] = info.conta_id;
     headers["chave"] = info.chave;
     headers["usuarioid"] = info.usuario_id;
+    headers["acessoid"] = info.acesso_id;
   }
 
   const data = dados.data;

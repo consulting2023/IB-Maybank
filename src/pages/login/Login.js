@@ -227,6 +227,9 @@ export default class Login extends Component {
         data: {
           email: email,
           password: texto,
+
+          ...(Produtos.login_captcha && { tokenc: this.state.captcha }),
+
           sub_banco_id: "",
           token_aparelho: "",
           nome_aparelho: "",
@@ -238,9 +241,6 @@ export default class Login extends Component {
         },
         method: "POST",
       };
-      if (Produtos.login_captcha) {
-        data.data['tokenc'] = this.state.captcha;
-      }
       Funcoes.Geral_API(data, false).then((res) => {
         if (res == 0) {
           this.props.alerts(
@@ -306,6 +306,7 @@ export default class Login extends Component {
       chave: dados.chave,
       email: dados.usuario.email,
       token_api: dados.token_acesso,
+      acesso_id: dados.acesso_id,
       cpf_cnpj: dados.documentos.cpf,
       agencia: dados.conta.agencia,
       conta: n,
