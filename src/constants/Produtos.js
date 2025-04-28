@@ -202,9 +202,24 @@ export default {
   tarifa: tarifas_mostrar,
   perfil: perfil_mostrar,
 
-  //Saldos Home
+  saldos: {
+    digital: {
+      id: 0,
+      show: true,
+    },
+    cartao: {
+      id: 1,
+      show: false,
+    },
+    investimento: {
+      id: 2,
+      show: true
+    }
+  },
+
+  //variaveis antigas de saldo, remova-as após tirar todas as instâncias delas no código
   saldoDigital: true,
-  saldoCartao: false,
+  saldoCartao: true,
   saldoCredito: false,
   saldoInvestimento: false,
 
@@ -297,7 +312,7 @@ export default {
   },
 
   testSuporte: {
-    emailTest: "rapa.rodrigues@gmail.com",
+    emailTest: "matheus.freitas@maybank.com.br",
     testLogin: false,
     testCambio: false,
   },
@@ -320,5 +335,5 @@ export default {
     chave: true,
   },
 
-  login_captcha: true
+  login_captcha: false
 };
