@@ -63,6 +63,13 @@ export default class Cambio extends Component {
       contaId: 0,
       saldoConta: 0,
       saldoCrypto: 0,
+
+      modalConverter: false,
+      valorConverter: "",
+      moedaConverter: null,
+      saldoForConverter: 0,
+      senhaConverter: "",
+      loadingConverter: false,
     };
   }
 
@@ -93,13 +100,41 @@ export default class Cambio extends Component {
     };
 
     Funcoes.Geral_API(dados, true).then((res) => {
+      console.log(res);
       if (res.status == 1 && res.saldos && res.saldos.length > 0) {
         this.setState({ liberarSaque: false, saque: res.saldos });
       } else {
         console.warn("Dados não encontrados ou status inválido.");
         this.setState({ liberarSaque: false });
       }
-    });
+    })
+  }
+
+  converterReal = () => {
+    this.setState({ loadingConverter: true });
+    const dados = {
+      url: "cambio/cambio/conversao-cripto-in-real",
+      data: {
+        conta_id: Funcoes.pessoa.conta_id,
+
+        amount: this.state.valorConverter,
+        moeda_id: this.state.moedaConverter.value,
+        senha: this.state.senhaConverter
+      },
+      method: "POST",
+    };
+
+    Funcoes.Geral_API(dados, true).then((res) => {
+      console.log(res);
+      if (res.cod == 100) {
+        alert(res.msg);
+      } else if (res.returnMessage == 'Check balance') {
+        alert('Saldo insuficiente');
+      } else if (res.status == 1) {
+        alert(res.message);
+        window.location.reload();
+      }
+    }).then( () => this.setState({ loadingConverter: false }) );
   }
 
   // Função de troca de senha para o modal
@@ -602,6 +637,28 @@ export default class Cambio extends Component {
                     <Col xs={7} className="px-0 my-auto">
                       <p className="buttonTitle m-auto">
                         {i18n.t("cambio.saqueMoeda")}
+                      </p>
+                    </Col>
+                  </Row>
+                </Button>
+              </Col>
+
+              <Col className="p-3">
+                <Button
+                  variant="outline-primary"
+                  className="baseButtonPrimary"
+                  onClick={() => {
+                    this.setState({ modalConverter: true });
+                    // this.converterReal();
+                  }}
+                >
+                  <Row className="w-80 m-auto">
+                    <Col xs={5} className="m-auto px-0">
+                      {Icones.cambio}
+                    </Col>
+                    <Col xs={7} className="px-0 my-auto">
+                      <p className="buttonTitle m-auto">
+                        Converter para Real
                       </p>
                     </Col>
                   </Row>
@@ -1133,6 +1190,181 @@ export default class Cambio extends Component {
                 {i18n.t("cambio.sacar")}
               </Button>
             )}
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          size="lg"
+          centered
+          show={this.state.modalConverter}
+          onHide={() => this.setState({ modalConverter: false })}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Converter para Real</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Container>
+              {this.state.contaGrupos &&
+              this.state.contaGrupos !== "undefined" && this.state.contaGrupos.length > 1 ? (
+                <Row>
+                  <Col md={8}>
+                    <h3>{i18n.t("home.conta")}</h3>
+                    <Select
+                      options={
+                        Array.isArray(this.state.contaGrupos)
+                          ? this.state.contaGrupos.map((conta) => ({
+                              value: conta.conta_id,
+                              label: conta.conta_id + " " + conta.nome_conta,
+                            }))
+                          : []
+                      } // Verifica se contaGrupos é um array
+                      value={this.state.contaId}
+                      onChange={(selectedOption) => {
+                        this.setState({ contaId: selectedOption });
+                        this.saldoCrypto(selectedOption.value);
+                        console.log(this.state.contaId);
+                      }}
+                      isSearchable
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          height: 40,
+                          minHeight: 40,
+                        }),
+                        placeholder: (base) => ({
+                          ...base,
+                          fontSize: 14,
+                        }),
+                      }}
+                    />
+                  </Col>
+                  <Col md={4}>
+                    <h3>
+                      {i18n.t("home.saldo") + " USDT" }{" "}
+                    </h3>
+                    <span style={{ marginLeft: 10 }}>
+                      <input
+                        value={
+                          this.state.saldoCrypto
+                            ? "R$ " + ` ${this.state.saldoCrypto.saldo}`
+                            : i18n.t("home.saldoNull")
+                        }
+                        placeholder=" 00,00"
+                        disabled
+                        style={{ height: 40 }}
+                      />
+                    </span>
+                  </Col>
+                </Row>
+              ) : null}
+
+              <br />
+
+              <Row className="mb-3">
+                <Col>
+                  <h3>{i18n.t("cambio.moeda")}</h3>
+                  <Select
+                    options={this.state.saque.map((moeda) => ({
+                      value: moeda.id,
+                      label: moeda.symbol,
+                      saldo: moeda.saldo, // Adiciona saldo como uma propriedade extra
+                    }))}
+                    placeholder="Escolher Moeda"
+                    value={this.state.moedaConverter} // Passa o objeto completo para `value`
+                    onChange={(selectedOption) => {
+                      if (selectedOption) {
+                        this.setState({
+                          moedaConverter: selectedOption, // Define o objeto completo selecionado
+                          saldoForConverter: selectedOption.saldo, // Define o saldo da moeda selecionada
+                        });
+                        console.log(selectedOption);
+                        /* this.cotacao(selectedOption.value); */ // Passa `value` para a função `cotacao`
+                      }
+                    }}
+                    isSearchable
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        height: 40,
+                        minHeight: 40,
+                      }),
+                      placeholder: (base) => ({
+                        ...base,
+                        fontSize: 14,
+                      }),
+                    }}
+                  />
+                </Col>
+                <Col>
+                  <h3>{i18n.t("cambio.saldo")}</h3>
+                  <h4>
+                    {this.state.saldoForConverter !== 0.0
+                      ? " " + this.state.saldoForConverter
+                      : i18n.t("home.saldoNull")}
+                  </h4>
+                </Col>
+                <Col>
+                  <h3>{i18n.t("cambio.valSaque")}</h3>
+                  <div>
+                    <input
+                      value={
+                        this.state.valorConverter
+                          ? this.state.valorConverter.toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }) // Exibe o valor formatado sem "R$"
+                          : "00,00"
+                      }
+                      placeholder="00,00"
+                      style={{ height: 40 }}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[\s.,]/g, ""); // Remove espaços e vírgulas
+                        const valorNumerico = Number(value) / 100; // Divide por 100 para obter o valor em reais
+
+                        this.setState({ valorConverter: valorNumerico });
+                      }}
+                    />
+                  </div>
+                </Col>
+              </Row>
+
+              <br />
+              <Row>
+                <h6>Insira sua senha</h6>
+              </Row>
+              <Row>
+                <OtpInput
+                  focusInput={1}
+                  isInputNum={true}
+                  value={this.state.senhaConverter}
+                  onChange={(value) => this.setState({ senhaConverter: value })}
+                  numInputs={6}
+                  className="tokenValidacao"
+                  isInputSecure={true}
+                />
+              </Row>
+            </Container>
+          </Modal.Body>
+          <Modal.Footer>
+            {
+              this.state.loadingConverter ? (
+                <Spinner animation="border" />
+              ) : (
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    this.converterReal()
+                  }}
+                  disabled={
+                    (this.state.moedaConverter === null) ||
+                    (this.state.valorConverter == "") ||
+                    (this.state.senhaConverter.length < 6)
+                  }
+                >
+                  Converter
+                </Button>
+              )
+            }
           </Modal.Footer>
         </Modal>
       </div>
