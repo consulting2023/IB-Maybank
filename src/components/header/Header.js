@@ -32,13 +32,18 @@ export default class Header extends Component {
       msgListShow: false,
       msg: [],
       pessoa: {},
-      saldos: {},
       termoModal: false,
       termo: "",
       btnTermo: true,
       chaveTermo: {},
       ipUser: "",
       tokenApp: "",
+
+      saldos: {},
+      loading: false,
+      show: false,
+      saldoSelected: {},
+      saldoBloqueado: '',
     };
   }
 
@@ -78,6 +83,7 @@ export default class Header extends Component {
   }
 
   SaldoConta = () => {
+    this.setState({ loading: true });
     const data = {
       url: "conta/saldo",
       data: { conta_id: Funcoes.pessoa.conta_id },
@@ -85,39 +91,48 @@ export default class Header extends Component {
     };
 
     Funcoes.Geral_API(data, true).then((res) => {
-      let tmpSaldos = this.state.saldos;
+      let saldos = [];
 
-      if (Produtos.saldoDigital)
-        tmpSaldos.digital = {
-          id: "1",
-          show: false,
+      if (Produtos.saldos.digital.show)
+        saldos.digital = {
+          id: Produtos.saldos.digital.id,
           icone: Icones.saldo1,
           titulo: i18n.t("home.saldoDigital"),
-          saldo: Formatar.formatarMoeda(res.digital),
-          saldoBloqueado: Formatar.formatarMoeda(res.bloqueados),
-          saldoTrue: res.digital,
+          saldo: res.digital,
         };
 
-      // if (Produtos.saldoCartao) tmpSaldos.push({ show: false, icone: Icones.saldo2, titulo: i18n.t('home.saldoCartao'), saldo: Formatar.formatarMoeda(res.cartao), saldoTrue: res.cartao });
+      if (Produtos.saldos.cartao.show)
+        saldos.cartao = {
+          id: Produtos.saldos.cartao.id,
+          icone: Icones.saldo2,
+          titulo: i18n.t("home.saldoCartao"),
+          saldo: res.cartao,
+        }
 
-      // if (Produtos.saldoCredito) tmpSaldos.push({ show: false, icone: Icones.saldo3, titulo: i18n.t('home.saldoConvenio'), saldo: Formatar.formatarMoeda(res.credito), saldoTrue: res.credito });
+      if (Produtos.saldos.investimento.show)
+        saldos.investimento = {
+          id: Produtos.saldos.investimento.id,
+          icone: Icones.saldo1,
+          titulo: "Investimento",
+          saldo: res.investimento,
+        }
 
-      // if (Produtos.saldoInvestimento) tmpSaldos.push({ show: false, icone: Icones.saldo4, titulo: i18n.t('home.saldoConvenio'), saldo: Formatar.formatarMoeda(res.investimento), saldoTrue: res.investimento });
+      const firstSaldo = Object.entries(saldos).sort((a, b) => a[1].id - b[1].id)[0][0];
 
-      this.setState({ saldos: tmpSaldos });
-    });
+      this.setState({ 
+        saldos: saldos, 
+        saldoSelected: saldos[firstSaldo], 
+        saldoBloqueado: res.bloqueados
+      });
+    })
+    .then(() => this.setState({ loading: false }));
   };
 
   setBlur = () => {
-    this.SaldoConta();
+    // this.SaldoConta();
     setTimeout(() => {
-      const newSaldos = this.state.saldos;
-      newSaldos.digital.show = !this.state.saldos.digital.show;
-      newSaldos.digital.showBloqueado =
-        !this.state.saldos.digital.showBloqueado;
-
-      this.setState({ saldos: newSaldos });
-    }, 500);
+      this.setState({ show: !this.state.show });
+    }, 200);
   };
 
   exibir_msg = (dados) => {
@@ -438,7 +453,7 @@ export default class Header extends Component {
 
               <ul className="navbar-nav align-items-center">
                 <li className="nav-item mx-1">
-                  {this.state.saldos.digital ? (
+                  {!this.state.loading ? (
                     <div className="saldosWrapper">
                       <Button
                         className="saldosBtn btn-light w-100 p-1"
@@ -448,17 +463,14 @@ export default class Header extends Component {
                           <Row className="select-none">
                             <Col xs={3} className="px-0 pr-2">
                               <p className="mt-2">
-                                {this.state.saldos.digital.icone}
+                                {Icones.saldo1}
                               </p>
                             </Col>
 
                             <Col xs={9}>
                               <Row className="saldosHome justify-content-center">
                                 <p className="text-nowrap texto-saldos select-none">
-                                  {/* {this.state.saldos.digital.titulo} */}
-                                  {this.state.saldos.digital.id === "1"
-                                    ? i18n.t("home.saldoBloqueado")
-                                    : "var_error"}
+                                  {i18n.t("home.saldoBloqueado")}
                                 </p>
                               </Row>
 
@@ -467,18 +479,18 @@ export default class Header extends Component {
                                   style={{ color: "red" }}
                                   className={
                                     "texto-saldos select-none saldoValor " +
-                                    (this.state.saldos.digital.showBloqueado
+                                    (this.state.show
                                       ? "deblurred"
                                       : null)
                                   }
                                 >
-                                  - {this.state.saldos.digital.saldoBloqueado}
+                                  - {Formatar.formatarMoeda(this.state.saldoBloqueado)}
                                 </span>
                               </Row>
                             </Col>
                           </Row>
                           <span className="p-2 px-3 mt-8 position-absolute text-center textoHeader">
-                            Saldo Bloqueado
+                            {i18n.t("home.saldoBloqueado")}
                           </span>
                         </Container>
                       </Button>
@@ -493,7 +505,7 @@ export default class Header extends Component {
                   )}
                 </li>
                 <li className="nav-item mx-1">
-                  {this.state.saldos.digital ? (
+                  {!this.state.loading || !this.state.saldoSelected ? (
                     <div className="saldosWrapper">
                       <Button
                         className="saldosBtn btn-light w-100 p-1"
@@ -503,17 +515,14 @@ export default class Header extends Component {
                           <Row className="select-none">
                             <Col xs={3} className="px-0 pr-2">
                               <p className="mt-2">
-                                {this.state.saldos.digital.icone}
+                                {this.state.saldoSelected?.icone}
                               </p>
                             </Col>
 
                             <Col xs={9}>
                               <Row className="saldosHome justify-content-center">
-                                <p className="text-nowrap texto-saldos select-none">
-                                  {/* {this.state.saldos.digital.titulo} */}
-                                  {this.state.saldos.digital.id === "1"
-                                    ? i18n.t("home.saldoDigital")
-                                    : "var_error"}
+                                <p className="text-nowrap texto-saldos select-none" style={{ minWidth: 90 }}>
+                                  {this.state.saldoSelected?.titulo}
                                 </p>
                               </Row>
 
@@ -521,12 +530,13 @@ export default class Header extends Component {
                                 <span
                                   className={
                                     "texto-saldos select-none saldoValor " +
-                                    (this.state.saldos.digital.show
+                                    (this.state.show
                                       ? "deblurred"
-                                      : null)
+                                      : null
+                                    )
                                   }
                                 >
-                                  {this.state.saldos.digital.saldo}
+                                  {Formatar.formatarMoeda(this.state.saldoSelected?.saldo)}
                                 </span>
                               </Row>
                             </Col>
@@ -547,7 +557,41 @@ export default class Header extends Component {
                   )}
                 </li>
 
-                <li className="nav-item mx-1">
+                <li>
+                  <Button 
+                    className="p-0" 
+                    style={{ borderRadius: '100%' }}
+                    onClick={ () => this.SaldoConta() }
+                    disabled={this.state.loading}
+                  >
+                    {Icones.saldoReload}
+                  </Button>
+                </li>
+
+                <li>
+                  <Dropdown>
+                    <Dropdown.Toggle className="p-0" disabled={this.state.loading}>
+                      {Icones.saldoArrow}
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu>
+                      {
+                        Object.values(this.state.saldos).sort((a, b) => a.id - b.id).map(saldo => (
+                          <Dropdown.Item 
+                            as="button" 
+                            onClick={() => {
+                              this.setState({ saldoSelected: saldo });
+                            }}
+                          >
+                            <span className="mx-3">{saldo.titulo}</span>
+                          </Dropdown.Item>
+                        ))
+                      }
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </li>
+
+                <li className="nav-item mr-1 ml-4">
                   <div className="usuarioWrapper">
                     <Button
                       variant="outline-primary"

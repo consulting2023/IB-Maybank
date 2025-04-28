@@ -6,6 +6,8 @@ import * as Iconio5 from "react-icons/io5";
 import * as Iconmd from "react-icons/md";
 import * as Iconbs from "react-icons/bs";
 import * as Iconhi from "react-icons/hi";
+import * as Icongi from "react-icons/gi";
+import * as Iconri from "react-icons/ri";
 
 import '../templates/style_icones.scss';
 
@@ -73,6 +75,10 @@ export default {
 
     saldo4: <Iconfa.FaRegChartBar className="iconesSaldos" />,
 
+    saldoReload: <Iconio5.IoReloadCircle style={{ fontSize: '22pt' }} />,
+
+    saldoArrow: <Iconmd.MdArrowDropDownCircle style={{ fontSize: '22pt' }} />,
+
     //Favoritos
 
     fav1: <div><Iconfa.FaDollarSign className="iconesFavoritos" /></div>,
@@ -112,6 +118,26 @@ export default {
     copiacola: <div><Iconfa.FaRegCopy style={{ fontSize: '26pt' }}/></div>,
 
     qrPix: <div><Icomim.ImQrcode style={{ fontSize: '26pt' }}/></div>,
+
+    pixEnviar: <div><Iconfa.FaArrowUp style={{ fontSize: '26pt' }} /></div>,
+
+    pixReceber: <div><Iconfa.FaArrowDown style={{ fontSize: '26pt' }} /></div>,
+
+    pixMinhasChaves: <div><Icongi.GiHouseKeys style={{ fontSize: '26pt' }} /></div>,
+
+    pixExtrato: <div><Iconfa.FaFileAlt style={{ fontSize: '26pt' }} /></div>,
+
+    pixAgendar: <div><Iconfa.FaCalendarAlt style={{ fontSize: '26pt' }} /></div>,
+
+    pixAgcc: <div><Iconri.RiBankFill style={{ fontSize: '26pt' }} /></div>,
+
+    pixMeusLimites: <div><Iconfa.FaCogs style={{ fontSize: '26pt' }} /></div>,
+
+    pixAjuda: <div><Iconmd.MdLiveHelp style={{ fontSize: '26pt' }} /></div>,
+
+    pixSeta: <div><Iconfa.FaChevronRight style={{ fontSize: '26pt' }} /></div>,
+
+    pixSend: <div><Iconio5.IoSend style={{ fontSize: '26pt' }} /></div>,
 
     // Extratos
 
