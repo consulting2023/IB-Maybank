@@ -776,6 +776,145 @@ export async function comprovante_ver(id) {
     console.error("Erro na requisição ou ao gerar o PDF", error);
   }
 }
+export async function comprovante_crypto(dados) {
+  console.log(pessoa)
+  try {
+    
+
+    const pix = dados[0];
+   
+
+    const doc = new jsPDF('landscape', 'mm', 'a4');
+
+    const addLogoAndGeneratePDF = (logoBase64, imgWidth, imgHeight) => {
+      const logoHeight = 20;
+      const margin = 8;
+      const pageWidth = doc.internal.pageSize.width;
+
+      if (logoBase64 && imgWidth && imgHeight) {
+        const logoWidth = logoHeight * (imgWidth / imgHeight);
+        doc.addImage(logoBase64, "PNG", margin, margin, logoWidth, logoHeight);
+      }
+
+      //Título
+      doc.setFontSize(24);
+      doc.setFont(undefined, "bold");
+      doc.text(
+        "Comprovante Cambio",
+        pageWidth / 2,
+        margin,
+        {
+          align: "center",
+          baseline: "top"
+        }
+      );
+
+      //Data de emissão
+      doc.setFontSize(8);
+      doc.setFont(undefined, "normal");
+      doc.text(
+        `DATA DE EMISSÃO: ${pix.data_hora_transferencia}`,
+        pageWidth - margin,
+        margin,
+        { 
+          align: "right",
+          baseline: "top"
+        }
+      );
+
+      //Subtítulo
+      doc.setTextColor("#696969");
+      doc.setFontSize(10);
+      doc.setFont(undefined, "normal");
+      doc.text(
+        "Via internet MAY BANK INTERMEDIACAO DE NEGOCIOS EIRELI",
+        pageWidth / 2, 
+        margin + logoHeight,
+        { 
+          align: "center",
+          baseline: "bottom"
+        }
+      );
+
+      // Função para adicionar seções ao PDF
+      let cursorY = logoHeight + margin + 15;
+      const addSection = (title, items, lastSection) => {
+
+        doc.setTextColor("#696969");
+        doc.setFontSize(12);
+        doc.setFont(undefined, "bold");
+        doc.text(title, margin, cursorY, { baseline: "top" });
+        cursorY += doc.getTextDimensions(`${title}`).h + 10;
+
+        items.forEach(({ label, value }, index) => {
+          doc.setTextColor("#000000");
+          doc.setFontSize(12);
+          doc.setFont(undefined, "bold");
+          doc.text(`${label}:`, margin, cursorY);
+
+          doc.setTextColor("#696969");
+          doc.setFont(undefined, "normal");
+          doc.text(value ? String(value) : "N/A", ((pageWidth / 4) + margin), cursorY);
+
+          if (index != (items.length - 1))
+            cursorY += 6;
+        });
+        if (!lastSection) {
+          cursorY += 8;
+          doc.setDrawColor("#A9A9A9");
+          doc.setLineWidth(0.2);
+          doc.line(margin, cursorY, (pageWidth - margin), cursorY); 
+          cursorY += 8;
+        }
+      };
+
+      // Dados do Pagador
+      addSection("Dados da Conta", [
+        { label: "Nome", value: pessoa.nome },
+        { label: "CPF/CNPJ", value: pessoa.cpf_cnpj },
+        { label: "Instituição", value: process.env.NOME_BANCO },
+      ]);
+
+      // Dados do Recebedor
+      addSection("Dados Transação", [
+        { label: "Moeda", value: pix.moeda_symbol },
+        { label: "Transação ID", value: pix.transaction_id },
+        { label: "Valor", value: ` ${pix.valor_real}` },
+        { label: "Data da Transação", value: pix.data_hora_transferencia },
+        { label: "ID da Transação", value: pix.transacao_id }
+      ]);
+
+   
+
+      
+
+      // Salva o PDF
+      doc.save("COMPROVANTE_Crypto.pdf");
+    };
+
+    // Carrega e converte o logotipo
+    const image = new Image();
+    image.src = require("../assets/images/logos/logo_transparente.png").default;
+
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(image, 0, 0, image.width, image.height);
+      const logoBase64 = canvas.toDataURL("image/png");
+      addLogoAndGeneratePDF(logoBase64, image.width, image.height);
+    };
+
+    image.onerror = () => {
+      console.error("Erro ao carregar a imagem do logotipo.");
+      addLogoAndGeneratePDF(null);
+    };
+  } catch (error) {
+    console.error("Erro na requisição ou ao gerar o PDF", error);
+  }
+ 
+}
 
 export async function getUniqueToken() {
   const localStorageKey = "uniqueInstallationToken";

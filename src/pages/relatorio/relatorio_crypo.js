@@ -12,7 +12,7 @@ import {
 import ReactLoading from "react-loading";
 import i18n from "../../tradutor/tradutor";
 import * as Formatar from "../../constants/Formatar";
-
+import * as Icon from "react-bootstrap-icons";
 export default class RelatorioCrypo extends Component {
   constructor() {
     super();
@@ -79,9 +79,10 @@ export default class RelatorioCrypo extends Component {
         method: "POST",
       };
 
-      console.log(data.data)
+      console.log(data.data);
 
       Funcoes.Geral_API(data, true).then((res) => {
+        console.log(res);
         if (res.status && res.data.length > 0) {
           this.setState({
             extrato: res.data,
@@ -198,6 +199,13 @@ export default class RelatorioCrypo extends Component {
     document.body.removeChild(link);
   };
 
+  comprovante_crypto = (id) => {
+    console.log(id);
+    const dados = this.state.extrato.filter((item) => item.transacao_id === id);
+    console.log(dados);
+    Funcoes.comprovante_crypto(dados); // deve enviar só os dados filtrados
+  };
+
   render() {
     return (
       <div className="extrato">
@@ -234,7 +242,6 @@ export default class RelatorioCrypo extends Component {
                   name="id"
                   value={this.state.id}
                   onChange={this.handleInputChange}
-                  
                 />
               </Form.Group>
             </Col>
@@ -247,11 +254,9 @@ export default class RelatorioCrypo extends Component {
                   name="endToEnd"
                   value={this.state.endToEnd}
                   onChange={this.handleInputChange}
-                  
                 />
               </Form.Group>
             </Col>
-
           </Row>
           <Col>
             <Button onClick={this.verExtrato} disabled={this.state.disabled}>
@@ -289,6 +294,7 @@ export default class RelatorioCrypo extends Component {
                         <th>{i18n.t("relatorio.valCotacao")}</th>
                         <th>{i18n.t("relatorio.valReal")}</th>
                         <th>{i18n.t("relatorio.moeda")}</th>
+                        <th>{i18n.t("relatorio.comprovantePdf")}</th>
                       </tr>
                     </thead>
 
@@ -327,6 +333,22 @@ export default class RelatorioCrypo extends Component {
                           </td>
 
                           <td>{dado.moeda_symbol || ""}</td>
+                          <td>
+                            <button
+                              style={{
+                                border: "none",
+                                background: "transparent",
+                              }}
+                              onClick={() =>
+                                this.comprovante_crypto(dado.transacao_id)
+                              }
+                            >
+                              <Icon.FileArrowDownFill
+                                data-tip="Home"
+                                className="iconeHome"
+                              />
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

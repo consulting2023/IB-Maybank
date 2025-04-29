@@ -585,6 +585,8 @@ export default {
     valCotacao: "美元汇率",
     valReal: "实际金额",
     moeda: "货币",
+    comprobantePdf: "PDF收据"
+
   },
 
   cambio: {

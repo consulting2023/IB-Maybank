@@ -639,6 +639,7 @@ export default {
     senha: "Senhas",
     cambio: "Cambio",
     relatorio: "Relatorio",
+  
   },
 
   header: {
@@ -689,6 +690,7 @@ export default {
     valCotacao: "Valor Cotação Dólar",
     valReal: "Valor Real",
     moeda: "Moeda",
+    comprovantePdf: "Comprovante PDF"
   },
 
   cambio: {
