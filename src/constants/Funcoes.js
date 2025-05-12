@@ -255,7 +255,7 @@ export function comprovanteGeral(id, tipo) {
           let fileName = "filename";
           let title = "";
           let date = "";
-          let subtitle = "Via internet MB Investimento";
+          let subtitle = "Via internet Maybank";
 
           if (logoBase64 && imgWidthLogo && imgHeightLogo) {
             const logoWidth = logoHeight * (imgWidthLogo / imgHeightLogo);
