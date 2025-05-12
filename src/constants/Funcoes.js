@@ -533,7 +533,7 @@ export function comprovanteGeral(id, tipo) {
           cursorY += 10;
           doc.addImage(iconsBase64.email, "PNG", margin, cursorY, iconSize, iconSize);
           doc.text(
-            'sac@mbinvestimento.com.br',
+            'sac@maybank.com.br',
             margin + iconSize + 6,
             cursorY + (iconSize / 2) - 0.25,
             { baseline: 'middle' }
