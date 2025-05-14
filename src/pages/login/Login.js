@@ -10,7 +10,7 @@ import {
   ButtonGroup,
   FormControl,
   FormGroup,
-  Image
+  Image,
 } from "react-bootstrap";
 import Icones from "../../constants/Icon";
 import OtpInput from "react-otp-input";
@@ -65,10 +65,10 @@ export default class Login extends Component {
 
       qr: {
         qrcode: "",
-        tempo_de_vida_previsto: 1
+        tempo_de_vida_previsto: 1,
       },
       qr_key: "",
-      qr_reloads: 0
+      qr_reloads: 0,
     };
 
     this.recaptchaRef = React.createRef();
@@ -94,45 +94,48 @@ export default class Login extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (Produtos.login_otp.qrcode) {
-      if (prevState.qr.tempo_de_vida_previsto !== this.state.qr.tempo_de_vida_previsto) {
+      if (
+        prevState.qr.tempo_de_vida_previsto !==
+        this.state.qr.tempo_de_vida_previsto
+      ) {
         this.iniciarQr();
       }
     }
   }
 
   gerarChave = () => {
-    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let resultado = '';
+    const caracteres =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let resultado = "";
     for (let i = 0; i < 64; i++) {
       const indiceAleatorio = Math.floor(Math.random() * caracteres.length);
       resultado += caracteres[indiceAleatorio];
     }
     this.setState({ qr_key: resultado });
     return resultado;
-  }
+  };
 
   getQr = async () => {
     const key = this.gerarChave();
     const data = {
       url: "otp/qrcode",
       data: {
-        "usuario_id": this.state.otp_user_id,
-        "device_key": key
+        usuario_id: this.state.otp_user_id,
+        device_key: key,
       },
       method: "POST",
     };
 
     Funcoes.Geral_API(data, false).then((res) => {
-      const reloads = ++this.state.qr_reloads; 
+      const reloads = ++this.state.qr_reloads;
       if (reloads >= 5) {
         this.pararQr();
         this.setState({ token: false });
       } else {
         this.setState({ qr: res, qr_reloads: reloads });
       }
-
     });
-  }
+  };
 
   iniciarQr = () => {
     //Iniciar intervalo de geração do QRCode
@@ -142,7 +145,6 @@ export default class Login extends Component {
     this.intervalQr = setInterval(() => {
       this.getQr();
     }, this.state.qr.tempo_de_vida_previsto * 1000);
-
 
     //Iniciar intervalo de checagem de se o QRCode
     if (this.intervalStatus) {
@@ -173,19 +175,19 @@ export default class Login extends Component {
     const data = {
       url: "otp/qrcode-liberado",
       data: {
-        "usuario_id": this.state.otp_user_id,
-        "device_key": this.state.qr_key
+        usuario_id: this.state.otp_user_id,
+        device_key: this.state.qr_key,
       },
       method: "POST",
     };
 
-    Funcoes.Geral_API(data, true).then(res => {
+    Funcoes.Geral_API(data, true).then((res) => {
       if (res) {
         Funcoes.setToken(this.state.token_chave, this.state.pfp);
         window.location.href = "/home";
       }
     });
-  }
+  };
 
   combinacoes = async () => {
     this.setState({ loading: true });
@@ -242,6 +244,7 @@ export default class Login extends Component {
         method: "POST",
       };
       Funcoes.Geral_API(data, false).then((res) => {
+        console.log(res);
         if (res == 0) {
           this.props.alerts(
             i18n.t("login.alertaCombinacoes"),
@@ -294,10 +297,17 @@ export default class Login extends Component {
     localStorage.setItem("nivel", dados.usuario.nivel);
     const contaGrupos = dados.conta_grupos || [];
     localStorage.setItem("conta_grupos", JSON.stringify(contaGrupos));
-
-    if (Produtos.login_otp.email) {
-      this.enviarToken();
+    if (dados.tipo_conta_app == 0) {
+      console.log("Bateu aqui");
+      Produtos.login_otp.email = true;
+      Produtos.login_otp.chave = false;
+      Produtos.login_otp.qrcode = false;
     }
+    setTimeout(() => {
+      if (Produtos.login_otp.email) {
+        this.enviarToken();
+      }
+    }, 200);
 
     var n = dados.conta.id;
     n = ("0000000" + n).slice(-7);
@@ -400,7 +410,11 @@ export default class Login extends Component {
           Funcoes.setToken(this.state.token_chave, this.state.pfp);
           window.location.href = "/home";
         } else {
-          this.props.alerts(i18n.t("login.erro"), i18n.t("login.tokenInvalido"), "warning");
+          this.props.alerts(
+            i18n.t("login.erro"),
+            i18n.t("login.tokenInvalido"),
+            "warning"
+          );
         }
       });
     }, 300);
@@ -428,7 +442,11 @@ export default class Login extends Component {
           Funcoes.setToken(this.state.token_chave, this.state.pfp);
           window.location.href = "/home";
         } else {
-          this.props.alerts(i18n.t("login.erro"), i18n.t("login.tokenInvalido"), "warning");
+          this.props.alerts(
+            i18n.t("login.erro"),
+            i18n.t("login.tokenInvalido"),
+            "warning"
+          );
         }
       });
     }, 300);
@@ -606,7 +624,6 @@ export default class Login extends Component {
                 <br />
 
                 <div>
-
                   <Row>
                     {Produtos.cadastro.cadastroLiberado ? (
                       <Col className="text-center">
@@ -648,9 +665,12 @@ export default class Login extends Component {
                           // onClick={() => this.combinacoes()}
                           onClick={() => {
                             if (Produtos.login_captcha) {
-                              this.setState({ captchaModal: true, captcha: "" });
+                              this.setState({
+                                captchaModal: true,
+                                captcha: "",
+                              });
                             } else {
-                              this.combinacoes()
+                              this.combinacoes();
                             }
                           }}
                         >
@@ -747,45 +767,52 @@ export default class Login extends Component {
               show={this.state.token}
               // show={true}
               onHide={() => {
-                this.setState({ token: false, qr: { qrcode: "", tempo_de_vida_previsto: 1} });
+                this.setState({
+                  token: false,
+                  qr: { qrcode: "", tempo_de_vida_previsto: 1 },
+                });
                 this.pararQr();
               }}
             >
               <Modal.Body>
-                {
-                  (Produtos.login_otp.email || Produtos.login_otp.chave || Produtos.login_otp.qrcode) ? ( <>
+                {Produtos.login_otp.email ||
+                Produtos.login_otp.chave ||
+                Produtos.login_otp.qrcode ? (
+                  <>
                     <Modal.Title className="mb-4">
                       {i18n.t("login.confirmeSuaIdentidade")}:
                     </Modal.Title>
 
-                    {
-                      Produtos.login_otp.qrcode && (
-                        <div>
-                          <span>
-                            {i18n.t("login.escaneieQr")}
-                          </span>
+                    {Produtos.login_otp.qrcode && (
+                      <div>
+                        <span>{i18n.t("login.escaneieQr")}</span>
 
-                          <div className="mt-3 d-flex rounded" style={{ height: 200, backgroundColor: 'white' }}>
-                            {
-                              this.state.qr.qrcode == '' ? (
-                                <ReactLoading
-                                  className="d-block m-auto"
-                                  type={"spin"}
-                                  color={"#000000"}
-                                  height={"50px"}
-                                  width={"15%"}
-                                />
-                              ) : (
-                                <Image style={{ height: '200px', width: '200px' }} className="m-auto" src={this.state.qr.qrcode} />
-                              )
-                            }
-                          </div>
+                        <div
+                          className="mt-3 d-flex rounded"
+                          style={{ height: 200, backgroundColor: "white" }}
+                        >
+                          {this.state.qr.qrcode == "" ? (
+                            <ReactLoading
+                              className="d-block m-auto"
+                              type={"spin"}
+                              color={"#000000"}
+                              height={"50px"}
+                              width={"15%"}
+                            />
+                          ) : (
+                            <Image
+                              style={{ height: "200px", width: "200px" }}
+                              className="m-auto"
+                              src={this.state.qr.qrcode}
+                            />
+                          )}
                         </div>
-                      )
-                    }
+                      </div>
+                    )}
 
-                    {
-                      Produtos.login_otp.qrcode && (Produtos.login_otp.chave || Produtos.login_otp.email) && (
+                    {Produtos.login_otp.qrcode &&
+                      (Produtos.login_otp.chave ||
+                        Produtos.login_otp.email) && (
                         <div className="d-flex my-3">
                           <hr className="divisoria" />
 
@@ -795,40 +822,29 @@ export default class Login extends Component {
 
                           <hr className="divisoria" />
                         </div>
-                      )
-                    }
+                      )}
 
-                    {
-                      (Produtos.login_otp.email || Produtos.login_otp.chave) && (
-                        <div>
-                          {
-                            Produtos.login_otp.email ? (
+                    {(Produtos.login_otp.email || Produtos.login_otp.chave) && (
+                      <div>
+                        {Produtos.login_otp.email ? (
+                          <span>
+                            {i18n.t("login.insiraCodigoEnviadoEmail")}
+                          </span>
+                        ) : (
+                          Produtos.login_otp.chave && (
+                            <span>{i18n.t("login.insiraCodigoChave")}</span>
+                          )
+                        )}
 
-                              <span>
-                                {i18n.t("login.insiraCodigoEnviadoEmail")}
-                              </span>
-
-                            ) : Produtos.login_otp.chave && (
-
-                              <span>
-                                {i18n.t("login.insiraCodigoChave")}
-                              </span>
-
-                            )
-                          }
-
-                          <div className="mt-3">
-                            <Otp otpProp={this.getOtp}/>
-                          </div>
-                        </div>   
-                      )
-                    }
-
-                    
-
-                 </> ) : (<>ERRO: NENHUMA OTP SELECIONADA</>)
-                }
-
+                        <div className="mt-3">
+                          <Otp otpProp={this.getOtp} />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>ERRO: NENHUMA OTP SELECIONADA</>
+                )}
               </Modal.Body>
             </Modal>
 
@@ -900,7 +916,9 @@ export default class Login extends Component {
                         }
                         onClick={() => (window.location.href = "/cadastropf")}
                       >
-                        <h5 className="py-2">{i18n.t("login.pessoa_fisica")}</h5>
+                        <h5 className="py-2">
+                          {i18n.t("login.pessoa_fisica")}
+                        </h5>
                       </Button>
                     ) : null}
 
@@ -912,7 +930,9 @@ export default class Login extends Component {
                         }
                         onClick={() => (window.location.href = "/cadastropj")}
                       >
-                        <h5 className="py-2">{i18n.t("login.pessoa_juridica")}</h5>
+                        <h5 className="py-2">
+                          {i18n.t("login.pessoa_juridica")}
+                        </h5>
                       </Button>
                     ) : null}
                   </ButtonGroup>
@@ -936,10 +956,10 @@ export default class Login extends Component {
                       ref={this.recaptchaRef}
                       className="mx-auto mb-2"
                       sitekey={process.env.CAPTCHA_KEY}
-                      onChange={ (e) => { 
+                      onChange={(e) => {
                         this.setState({ captcha: e });
                       }}
-                      onErrored={ () => {
+                      onErrored={() => {
                         // const cookies = document.cookie.split(";");
 
                         // cookies.forEach((cookie) => {
@@ -970,10 +990,10 @@ export default class Login extends Component {
                 </div>
               </Modal.Body>
               <Modal.Footer>
-                {
-                  this.state.captcha && ( <>
+                {this.state.captcha && (
+                  <>
                     <Button
-                      onClick={ () => {
+                      onClick={() => {
                         if (
                           this.state.password[0] != "" &&
                           this.state.password[1] != "" &&
@@ -992,8 +1012,8 @@ export default class Login extends Component {
                     >
                       Continuar
                     </Button>
-                  </> )
-                }
+                  </>
+                )}
               </Modal.Footer>
             </Modal>
           </div>
